@@ -99,10 +99,15 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .section-heading h2 { margin: 0; font: 700 clamp(2.3rem, 4vw, 3.3rem)/1.12 var(--font-display); letter-spacing: -.065em; }
 .section-heading > p:last-child { max-width: 500px; margin: 18px auto 0; color: var(--ink-soft); font-size: .98rem; line-height: 1.75; }
 .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: min(100%, 1220px); margin: auto; }
-.feature-card { position: relative; min-height: 288px; padding: 29px 30px 25px; border-radius: 9px; }
+.feature-card { position: relative; min-height: 288px; padding: 29px 30px 25px; overflow: hidden; isolation: isolate; border-radius: 9px; }
+.feature-card::before { position: absolute; z-index: -1; inset: 0; background-position: center; background-repeat: no-repeat; background-size: cover; content: ''; transition: transform .5s ease; }
+.feature-card:hover::before { transform: scale(1.045); }
 .feature-card-dark { background: #19372c; color: white; }
+.feature-card-dark::before { background-image: linear-gradient(90deg, rgba(25, 55, 44, .08), rgba(25, 55, 44, .02)), url('../assets/images/card-challenges.svg'); opacity: .82; }
 .feature-card-mint { background: #cce7d9; color: var(--ink); }
+.feature-card-mint::before { background-image: linear-gradient(90deg, rgba(204, 231, 217, .04), rgba(204, 231, 217, .06)), url('../assets/images/card-collaboration.svg'); opacity: .78; }
 .feature-card-cream { background: #f3e7c7; color: var(--ink); }
+.feature-card-cream::before { background-image: linear-gradient(90deg, rgba(243, 231, 199, .02), rgba(243, 231, 199, .04)), url('../assets/images/card-learning.svg'); opacity: .8; }
 .feature-number { font-size: .7rem; font-weight: 800; letter-spacing: .12em; opacity: .65; }
 .feature-symbol { position: absolute; top: 24px; right: 28px; font-size: 1.4rem; }
 .feature-card h3 { margin: 45px 0 9px; font: 700 1.32rem/1.25 var(--font-display); letter-spacing: -.04em; }
