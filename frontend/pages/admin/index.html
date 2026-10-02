@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="pt">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#10231d">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Administração | IMPACTA</title>
+    <link rel="stylesheet" href="../../styles/main.css">
+    <link rel="stylesheet" href="../../styles/admin.css">
+    <script src="../../scripts/admin.js" defer></script>
+</head>
+<body class="admin-page">
+    <a class="admin-skip-link" href="#admin-content">Saltar para o conteúdo</a>
+    <div class="admin-shell">
+        <aside class="admin-sidebar" id="admin-sidebar">
+            <a class="brand admin-brand" href="../index.html" aria-label="IMPACTA, página inicial">
+                <span class="brand-mark" aria-hidden="true">i</span><span>impacta<span class="brand-period">.</span></span>
+            </a>
+            <p class="admin-sidebar-label">PLATAFORMA</p>
+            <nav class="admin-nav" aria-label="Secções de administração">
+                <a href="#overview" data-admin-nav="overview" aria-current="page"><span aria-hidden="true">⌂</span> Visão geral</a>
+                <a href="#users" data-admin-nav="users"><span aria-hidden="true">♙</span> Utilizadores</a>
+                <a href="#roles" data-admin-nav="roles"><span aria-hidden="true">◇</span> Funções e permissões</a>
+                <a href="#communities" data-admin-nav="communities"><span aria-hidden="true">◎</span> Comunidades</a>
+                <a href="#projects" data-admin-nav="projects"><span aria-hidden="true">↗</span> Projetos e desafios</a>
+                <a href="#moderation" data-admin-nav="moderation"><span aria-hidden="true">✳</span> Moderação</a>
+                <a href="#reports" data-admin-nav="reports"><span aria-hidden="true">⚑</span> Denúncias e recursos</a>
+                <a href="#announcements" data-admin-nav="announcements"><span aria-hidden="true">▣</span> Anúncios</a>
+                <a href="#recognition" data-admin-nav="recognition"><span aria-hidden="true">✦</span> Distintivos e pontos</a>
+                <a href="#privacy" data-admin-nav="privacy"><span aria-hidden="true">◈</span> Privacidade</a>
+                <a href="#audit" data-admin-nav="audit"><span aria-hidden="true">≡</span> Auditoria</a>
+                <a href="#security" data-admin-nav="security"><span aria-hidden="true">⛨</span> Segurança</a>
+                <a href="#settings" data-admin-nav="settings"><span aria-hidden="true">⚙</span> Configurações</a>
+            </nav>
+            <div class="admin-sidebar-foot">
+                <span class="admin-lock-mark" aria-hidden="true">⌑</span>
+                <span><strong>Acesso condicionado</strong><small>Autenticação e MFA pendentes</small></span>
+            </div>
+        </aside>
+
+        <main class="admin-main" id="admin-content">
+            <header class="admin-topbar">
+                <button class="admin-menu-toggle" type="button" aria-expanded="false" aria-controls="admin-sidebar" aria-label="Abrir navegação">☰</button>
+                <div class="admin-breadcrumb"><span>IMPACTA</span><span aria-hidden="true">/</span><strong id="admin-current-title">Visão geral</strong></div>
+                <div class="admin-top-actions">
+                    <span class="admin-env-badge"><i aria-hidden="true"></i> Pré-visualização</span>
+                    <a class="admin-home-link" href="../index.html">Voltar ao site <span aria-hidden="true">↗</span></a>
+                </div>
+            </header>
+
+            <div class="admin-content-wrap">
+                <section class="admin-page-heading" aria-labelledby="admin-heading">
+                    <div>
+                        <p class="admin-eyebrow"><span></span> CENTRO DE ADMINISTRAÇÃO</p>
+                        <h1 id="admin-heading">Uma plataforma, <span>bem cuidada.</span></h1>
+                        <p id="admin-description">Acompanhe a atividade e as decisões que mantêm a comunidade segura.</p>
+                    </div>
+                    <div class="admin-operator-card">
+                        <span class="admin-operator-avatar" aria-hidden="true">A</span>
+                        <span><strong>Acesso protegido</strong><small>Sem sessão administrativa</small></span>
+                    </div>
+                </section>
+
+                <section class="admin-security-notice" role="status" aria-live="polite">
+                    <span class="admin-notice-icon" aria-hidden="true">⌑</span>
+                    <div><strong>Área administrativa bloqueada até a ligação segura</strong>
+                        <p>Esta pré-visualização não lê nem altera dados. O acesso real só será ativado depois da API com autenticação, MFA e permissões estar ligada à base de dados aprovada.</p>
+                    </div>
+                    <span class="admin-notice-state">SEM ACESSO A DADOS</span>
+                </section>
+
+                <section class="admin-view" data-admin-view="overview" aria-labelledby="overview-title">
+                    <div class="admin-section-heading">
+                        <div><p class="admin-eyebrow">ACOMPANHAMENTO</p><h2 id="overview-title">Visão geral</h2></div>
+                        <span class="admin-period-label">Indicadores indisponíveis</span>
+                    </div>
+                    <div class="admin-stat-grid" aria-label="Indicadores não carregados">
+                        <article class="admin-stat-card"><span>Utilizadores ativos</span><strong>—</strong><small>Disponível após ligação</small><i class="stat-mark stat-mark-green" aria-hidden="true">♙</i></article>
+                        <article class="admin-stat-card"><span>Projetos em curso</span><strong>—</strong><small>Disponível após ligação</small><i class="stat-mark stat-mark-mint" aria-hidden="true">↗</i></article>
+                        <article class="admin-stat-card"><span>Denúncias por rever</span><strong>—</strong><small>Disponível após ligação</small><i class="stat-mark stat-mark-amber" aria-hidden="true">⚑</i></article>
+                        <article class="admin-stat-card"><span>Pedidos de privacidade</span><strong>—</strong><small>Disponível após ligação</small><i class="stat-mark stat-mark-blue" aria-hidden="true">◈</i></article>
+                    </div>
+                    <div class="admin-overview-grid">
+                        <article class="admin-panel admin-queue-panel">
+                            <div class="admin-panel-heading"><div><p class="admin-eyebrow">ATENÇÃO DA EQUIPA</p><h3>Filas de trabalho</h3></div><span class="admin-panel-icon">≡</span></div>
+                            <div class="admin-empty-state"><span aria-hidden="true">⌑</span><strong>Fila ainda não ligada</strong><p>Denúncias, recursos e pedidos de privacidade aparecerão aqui quando a API estiver ativa.</p></div>
+                        </article>
+                        <article class="admin-panel admin-activity-panel">
+                            <div class="admin-panel-heading"><div><p class="admin-eyebrow">REGISTO RECENTE</p><h3>Atividade administrativa</h3></div><span class="admin-panel-icon">◷</span></div>
+                            <div class="admin-empty-state"><span aria-hidden="true">⌑</span><strong>Sem dados carregados</strong><p>As ações administrativas serão registadas e apresentadas aqui, com acesso limitado por permissão.</p></div>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="admin-view" data-admin-view="users" aria-labelledby="users-title" hidden>
+                    <div class="admin-section-heading"><div><p class="admin-eyebrow">CONTAS DA COMUNIDADE</p><h2 id="users-title">Utilizadores</h2></div></div>
+                    <div class="admin-module-grid"><article><b>01</b><h3>Pesquisa e consulta</h3><p>Localizar contas e consultar apenas os dados necessários ao trabalho autorizado.</p></article><article><b>02</b><h3>Estado da conta</h3><p>Suspender ou restaurar o acesso com motivo e histórico da decisão.</p></article><article><b>03</b><h3>Privacidade</h3><p>Iniciar o fluxo de exportação, correção ou encerramento de uma conta.</p></article></div>
+                    <div class="admin-locked-state"><span aria-hidden="true">⌑</span><div><strong>Consulta desativada</strong><p>Os dados de utilizadores só serão apresentados depois da autenticação e das permissões estarem ativas.</p></div></div>
+                </section>
+
+                <section class="admin-view" data-admin-view="roles" aria-labelledby="roles-title" hidden>
+                    <div class="admin-section-heading"><div><p class="admin-eyebrow">ACESSO COM PRINCÍPIO DE MÍNIMO PRIVILÉGIO</p><h2 id="roles-title">Funções e permissões</h2></div></div>
+                    <div class="admin-module-grid"><article><b>01</b><h3>Apoio</h3><p>Consulta limitada e apoio em fluxos autorizados.</p></article><article><b>02</b><h3>Moderação</h3><p>Conteúdo sinalizado, denúncias e recursos.</p></article><article><b>03</b><h3>Gestão de comunidade</h3><p>Operações limitadas às comunidades atribuídas.</p></article><article><b>04</b><h3>Administração da plataforma</h3><p>Permissões da plataforma sem promoção de super-admin pela interface.</p></article></div>
+                    <div class="admin-locked-state"><span aria-hidden="true">⌑</span><div><strong>Gestão de acesso desativada</strong><p>As permissões serão verificadas em cada pedido à API. Um botão oculto não substitui a autorização do servidor.</p></div></div>
+                </section>
+
+                <section class="admin-view" data-admin-view="communities" aria-labelledby="communities-title" hidden>
+                    <div class="admin-section-heading"><div><p class="admin-eyebrow">ESPAÇOS COLABORATIVOS</p><h2 id="communities-title">Comunidades</h2></div></div>
+                    <div class="admin-module-grid"><article><b>01</b><h3>Revisão</h3><p>Analisar comunidades pendentes e respetiva área de impacto.</p></article><article><b>02</b><h3>Membros</h3><p>Consultar e gerir adesões dentro do âmbito atribuído.</p></article><article><b>03</b><h3>Estado e visibilidade</h3><p>Gerir a publicação, suspensão e arquivo com histórico.</p></article></div>
+                    <div class="admin-locked-state"><span aria-hidden="true">⌑</span><div><strong>Gestão desativada</strong><p>A lista e as ações de comunidade aguardam a API autenticada.</p></div></div>
+                </section>
+
+                <section class="admin-view" data-admin-view="projects" aria-labelledby="projects-title" hidden>
+                    <div class="admin-section-heading"><div><p class="admin-eyebrow">IDEIAS EM AÇÃO</p><h2 id="projects-title">Projetos e desafios</h2></div></div>
+                    <div class="admin-module-grid"><article><b>01</b><h3>Projetos</h3><p>Rever propostas, estados e participação.</p></article><article><b>02</b><h3>Desafios</h3><p>Gerir períodos de participação e submissões.</p></article><article><b>03</b><h3>Decisões</h3><p>Registar aprovação ou rejeição com motivo.</p></article></div>
+                    <div class="admin-locked-state"><span aria-hidden="true">⌑</span><div><strong>Revisão desativada</strong><p>O conteúdo real só será consultado com autenticação e autorização por recurso.</p></div></div>
+                </section>
+
+                <section class="admin-view" data-admin-view="moderation" aria-labelledby="moderation-title" hidden>
+                    <div class="admin-section-heading"><div><p class="admin-eyebrow">SEGURANÇA DA COMUNIDADE</p><h2 id="moderation-title">Moderação</h2></div></div>
+                    <div class="admin-module-grid"><article><b>01</b><h3>Publicações</h3><p>Ocultar, restaurar ou remover conteúdo com uma razão registada.</p></article><article><b>02</b><h3>Comentários</h3><p>Tratar conteúdo sinalizado sem expor dados desnecessários.</p></article><article><b>03</b><h3>Contas</h3><p>Aplicar avisos ou suspensões proporcionais, com prazo quando aplicável.</p></article></div>
+                    <div class="admin-locked-state"><span aria-hidden="true">⌑</span><div><strong>Ações de moderação desativadas</strong><p>Cada ação exigirá permissão, motivo e registo de auditoria no servidor.</p></div></div>
+                </section>
+
+                <section class="admin-view" data-admin-view="reports" aria-labelledby="reports-title" hidden>
+                    <div class="admin-section-heading"><div><p class="admin-eyebrow">TRIAGEM E RECURSOS</p><h2 id="reports-title">Denúncias e recursos</h2></div></div>
+                    <div class="admin-module-grid"><article><b>01</b><h3>Triagem</h3><p>Classificar e atribuir denúncias à equipa autorizada.</p></article><article><b>02</b><h3>Decisão</h3><p>Registar o resultado e a respetiva fundamentação.</p></article><article><b>03</b><h3>Recurso</h3><p>Rever decisões anteriores com histórico separado.</p></article></div>
+                    <div class="admin-locked-state"><span aria-hidden="true">⌑</span><div><strong>Fila desativada</strong><p>Não existem contagens fictícias nem denúncias de demonstração nesta página.</p></div></div>
+                </section>
+
+                <section class="admin-view" data-admin-view="announcements" aria-labelledby="announcements-title" hidden>
+                    <div class="admin-section-heading"><div><p class="admin-eyebrow">COMUNICAÇÃO DA PLATAFORMA</p><h2 id="announcements-title">Anúncios</h2></div></div>
+                    <div class="admin-module-grid"><article><b>01</b><h3>Preparar</h3><p>Criar rascunhos e rever o conteúdo antes da publicação.</p></article><article><b>02</b><h3>Agendar</h3><p>Definir início, expiração e público permitido.</p></article><article><b>03</b><h3>Publicar</h3><p>Publicar ou arquivar e manter um registo da alteração.</p></article></div>
+                    <div class="admin-locked-state"><span aria-hidden="true">⌑</span><div><strong>Edição desativada</strong><p>A API validará conteúdo, público e datas antes de aceitar alterações.</p></div></div>
+                </section>
+
+                <section class="admin-view" data-admin-view="recognition" aria-labelledby="recognition-title" hidden>
+                    <div class="admin-section-heading"><div><p class="admin-eyebrow">CONTRIBUIÇÃO DA COMUNIDADE</p><h2 id="recognition-title">Distintivos e pontos</h2></div></div>
+                    <div class="admin-module-grid"><article><b>01</b><h3>Distintivos</h3><p>Manter reconhecimento ativo e atribuições explicáveis.</p></article><article><b>02</b><h3>Registo de pontos</h3><p>Usar lançamentos com ator, motivo e origem.</p></article><article><b>03</b><h3>Histórico</h3><p>Preservar a sequência de ganhos e ajustes.</p></article></div>
+                    <div class="admin-locked-state"><span aria-hidden="true">⌑</span><div><strong>Gestão desativada</strong><p>Os pontos não serão alterados sem autorização e registo imutável da operação.</p></div></div>
+                </section>
+
+                <section class="admin-view" data-admin-view="privacy" aria-labelledby="privacy-title" hidden>
+                    <div class="admin-section-heading"><div><p class="admin-eyebrow">DADOS PESSOAIS</p><h2 id="privacy-title">Privacidade</h2></div></div>
+                    <div class="admin-module-grid"><article><b>01</b><h3>Acesso e exportação</h3><p>Receber e acompanhar pedidos com visibilidade restrita.</p></article><article><b>02</b><h3>Correção</h3><p>Encaminhar pedidos de correção e registar o resultado.</p></article><article><b>03</b><h3>Encerramento</h3><p>Iniciar o fluxo de encerramento com revisão e retenção definidas.</p></article></div>
+                    <div class="admin-locked-state"><span aria-hidden="true">⌑</span><div><strong>Pedidos protegidos</strong><p>O acesso a estes dados exigirá uma permissão específica e será auditado.</p></div></div>
+                </section>
+
+                <section class="admin-view" data-admin-view="audit" aria-labelledby="audit-title" hidden>
+                    <div class="admin-section-heading"><div><p class="admin-eyebrow">RESPONSABILIZAÇÃO</p><h2 id="audit-title">Auditoria</h2></div></div>
+                    <div class="admin-module-grid"><article><b>01</b><h3>Pesquisa</h3><p>Consultar eventos por ator, alvo, período e ação autorizada.</p></article><article><b>02</b><h3>Exportação</h3><p>Exigir permissão própria para exportar um conjunto limitado.</p></article><article><b>03</b><h3>Proteção</h3><p>Não incluir palavras-passe, tokens, segredos ou dados pessoais desnecessários.</p></article></div>
+                    <div class="admin-locked-state"><span aria-hidden="true">⌑</span><div><strong>Registo indisponível</strong><p>A auditoria só ficará visível depois de autenticação e permissões verificadas.</p></div></div>
+                </section>
+
+                <section class="admin-view" data-admin-view="security" aria-labelledby="security-title" hidden>
+                    <div class="admin-section-heading"><div><p class="admin-eyebrow">PROTEÇÃO DO ACESSO</p><h2 id="security-title">Segurança</h2></div></div>
+                    <div class="admin-module-grid"><article><b>01</b><h3>MFA obrigatório</h3><p>Exigir segundo fator para contas administrativas.</p></article><article><b>02</b><h3>Sessões</h3><p>Consultar as próprias sessões e revogar sessões autorizadas.</p></article><article><b>03</b><h3>Reautenticação</h3><p>Confirmar a identidade antes de ações de alto impacto.</p></article></div>
+                    <div class="admin-locked-state"><span aria-hidden="true">⌑</span><div><strong>Controlos não ativos</strong><p>Esta pré-visualização não oferece autenticação, MFA, sessões nem ações administrativas.</p></div></div>
+                </section>
+
+                <section class="admin-view" data-admin-view="settings" aria-labelledby="settings-title" hidden>
+                    <div class="admin-section-heading"><div><p class="admin-eyebrow">OPERAÇÃO DA PLATAFORMA</p><h2 id="settings-title">Configurações</h2></div></div>
+                    <div class="admin-module-grid"><article><b>01</b><h3>Definições públicas</h3><p>Alterar opções validadas e não secretas.</p></article><article><b>02</b><h3>Credenciais</h3><p>Manter segredos fora da base de dados e do código.</p></article><article><b>03</b><h3>Histórico</h3><p>Registar quem mudou cada definição e quando.</p></article></div>
+                    <div class="admin-locked-state"><span aria-hidden="true">⌑</span><div><strong>Edição desativada</strong><p>Credenciais e definições só serão acessíveis através dos controlos seguros do backend.</p></div></div>
+                </section>
+
+                <footer class="admin-footer"><span>IMPACTA · Administração da plataforma</span><span>Pré-visualização sem dados reais</span></footer>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
