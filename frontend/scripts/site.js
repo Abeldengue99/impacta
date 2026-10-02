@@ -1,5 +1,21 @@
 const menuToggle = document.querySelector('.menu-toggle');
 const siteNav = document.querySelector('.site-nav');
+const siteHeader = document.querySelector('.site-header');
+
+if (siteHeader) {
+    let headerUpdateQueued = false;
+    const updateHeaderState = () => {
+        siteHeader.classList.toggle('is-scrolled', window.scrollY > 24);
+        headerUpdateQueued = false;
+    };
+
+    window.addEventListener('scroll', () => {
+        if (headerUpdateQueued) return;
+        headerUpdateQueued = true;
+        window.requestAnimationFrame(updateHeaderState);
+    }, { passive: true });
+    updateHeaderState();
+}
 
 if (menuToggle && siteNav) {
     menuToggle.addEventListener('click', () => {
@@ -76,7 +92,7 @@ if (impactCarousel) {
     } else startRotation();
 }
 const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
-const revealElements = [...document.querySelectorAll('.hero-copy, .hero-art, .section-heading, .feature-card, .closing-content, .closing-banner > .button')];
+const revealElements = [...document.querySelectorAll('.hero-copy, .hero-art, .section-heading, .feature-card, .closing-content, .closing-banner > .button, .site-footer')];
 
 if (!motionPreference.matches && 'IntersectionObserver' in window && revealElements.length) {
     const revealObserver = new IntersectionObserver((entries, observer) => {
