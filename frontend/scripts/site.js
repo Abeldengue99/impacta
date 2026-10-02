@@ -92,7 +92,7 @@ if (impactCarousel) {
     } else startRotation();
 }
 const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
-const revealElements = [...document.querySelectorAll('.hero-copy, .hero-art, .section-heading, .feature-card, .closing-content, .closing-banner > .button, .site-footer')];
+const revealElements = [...document.querySelectorAll('.hero-copy, .hero-art, .section-heading, .feature-card, .closing-content, .closing-banner > .button')];
 
 if (!motionPreference.matches && 'IntersectionObserver' in window && revealElements.length) {
     const revealObserver = new IntersectionObserver((entries, observer) => {
