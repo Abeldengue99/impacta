@@ -218,3 +218,62 @@ button, a { -webkit-tap-highlight-color: transparent; }
     *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
     .carousel-slide { transition: none; }
 }
+/* IMPACTA motion effects */
+@media (prefers-reduced-motion: no-preference) {
+    .motion-reveal {
+        opacity: 0;
+        translate: 0 22px;
+        transition: opacity .72s cubic-bezier(.2, .7, .2, 1), translate .72s cubic-bezier(.2, .7, .2, 1);
+        transition-delay: var(--reveal-delay, 0ms);
+    }
+    .motion-reveal.is-visible { opacity: 1; translate: 0 0; }
+
+    .hero-art .impact-card-main { animation: impacta-card-float 7s ease-in-out infinite; }
+    .hero-art .note-top { animation: impacta-note-float 6s ease-in-out infinite; }
+    .hero-art .note-bottom { animation: impacta-note-float 6s ease-in-out -3s infinite reverse; }
+    .hero-art .art-sun { transform-origin: center; animation: impacta-sun-turn 28s linear infinite; }
+
+    .feature-card {
+        transition: transform .32s cubic-bezier(.2, .7, .2, 1), box-shadow .32s ease;
+    }
+    .feature-card::after {
+        position: absolute;
+        z-index: -1;
+        inset: 0;
+        border-radius: inherit;
+        background: radial-gradient(330px circle at var(--pointer-x, 50%) var(--pointer-y, 50%), rgba(255, 255, 255, .2), transparent 48%);
+        content: '';
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .24s ease;
+    }
+    .feature-card:focus-within { transform: translateY(-4px); box-shadow: 0 16px 34px rgba(25, 56, 42, .12); }
+    .feature-card:focus-within::after { opacity: .7; }
+
+    .carousel-slide img { transform: scale(1.07); transition: transform 7s cubic-bezier(.2, .7, .2, 1); }
+    .carousel-slide.is-active img { transform: scale(1); }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .feature-card:hover {
+        transform: perspective(900px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) translateY(-6px);
+        box-shadow: 0 18px 38px rgba(25, 56, 42, .16);
+    }
+    .feature-card:hover::after { opacity: 1; }
+}
+
+@keyframes impacta-card-float {
+    0%, 100% { transform: translate3d(0, 0, 0) rotate(2deg); }
+    50% { transform: translate3d(0, -8px, 0) rotate(1.2deg); }
+}
+@keyframes impacta-note-float {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 -6px; }
+}
+@keyframes impacta-sun-turn { to { rotate: 360deg; } }
+
+@media (prefers-reduced-motion: reduce) {
+    .motion-reveal { opacity: 1 !important; translate: none !important; }
+    .hero-art .impact-card-main, .hero-art .note-top, .hero-art .note-bottom, .hero-art .art-sun { animation: none !important; }
+    .feature-card { transform: none !important; }
+}

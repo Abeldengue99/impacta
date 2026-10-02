@@ -75,3 +75,38 @@ if (impactCarousel) {
         toggleButton.querySelector('span').textContent = '▶';
     } else startRotation();
 }
+const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+const revealElements = [...document.querySelectorAll('.hero-copy, .hero-art, .section-heading, .feature-card, .closing-content, .closing-banner > .button')];
+
+if (!motionPreference.matches && 'IntersectionObserver' in window && revealElements.length) {
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+        });
+    }, { threshold: 0.14, rootMargin: '0px 0px -32px 0px' });
+
+    const featureCards = [...document.querySelectorAll('.feature-card')];
+    revealElements.forEach((element) => {
+        if (element.classList.contains('feature-card')) {
+            element.style.setProperty('--reveal-delay', `${featureCards.indexOf(element) * 110}ms`);
+        }
+        element.classList.add('motion-reveal');
+        revealObserver.observe(element);
+    });
+}
+
+if (!motionPreference.matches && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    document.querySelectorAll('.feature-card').forEach((card) => {
+        card.addEventListener('pointermove', (event) => {
+            const bounds = card.getBoundingClientRect();
+            const x = event.clientX - bounds.left;
+            const y = event.clientY - bounds.top;
+            card.style.setProperty('--pointer-x', `${x}px`);
+            card.style.setProperty('--pointer-y', `${y}px`);
+            card.style.setProperty('--tilt-x', `${((bounds.height / 2 - y) / bounds.height) * 3}deg`);
+            card.style.setProperty('--tilt-y', `${((x - bounds.width / 2) / bounds.width) * 3}deg`);
+        }, { passive: true });
+    });
+}
