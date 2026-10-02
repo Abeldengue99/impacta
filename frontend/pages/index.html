@@ -1,100 +1,102 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impacta | Aprende. Colabora. Impacta.</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#10231d">
+    <meta name="description" content="O IMPACTA liga pessoas que querem aprender, colaborar e criar mudanças positivas nas suas comunidades.">
+    <title>IMPACTA — Aprende. Colabora. Impacta.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../styles/main.css">
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-    <nav class="navbar">
-        <a href="index.html" class="logo">
-            <i data-lucide="globe"></i> Impacta<span>.</span>
+    <header class="site-header">
+        <a class="brand" href="index.html" aria-label="IMPACTA, página inicial">
+            <span class="brand-mark" aria-hidden="true">i</span>
+            <span>impacta<span class="brand-period">.</span></span>
         </a>
-        <ul class="nav-links">
-            <li><a href="#funcionalidades">Funcionalidades</a></li>
-            <li><a href="#comunidade">Comunidade</a></li>
-            <li><a href="#projetos">Projetos</a></li>
-        </ul>
-        <div class="nav-actions">
-            <a href="login.html" class="btn btn-glass">Entrar</a>
-            <a href="register.html" class="btn btn-primary">Começar Agora</a>
+        <nav class="site-nav" aria-label="Navegação principal">
+            <a href="#como-funciona">Como funciona</a>
+            <a href="#frentes">Áreas de impacto</a>
+            <a href="feed.html">Comunidade</a>
+        </nav>
+        <div class="header-actions">
+            <a class="text-link" href="login.html">Entrar</a>
+            <a class="button button-small" href="register.html">Criar conta <span aria-hidden="true">↗</span></a>
         </div>
-    </nav>
-
-    <header class="hero">
-        <div class="bg-glow glow-1"></div>
-        <div class="bg-glow glow-2"></div>
-        
-        <div class="hero-content">
-            <div class="badge glass-panel" style="display: inline-block; padding: 6px 16px; border-radius: 50px; font-size: 0.9rem; font-weight: 500; margin-bottom: 24px; color: var(--primary);">
-                🚀 A rede social com propósito
-            </div>
-            <h1>Transforma o teu conhecimento em <span class="highlight">impacto real.</span></h1>
-            <p>Não desperdices tempo com feeds vazios. Junta-te a uma comunidade que resolve problemas, partilha soluções e cria impacto no mundo real.</p>
-            
-            <div class="hero-actions">
-                <a href="register.html" class="btn btn-primary">Criar Conta Gratuita</a>
-                <a href="#funcionalidades" class="btn btn-glass">Saber mais</a>
-            </div>
-        </div>
-        
-        <!-- Hero visual / mockup placeholder -->
-        <div class="hero-visual glass-panel">
-            <!-- Simulação de um post da rede social -->
-            <div class="glass-panel" style="padding: 16px; display: flex; gap: 12px; align-items: center; border: none; background: rgba(255,255,255,0.8);">
-                <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff; font-size: 1.2rem;">JS</div>
-                <div>
-                    <h4 style="font-size: 1.1rem; margin: 0; color: var(--text-main);">João Silva <span style="color: var(--gold); font-size: 0.8rem; margin-left: 8px;">◆ Nível 5</span></h4>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Criou o projeto "Reciclagem Digital"</p>
-                </div>
-            </div>
-            <div style="flex-grow: 1; border-radius: 12px; background: rgba(24, 119, 242, 0.05); border: 1px dashed rgba(24, 119, 242, 0.3); display: flex; align-items: center; justify-content: center; flex-direction: column;">
-                <i data-lucide="activity" style="width: 56px; height: 56px; color: var(--primary); margin-bottom: 16px;"></i>
-                <p style="color: var(--text-main); font-weight: 500;">Monitorizando impacto ambiental...</p>
-                <div style="width: 60%; height: 6px; background: rgba(0,0,0,0.1); border-radius: 10px; margin-top: 16px; overflow: hidden;">
-                    <div style="width: 75%; height: 100%; background: var(--primary); border-radius: 10px;"></div>
-                </div>
-                <p style="font-size: 0.8rem; color: var(--primary); margin-top: 8px;">Meta: 75% concluída</p>
-            </div>
-        </div>
+        <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-nav">☰</button>
     </header>
 
-    <section id="funcionalidades" class="features">
-        <h2 class="section-title">Muito mais que likes. <br><span style="color: var(--primary);">Impacto mensurável.</span></h2>
-        
-        <div class="features-grid">
-            <div class="feature-card glass-panel">
-                <div class="feature-icon">
-                    <i data-lucide="target"></i>
+    <main>
+        <section class="hero" id="inicio">
+            <div class="hero-copy">
+                <p class="eyebrow"><span class="eyebrow-dot"></span> Ideias que saem do papel</p>
+                <h1>O teu conhecimento pode <span>mudar realidades.</span></h1>
+                <p class="hero-description">Encontra pessoas, partilha soluções e participa em projetos que respondem a desafios reais da tua comunidade.</p>
+                <div class="hero-actions">
+                    <a class="button" href="register.html">Fazer parte <span aria-hidden="true">↗</span></a>
+                    <a class="button button-quiet" href="feed.html">Explorar a comunidade <span aria-hidden="true">→</span></a>
                 </div>
-                <h3>Desafios Reais</h3>
-                <p>Cumpre missões diárias nas áreas de educação, ambiente e saúde. Aprende enquanto resolves problemas da tua comunidade.</p>
+                <div class="hero-note"><span class="note-avatars" aria-hidden="true"><i>JM</i><i>AC</i><i>LS</i></span><span>Aprender juntos. Fazer a diferença.</span></div>
             </div>
-            
-            <div class="feature-card glass-panel">
-                <div class="feature-icon">
-                    <i data-lucide="users"></i>
-                </div>
-                <h3>Projetos Colaborativos</h3>
-                <p>Junta-te a outros membros para construir soluções em grupo e ganhar experiência prática num ambiente real.</p>
-            </div>
-            
-            <div class="feature-card glass-panel">
-                <div class="feature-icon">
-                    <i data-lucide="award"></i>
-                </div>
-                <h3>Reputação por Ação</h3>
-                <p>Sobe no ranking não pela fama, mas pela qualidade e impacto que o teu conhecimento e voluntariado geram.</p>
-            </div>
-        </div>
-    </section>
 
-    <script>
-        // Inicializar os ícones do Lucide
-        lucide.createIcons();
-    </script>
+            <div class="hero-art" aria-label="Exemplo de projeto comunitário em destaque">
+                <div class="art-orbit orbit-one"></div>
+                <div class="art-orbit orbit-two"></div>
+                <div class="art-sun" aria-hidden="true">✳</div>
+                <div class="impact-card impact-card-main">
+                    <div class="card-topline"><span class="card-kicker">PROJETO EM DESTAQUE</span><span class="live-dot" aria-label="Ativo"></span></div>
+                    <div class="project-illustration" aria-hidden="true"><span class="sun-shape"></span><span class="hill hill-back"></span><span class="hill hill-front"></span><span class="plant plant-one">♧</span><span class="plant plant-two">♧</span></div>
+                    <div class="project-card-copy"><span class="tag tag-green">Ambiente</span><h2>Mais verde, juntos</h2><p>Uma ideia cresce quando a comunidade participa.</p></div>
+                    <div class="progress-row"><span>Mobilização da comunidade</span><strong>Em curso</strong></div>
+                    <div class="progress-track"><span></span></div>
+                    <a href="feed.html#projetos" class="card-link">Ver projeto <span aria-hidden="true">↗</span></a>
+                </div>
+                <div class="floating-note note-top"><span class="note-icon">✦</span><span><strong>Ideias partilhadas</strong><small>com propósito</small></span></div>
+                <div class="floating-note note-bottom"><span class="note-icon note-icon-yellow">◎</span><span><strong>Impacto local</strong><small>feito em conjunto</small></span></div>
+            </div>
+            <div class="hero-stamp" aria-hidden="true">IMPACTO<br>COMEÇA<br>AQUI <span>↘</span></div>
+        </section>
+
+        <section class="intro-section" id="como-funciona">
+            <div class="section-heading">
+                <p class="eyebrow">Uma comunidade em movimento</p>
+                <h2>Do que sabes ao que <span>podemos fazer.</span></h2>
+                <p>O IMPACTA aproxima quem tem uma ideia de quem pode ajudar a torná-la realidade.</p>
+            </div>
+            <div class="feature-grid" id="frentes">
+                <article class="feature-card feature-card-dark">
+                    <span class="feature-number">01</span><span class="feature-symbol" aria-hidden="true">↗</span>
+                    <h3>Descobre desafios</h3><p>Encontra causas e necessidades concretas onde as tuas capacidades podem fazer diferença.</p>
+                    <a href="feed.html#desafios">Explorar desafios <span aria-hidden="true">→</span></a>
+                </article>
+                <article class="feature-card feature-card-mint">
+                    <span class="feature-number">02</span><span class="feature-symbol" aria-hidden="true">◎</span>
+                    <h3>Constrói em conjunto</h3><p>Junta-te a pessoas com diferentes talentos e transforma boas ideias em projetos colaborativos.</p>
+                    <a href="feed.html#projetos">Ver projetos <span aria-hidden="true">→</span></a>
+                </article>
+                <article class="feature-card feature-card-cream">
+                    <span class="feature-number">03</span><span class="feature-symbol" aria-hidden="true">✳</span>
+                    <h3>Partilha o que aprendeste</h3><p>Regista o teu percurso, inspira outras pessoas e ajuda a comunidade a continuar a crescer.</p>
+                    <a href="feed.html">Conhecer a comunidade <span aria-hidden="true">→</span></a>
+                </article>
+            </div>
+        </section>
+
+        <section class="closing-banner">
+            <div><p class="eyebrow">O próximo passo é teu</p><h2>Há muito para fazer.<br><span>Vamos começar?</span></h2></div>
+            <a class="button button-light" href="register.html">Juntar-me ao IMPACTA <span aria-hidden="true">↗</span></a>
+            <div class="closing-spark" aria-hidden="true">✳</div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <a class="brand brand-footer" href="index.html"><span class="brand-mark" aria-hidden="true">i</span><span>impacta<span class="brand-period">.</span></span></a>
+        <p>Aprende. Colabora. Impacta.</p>
+        <span>© <span id="year">2026</span> IMPACTA</span>
+    </footer>
+    <script src="../scripts/site.js" defer></script>
 </body>
 </html>

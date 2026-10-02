@@ -1,187 +1,95 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="../styles/facebook-style.css">
-    <title>Impacta - Feed de Impacto</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f6f1">
+    <title>Comunidade — IMPACTA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/feed.css">
+    <script src="../scripts/feed.js" defer></script>
 </head>
-<body>
-    <nav>
-        <div class="nav-left">
-            <h2>Impacta.</h2>
-            <input type="text" placeholder="Pesquisar projetos, desafios...">
-        </div>
-        <div class="nav-middle">
-            <a href="#" class="active">
-                <i class="fa fa-home"></i>
-            </a>
-            <a href="#">
-                <i class="fa fa-flag"></i> <!-- Desafios -->
-            </a>
-            <a href="#">
-                <i class="fa fa-users"></i> <!-- Comunidades -->
-            </a>
-            <a href="#">
-                <i class="fa fa-trophy"></i> <!-- Ranking -->
-            </a>
-        </div>
-        <div class="nav-right">
-            <span class="profile">IS</span>
-            <a href="#">
-                <i class="fa fa-bell"></i>
-            </a>
-            <a href="#">
-                <i class="fas fa-ellipsis-h"></i>
-            </a>
-        </div>
-    </nav>
+<body class="feed-page">
+    <header class="feed-header">
+        <a class="brand" href="index.html" aria-label="IMPACTA, página inicial"><span class="brand-mark" aria-hidden="true">i</span><span>impacta<span class="brand-period">.</span></span></a>
+        <label class="feed-search"><span aria-hidden="true">⌕</span><input id="feed-search" type="search" placeholder="Pesquisar ideias e projetos" aria-label="Pesquisar publicações"></label>
+        <nav class="feed-top-nav" aria-label="Navegação da comunidade">
+            <a class="top-nav-active" href="#feed" aria-label="Início">Início</a>
+            <a href="#desafios">Desafios</a>
+            <a href="#projetos">Projetos</a>
+        </nav>
+        <div class="feed-header-actions"><a class="header-icon" href="#comunidade" aria-label="Notificações">♧<span class="notification-dot"></span></a><a class="user-chip" href="login.html" aria-label="Entrar na conta">IS</a></div>
+    </header>
 
-    <div class="container">
-        <!-- PAINEL ESQUERDO: Menu Principal -->
-        <div class="left-panel">
-            <ul>
-                <li>
-                    <i class="fa fa-user-circle" style="color: #65676b;"></i>
-                    <p>Igor Silva (Nível 3)</p>
-                </li>
-                <li>
-                    <i class="fa fa-flag" style="color: #1877f2;"></i>
-                    <p>Desafios Diários</p>
-                </li>
-                <li>
-                    <i class="fa fa-briefcase" style="color: #e42645;"></i>
-                    <p>Meus Projetos</p>
-                </li>
-                <li>
-                    <i class="fa fa-users" style="color: #1b74e4;"></i>
-                    <p>Comunidades</p>
-                </li>
-                <li>
-                    <i class="fa fa-trophy" style="color: #f5c33b;"></i>
-                    <p>Ranking Global</p>
-                </li>
-                <li>
-                    <i class="fa fa-certificate" style="color: #2b9a3f;"></i>
-                    <p>Certificados Obtidos</p>
-                </li>
-            </ul>
-        </div>
+    <main class="feed-layout" id="feed">
+        <aside class="feed-sidebar sidebar-left">
+            <a class="mini-profile" href="login.html"><span class="avatar avatar-user">IS</span><span><strong>Olá, participante</strong><small>Faz parte da comunidade</small></span></a>
+            <p class="sidebar-label">A tua comunidade</p>
+            <nav class="side-nav" aria-label="Secções da comunidade">
+                <a class="side-nav-active" href="#feed"><span>⌂</span> O teu feed</a>
+                <a href="#desafios"><span>✳</span> Desafios</a>
+                <a href="#projetos"><span>↗</span> Projetos</a>
+                <a href="#comunidade"><span>◎</span> Comunidades</a>
+            </nav>
+            <div class="sidebar-callout"><span class="callout-icon">✦</span><h3>Uma ideia pode ser o início.</h3><p>Partilha algo que possa ajudar a tua comunidade.</p><a href="#composer">Partilhar uma ideia <span>→</span></a></div>
+            <a class="back-home" href="index.html"><span>←</span> Voltar à página inicial</a>
+        </aside>
 
-        <!-- PAINEL CENTRAL: Feed de Impacto -->
-        <div class="middle-panel">
-            <!-- Criar Post -->
-            <div class="post create">
-                <div class="post-top">
-                    <div class="dp">IS</div>
-                    <input type="text" placeholder="Partilha uma solução, recurso ou desafio concluído..." />
-                </div>
-                <div class="post-bottom">
-                    <div class="action" style="color: #f3425f;">
-                        <i class="fa fa-camera"></i>
-                        <span>Foto/Vídeo de Ação</span>
-                    </div>
-                    <div class="action" style="color: #45bd62;">
-                        <i class="fa fa-check-circle"></i>
-                        <span>Provar Desafio</span>
-                    </div>
-                    <div class="action" style="color: #f7b928;">
-                        <i class="fa fa-lightbulb"></i>
-                        <span>Partilhar Dica</span>
-                    </div>
-                </div>
+        <section class="feed-column" aria-label="Publicações da comunidade">
+            <div class="feed-welcome">
+                <div><p class="eyebrow">COMUNIDADE IMPACTA · O TEU ESPAÇO</p><h1>Ideias que <span>movem.</span></h1><p>Aprende com outras pessoas e descobre onde podes contribuir.</p></div>
+                <span class="welcome-mark" aria-hidden="true">✳</span>
             </div>
 
-            <!-- Post 1 -->
-            <div class="post">
-                <div class="post-header">
-                    <div class="dp" style="background-color: #2b9a3f; color: white;">MR</div>
-                    <div class="post-info">
-                        <p class="name">Maria Rodrigues <i class="fa fa-check-circle" style="color: #1877f2; font-size: 12px;"></i></p>
-                        <span class="time">há 2 horas • Comunidade de Educação</span>
-                    </div>
-                </div>
-                <div class="post-content">
-                    <span class="badge"><i class="fa fa-star"></i> Desafio Concluído (+50 XP)</span><br><br>
-                    Acabei de concluir o desafio "Mentoria Solidária"! Ajudei 3 estudantes do ensino secundário com as suas dúvidas de Matemática Básica através de videochamada. <br><br>
-                    O conhecimento só tem valor quando é partilhado! 📚✏️
-                </div>
-                <div class="post-bottom" style="border-top: 1px solid #e4e6eb;">
-                    <div class="action">
-                        <i class="fa fa-lightbulb"></i>
-                        <span>Inspirador (24)</span>
-                    </div>
-                    <div class="action">
-                        <i class="fa fa-comment"></i>
-                        <span>Comentar (5)</span>
-                    </div>
-                    <div class="action">
-                        <i class="fa fa-share"></i>
-                        <span>Partilhar</span>
-                    </div>
-                </div>
-            </div>
+            <form class="composer panel" id="composer">
+                <div class="composer-top"><span class="avatar avatar-user">IS</span><label class="composer-input-wrap" for="post-text"><span class="visually-hidden">A tua publicação</span><textarea id="post-text" name="content" rows="2" maxlength="500" placeholder="Que ideia, solução ou progresso queres partilhar?" required></textarea></label></div>
+                <div class="composer-bottom"><div class="composer-hint"><span class="composer-hint-dot"></span> A comunidade cresce com a tua participação</div><button class="button button-small" type="submit"><span aria-hidden="true">↗</span> Publicar</button></div>
+                <p class="form-status" id="composer-status" aria-live="polite"></p>
+            </form>
 
-            <!-- Post 2 -->
-            <div class="post">
-                <div class="post-header">
-                    <div class="dp" style="background-color: #1877f2; color: white;">PT</div>
-                    <div class="post-info">
-                        <p class="name">Projeto "Tecnologia para Todos"</p>
-                        <span class="time">há 5 horas • Área de Tecnologia</span>
-                    </div>
-                </div>
-                <div class="post-content">
-                    <span class="badge" style="background-color: #e5f3ea; color: #2b9a3f;"><i class="fa fa-users"></i> Procura-se Voluntários</span><br><br>
-                    Estamos a criar uma plataforma Open Source para conectar ONGs a programadores. Precisamos de pessoas com conhecimentos em <strong>HTML e CSS</strong>. Alguém disponível para impactar o mundo real hoje? 💻🌍
-                </div>
-                <div class="post-bottom" style="border-top: 1px solid #e4e6eb;">
-                    <div class="action">
-                        <i class="fa fa-hand-paper"></i>
-                        <span>Vou Ajudar (12)</span>
-                    </div>
-                    <div class="action">
-                        <i class="fa fa-comment"></i>
-                        <span>Comentar (8)</span>
-                    </div>
-                    <div class="action">
-                        <i class="fa fa-share"></i>
-                        <span>Partilhar</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+            <div class="feed-toolbar"><div><span class="eyebrow">PARTILHAS DA COMUNIDADE</span><h2>Em destaque</h2></div><label class="sort-control">Ordenar <select id="feed-sort" aria-label="Ordenar publicações"><option value="recent">Mais recentes</option><option value="supported">Mais apoiadas</option></select></label></div>
+            <div class="post-list" id="post-list">
+                <article class="post-card panel" data-post data-supports="18">
+                    <div class="post-heading"><span class="avatar avatar-terracotta">MR</span><div class="post-author"><strong>Maria Rodrigues</strong><span>Comunidade de Educação <i aria-hidden="true">·</i> há 2 horas</span></div><span class="post-menu" aria-hidden="true">···</span></div>
+                    <span class="post-tag tag-green">Desafio concluído <b>+50 XP</b></span>
+                    <p class="post-copy">Esta semana acompanhei três estudantes nas suas dúvidas de Matemática. Uma hora de conversa abriu espaço para novas perguntas, confiança e vontade de continuar a aprender.</p>
+                    <div class="post-context"><span class="context-icon">✳</span><span><strong>Mentoria Solidária</strong><small>Desafio · Educação</small></span><a href="#desafios" aria-label="Ver desafio Mentoria Solidária">↗</a></div>
+                    <div class="post-actions"><button class="support-button" type="button" data-support aria-pressed="false"><span aria-hidden="true">♡</span> Apoiar <span class="support-count">18</span></button><button type="button" class="comment-button" data-comment aria-expanded="false"><span aria-hidden="true">◌</span> Comentar <span>5</span></button><button type="button" class="share-button" data-share><span aria-hidden="true">↗</span> Partilhar</button></div>
+                </article>
 
-        <!-- PAINEL DIREITO: Widgets Secundários -->
-        <div class="right-panel">
-            <div class="section">
-                <h4>Projetos Ativos</h4>
-                <div class="item">
-                    <div class="icon-box" style="background-color: #e42645;"><i class="fa fa-tree"></i></div>
-                    <p class="name">Limpeza Praia Norte</p>
-                </div>
-                <div class="item">
-                    <div class="icon-box" style="background-color: #2b9a3f;"><i class="fa fa-book"></i></div>
-                    <p class="name">Doação de Livros</p>
-                </div>
+                <article class="post-card panel" data-post data-supports="12">
+                    <div class="post-heading"><span class="avatar avatar-blue">PT</span><div class="post-author"><strong>Projeto Tecnologia para Todos</strong><span>Área de Tecnologia <i aria-hidden="true">·</i> há 5 horas</span></div><span class="post-menu" aria-hidden="true">···</span></div>
+                    <span class="post-tag tag-blue">Procuramos voluntários</span>
+                    <p class="post-copy">Estamos a criar uma plataforma de código aberto para aproximar organizações sociais e pessoas da tecnologia. Procuramos quem queira ajudar com HTML, CSS ou simplesmente testar as primeiras ideias.</p>
+                    <div class="post-context"><span class="context-icon context-icon-blue">↗</span><span><strong>Tecnologia para Todos</strong><small>Projeto colaborativo · 4 participantes</small></span><a href="#projetos" aria-label="Ver projeto Tecnologia para Todos">↗</a></div>
+                    <div class="post-actions"><button class="support-button" type="button" data-support aria-pressed="false"><span aria-hidden="true">♡</span> Apoiar <span class="support-count">12</span></button><button type="button" class="comment-button" data-comment aria-expanded="false"><span aria-hidden="true">◌</span> Comentar <span>8</span></button><button type="button" class="share-button" data-share><span aria-hidden="true">↗</span> Partilhar</button></div>
+                </article>
             </div>
-            
-            <br>
+            <p class="empty-state panel" id="empty-state" hidden>Nenhuma publicação corresponde à pesquisa.</p>
+        </section>
 
-            <div class="section">
-                <h4>Top Contribuidores</h4>
-                <div class="item">
-                    <div class="dp" style="width: 35px; height: 35px; border-radius: 50%; background-color: #1877f2; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">AD</div>
-                    <p class="name">Ana Dias <br><span style="font-size: 12px; color: #65676b; font-weight: normal;">4,200 XP</span></p>
-                </div>
-                <div class="item">
-                    <div class="dp" style="width: 35px; height: 35px; border-radius: 50%; background-color: #f5c33b; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">CM</div>
-                    <p class="name">Carlos Mendes <br><span style="font-size: 12px; color: #65676b; font-weight: normal;">3,850 XP</span></p>
-                </div>
-            </div>
-        </div>
-    </div>
+        <aside class="feed-sidebar sidebar-right">
+            <section class="widget panel" id="desafios">
+                <div class="widget-heading"><div><span class="eyebrow">PEQUENAS AÇÕES</span><h2>Desafio da semana</h2></div><span class="widget-symbol">✳</span></div>
+                <div class="challenge-art" aria-hidden="true"><span class="challenge-sun"></span><span class="challenge-leaf leaf-a">♧</span><span class="challenge-leaf leaf-b">♧</span><span class="challenge-ground"></span></div>
+                <span class="tag tag-green">Ambiente</span><h3>Um espaço mais limpo</h3><p>Identifica um espaço comum que precisa de cuidado e convida mais alguém para agir contigo.</p>
+                <button class="button button-full challenge-button" type="button" data-challenge>Quero participar <span aria-hidden="true">→</span></button>
+                <p class="widget-status" id="challenge-status" aria-live="polite"></p>
+            </section>
+
+            <section class="widget panel" id="projetos">
+                <div class="widget-heading"><div><span class="eyebrow">IDEIAS EM AÇÃO</span><h2>Projetos da comunidade</h2></div><a class="widget-more" href="#feed" aria-label="Ver todos os projetos">↗</a></div>
+                <a class="project-row" href="#feed"><span class="project-icon project-icon-green">♧</span><span><strong>Biblioteca de Bairro</strong><small>Educação <i>·</i> 6 participantes</small></span></a>
+                <a class="project-row" href="#feed"><span class="project-icon project-icon-yellow">☼</span><span><strong>Horta partilhada</strong><small>Ambiente <i>·</i> 9 participantes</small></span></a>
+                <a class="project-row" href="#feed"><span class="project-icon project-icon-blue">◎</span><span><strong>Tecnologia para Todos</strong><small>Tecnologia <i>·</i> 4 participantes</small></span></a>
+            </section>
+
+            <section class="community-note" id="comunidade"><span class="note-spark">✦</span><p>O impacto não se mede só em números. Começa quando alguém decide participar.</p></section>
+            <footer class="feed-footer"><a href="index.html">Sobre o IMPACTA</a><span>·</span><a href="#feed">Ajuda</a><span>·</span><span>© IMPACTA 2026</span></footer>
+        </aside>
+    </main>
 </body>
 </html>

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#10231d">
+    <title>Entrar — IMPACTA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/main.css">
+</head>
+<body class="auth-page">
+    <aside class="auth-visual">
+        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">i</span><span>impacta<span class="brand-period">.</span></span></a>
+        <div class="auth-visual-copy"><p class="eyebrow">A comunidade faz acontecer</p><h1>O teu próximo passo pode <span>começar aqui.</span></h1><p>Volta às conversas, aos projetos e às ideias que estás a ajudar a fazer crescer.</p></div>
+        <p class="auth-quote">“Pequenas ações, feitas em conjunto, podem abrir novos caminhos.”<strong>Comunidade IMPACTA</strong></p>
+    </aside>
+    <main class="auth-panel">
+        <section class="auth-card" aria-labelledby="auth-title">
+            <a class="auth-back" href="index.html">← Página inicial</a>
+            <h2 id="auth-title">Que bom ter-te de volta.</h2>
+            <p class="auth-subtitle">Entra para continuares a participar na comunidade.</p>
+            <form class="auth-form" action="../../backend/api/login.php" method="post">
+                <label for="email">E-mail<input id="email" name="email" type="email" autocomplete="email" placeholder="nome@exemplo.com" required></label>
+                <label for="password">Palavra-passe<input id="password" name="password" type="password" autocomplete="current-password" placeholder="A tua palavra-passe" required></label>
+                <button class="button" type="submit">Entrar <span aria-hidden="true">↗</span></button>
+            </form>
+            <p class="auth-switch">Ainda não tens conta? <a href="register.html">Criar conta</a></p>
+        </section>
+    </main>
+</body>
+</html>
