@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="../styles/facebook-style.css">
+    <title>Impacta - Feed de Impacto</title>
+</head>
+<body>
+    <nav>
+        <div class="nav-left">
+            <h2>Impacta.</h2>
+            <input type="text" placeholder="Pesquisar projetos, desafios...">
+        </div>
+        <div class="nav-middle">
+            <a href="#" class="active">
+                <i class="fa fa-home"></i>
+            </a>
+            <a href="#">
+                <i class="fa fa-flag"></i> <!-- Desafios -->
+            </a>
+            <a href="#">
+                <i class="fa fa-users"></i> <!-- Comunidades -->
+            </a>
+            <a href="#">
+                <i class="fa fa-trophy"></i> <!-- Ranking -->
+            </a>
+        </div>
+        <div class="nav-right">
+            <span class="profile">IS</span>
+            <a href="#">
+                <i class="fa fa-bell"></i>
+            </a>
+            <a href="#">
+                <i class="fas fa-ellipsis-h"></i>
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- PAINEL ESQUERDO: Menu Principal -->
+        <div class="left-panel">
+            <ul>
+                <li>
+                    <i class="fa fa-user-circle" style="color: #65676b;"></i>
+                    <p>Igor Silva (Nível 3)</p>
+                </li>
+                <li>
+                    <i class="fa fa-flag" style="color: #1877f2;"></i>
+                    <p>Desafios Diários</p>
+                </li>
+                <li>
+                    <i class="fa fa-briefcase" style="color: #e42645;"></i>
+                    <p>Meus Projetos</p>
+                </li>
+                <li>
+                    <i class="fa fa-users" style="color: #1b74e4;"></i>
+                    <p>Comunidades</p>
+                </li>
+                <li>
+                    <i class="fa fa-trophy" style="color: #f5c33b;"></i>
+                    <p>Ranking Global</p>
+                </li>
+                <li>
+                    <i class="fa fa-certificate" style="color: #2b9a3f;"></i>
+                    <p>Certificados Obtidos</p>
+                </li>
+            </ul>
+        </div>
+
+        <!-- PAINEL CENTRAL: Feed de Impacto -->
+        <div class="middle-panel">
+            <!-- Criar Post -->
+            <div class="post create">
+                <div class="post-top">
+                    <div class="dp">IS</div>
+                    <input type="text" placeholder="Partilha uma solução, recurso ou desafio concluído..." />
+                </div>
+                <div class="post-bottom">
+                    <div class="action" style="color: #f3425f;">
+                        <i class="fa fa-camera"></i>
+                        <span>Foto/Vídeo de Ação</span>
+                    </div>
+                    <div class="action" style="color: #45bd62;">
+                        <i class="fa fa-check-circle"></i>
+                        <span>Provar Desafio</span>
+                    </div>
+                    <div class="action" style="color: #f7b928;">
+                        <i class="fa fa-lightbulb"></i>
+                        <span>Partilhar Dica</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Post 1 -->
+            <div class="post">
+                <div class="post-header">
+                    <div class="dp" style="background-color: #2b9a3f; color: white;">MR</div>
+                    <div class="post-info">
+                        <p class="name">Maria Rodrigues <i class="fa fa-check-circle" style="color: #1877f2; font-size: 12px;"></i></p>
+                        <span class="time">há 2 horas • Comunidade de Educação</span>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <span class="badge"><i class="fa fa-star"></i> Desafio Concluído (+50 XP)</span><br><br>
+                    Acabei de concluir o desafio "Mentoria Solidária"! Ajudei 3 estudantes do ensino secundário com as suas dúvidas de Matemática Básica através de videochamada. <br><br>
+                    O conhecimento só tem valor quando é partilhado! 📚✏️
+                </div>
+                <div class="post-bottom" style="border-top: 1px solid #e4e6eb;">
+                    <div class="action">
+                        <i class="fa fa-lightbulb"></i>
+                        <span>Inspirador (24)</span>
+                    </div>
+                    <div class="action">
+                        <i class="fa fa-comment"></i>
+                        <span>Comentar (5)</span>
+                    </div>
+                    <div class="action">
+                        <i class="fa fa-share"></i>
+                        <span>Partilhar</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Post 2 -->
+            <div class="post">
+                <div class="post-header">
+                    <div class="dp" style="background-color: #1877f2; color: white;">PT</div>
+                    <div class="post-info">
+                        <p class="name">Projeto "Tecnologia para Todos"</p>
+                        <span class="time">há 5 horas • Área de Tecnologia</span>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <span class="badge" style="background-color: #e5f3ea; color: #2b9a3f;"><i class="fa fa-users"></i> Procura-se Voluntários</span><br><br>
+                    Estamos a criar uma plataforma Open Source para conectar ONGs a programadores. Precisamos de pessoas com conhecimentos em <strong>HTML e CSS</strong>. Alguém disponível para impactar o mundo real hoje? 💻🌍
+                </div>
+                <div class="post-bottom" style="border-top: 1px solid #e4e6eb;">
+                    <div class="action">
+                        <i class="fa fa-hand-paper"></i>
+                        <span>Vou Ajudar (12)</span>
+                    </div>
+                    <div class="action">
+                        <i class="fa fa-comment"></i>
+                        <span>Comentar (8)</span>
+                    </div>
+                    <div class="action">
+                        <i class="fa fa-share"></i>
+                        <span>Partilhar</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAINEL DIREITO: Widgets Secundários -->
+        <div class="right-panel">
+            <div class="section">
+                <h4>Projetos Ativos</h4>
+                <div class="item">
+                    <div class="icon-box" style="background-color: #e42645;"><i class="fa fa-tree"></i></div>
+                    <p class="name">Limpeza Praia Norte</p>
+                </div>
+                <div class="item">
+                    <div class="icon-box" style="background-color: #2b9a3f;"><i class="fa fa-book"></i></div>
+                    <p class="name">Doação de Livros</p>
+                </div>
+            </div>
+            
+            <br>
+
+            <div class="section">
+                <h4>Top Contribuidores</h4>
+                <div class="item">
+                    <div class="dp" style="width: 35px; height: 35px; border-radius: 50%; background-color: #1877f2; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">AD</div>
+                    <p class="name">Ana Dias <br><span style="font-size: 12px; color: #65676b; font-weight: normal;">4,200 XP</span></p>
+                </div>
+                <div class="item">
+                    <div class="dp" style="width: 35px; height: 35px; border-radius: 50%; background-color: #f5c33b; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">CM</div>
+                    <p class="name">Carlos Mendes <br><span style="font-size: 12px; color: #65676b; font-weight: normal;">3,850 XP</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

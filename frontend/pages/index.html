@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impacta | Aprende. Colabora. Impacta.</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <i data-lucide="globe"></i> Impacta<span>.</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="#funcionalidades">Funcionalidades</a></li>
+            <li><a href="#comunidade">Comunidade</a></li>
+            <li><a href="#projetos">Projetos</a></li>
+        </ul>
+        <div class="nav-actions">
+            <a href="login.html" class="btn btn-glass">Entrar</a>
+            <a href="register.html" class="btn btn-primary">Começar Agora</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="bg-glow glow-1"></div>
+        <div class="bg-glow glow-2"></div>
+        
+        <div class="hero-content">
+            <div class="badge glass-panel" style="display: inline-block; padding: 6px 16px; border-radius: 50px; font-size: 0.9rem; font-weight: 500; margin-bottom: 24px; color: var(--primary);">
+                🚀 A rede social com propósito
+            </div>
+            <h1>Transforma o teu conhecimento em <span class="highlight">impacto real.</span></h1>
+            <p>Não desperdices tempo com feeds vazios. Junta-te a uma comunidade que resolve problemas, partilha soluções e cria impacto no mundo real.</p>
+            
+            <div class="hero-actions">
+                <a href="register.html" class="btn btn-primary">Criar Conta Gratuita</a>
+                <a href="#funcionalidades" class="btn btn-glass">Saber mais</a>
+            </div>
+        </div>
+        
+        <!-- Hero visual / mockup placeholder -->
+        <div class="hero-visual glass-panel">
+            <!-- Simulação de um post da rede social -->
+            <div class="glass-panel" style="padding: 16px; display: flex; gap: 12px; align-items: center; border: none; background: rgba(255,255,255,0.8);">
+                <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff; font-size: 1.2rem;">JS</div>
+                <div>
+                    <h4 style="font-size: 1.1rem; margin: 0; color: var(--text-main);">João Silva <span style="color: var(--gold); font-size: 0.8rem; margin-left: 8px;">◆ Nível 5</span></h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Criou o projeto "Reciclagem Digital"</p>
+                </div>
+            </div>
+            <div style="flex-grow: 1; border-radius: 12px; background: rgba(24, 119, 242, 0.05); border: 1px dashed rgba(24, 119, 242, 0.3); display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                <i data-lucide="activity" style="width: 56px; height: 56px; color: var(--primary); margin-bottom: 16px;"></i>
+                <p style="color: var(--text-main); font-weight: 500;">Monitorizando impacto ambiental...</p>
+                <div style="width: 60%; height: 6px; background: rgba(0,0,0,0.1); border-radius: 10px; margin-top: 16px; overflow: hidden;">
+                    <div style="width: 75%; height: 100%; background: var(--primary); border-radius: 10px;"></div>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--primary); margin-top: 8px;">Meta: 75% concluída</p>
+            </div>
+        </div>
+    </header>
+
+    <section id="funcionalidades" class="features">
+        <h2 class="section-title">Muito mais que likes. <br><span style="color: var(--primary);">Impacto mensurável.</span></h2>
+        
+        <div class="features-grid">
+            <div class="feature-card glass-panel">
+                <div class="feature-icon">
+                    <i data-lucide="target"></i>
+                </div>
+                <h3>Desafios Reais</h3>
+                <p>Cumpre missões diárias nas áreas de educação, ambiente e saúde. Aprende enquanto resolves problemas da tua comunidade.</p>
+            </div>
+            
+            <div class="feature-card glass-panel">
+                <div class="feature-icon">
+                    <i data-lucide="users"></i>
+                </div>
+                <h3>Projetos Colaborativos</h3>
+                <p>Junta-te a outros membros para construir soluções em grupo e ganhar experiência prática num ambiente real.</p>
+            </div>
+            
+            <div class="feature-card glass-panel">
+                <div class="feature-icon">
+                    <i data-lucide="award"></i>
+                </div>
+                <h3>Reputação por Ação</h3>
+                <p>Sobe no ranking não pela fama, mas pela qualidade e impacto que o teu conhecimento e voluntariado geram.</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Inicializar os ícones do Lucide
+        lucide.createIcons();
+    </script>
+</body>
+</html>
