@@ -9,6 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../styles/main.css">
+    <script src="../scripts/api.js" defer></script>
+    <script src="../scripts/auth.js" defer></script>
 </head>
 <body class="auth-page">
     <aside class="auth-visual">
@@ -21,11 +23,12 @@
             <a class="auth-back" href="index.html">← Página inicial</a>
             <h2 id="auth-title">Que bom ter-te de volta.</h2>
             <p class="auth-subtitle">Entra para continuares a participar na comunidade.</p>
-            <form class="auth-form" action="../../backend/api/login.php" method="post">
+            <form class="auth-form" id="login-form" method="post">
                 <label for="email">E-mail<input id="email" name="email" type="email" autocomplete="email" placeholder="nome@exemplo.com" required></label>
                 <label for="password">Palavra-passe<input id="password" name="password" type="password" autocomplete="current-password" placeholder="A tua palavra-passe" required></label>
                 <button class="button" type="submit">Entrar <span aria-hidden="true">↗</span></button>
             </form>
+            <p class="auth-feedback" id="login-status" role="status" aria-live="polite" hidden></p>
             <p class="auth-switch">Ainda não tens conta? <a href="register.html">Criar conta</a></p>
         </section>
     </main>

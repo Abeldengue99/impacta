@@ -2,11 +2,14 @@
     const apiPort = '3001';
     const apiRoot = `${window.location.protocol}//${window.location.hostname}:${apiPort}/api/v1`;
 
-    const get = async (path) => {
+    const request = async (path, method = 'GET', body) => {
+        const headers = { Accept: 'application/json' };
+        if (body !== undefined) headers['Content-Type'] = 'application/json';
         const response = await fetch(`${apiRoot}${path}`, {
-            method: 'GET',
-            headers: { Accept: 'application/json' },
-            credentials: 'include'
+            method,
+            headers,
+            credentials: 'include',
+            body: body === undefined ? undefined : JSON.stringify(body)
         });
         let payload;
         try {
@@ -14,11 +17,23 @@
         } catch {
             throw new Error('api_unavailable');
         }
-        if (!response.ok || !payload || !Array.isArray(payload.items)) {
-            throw new Error('api_unavailable');
+        if (!response.ok) {
+            throw Object.assign(new Error(payload?.error || 'api_unavailable'), {
+                code: payload?.error || 'api_unavailable'
+            });
         }
+        return payload;
+    };
+
+    const get = async (path) => {
+        const payload = await request(path);
+        if (!payload || !Array.isArray(payload.items)) throw new Error('api_unavailable');
         return payload.items;
     };
 
-    window.ImpactaAPI = Object.freeze({ get });
+    window.ImpactaAPI = Object.freeze({
+        get,
+        post: (path, body) => request(path, 'POST', body),
+        delete: (path) => request(path, 'DELETE')
+    });
 })();

@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../styles/main.css">
+    <script src="../scripts/api.js" defer></script>
     <script src="../scripts/auth.js" defer></script>
 </head>
 <body class="auth-page">
@@ -22,15 +23,29 @@
             <a class="auth-back" href="index.html">← Página inicial</a>
             <h2 id="auth-title">Cria a tua conta.</h2>
             <p class="auth-subtitle">Junta-te a pessoas que transformam vontade em ação.</p>
-            <form class="auth-form" id="register-form" action="../../backend/api/register.php" method="post">
-                <label for="full-name">Nome<input id="full-name" name="full_name" type="text" autocomplete="name" placeholder="O teu nome" minlength="2" maxlength="120" required></label>
-                <label for="register-email">E-mail<input id="register-email" name="email" type="email" autocomplete="email" placeholder="nome@exemplo.com" maxlength="254" required></label>
-                <label for="interest">Área de interesse<select id="interest" name="interest" required><option value="" selected disabled>Escolhe uma área</option><option value="education">Educação</option><option value="environment">Ambiente</option><option value="technology">Tecnologia</option><option value="health">Saúde</option><option value="community">Comunidade</option><option value="other">Outra</option></select></label>
-                <label for="register-password">Palavra-passe<input id="register-password" name="password" type="password" autocomplete="new-password" placeholder="Pelo menos 8 caracteres" minlength="8" required></label>
-                <label for="confirm-password">Confirmar palavra-passe<input id="confirm-password" name="password_confirmation" type="password" autocomplete="new-password" placeholder="Repete a palavra-passe" minlength="8" required></label>
+            <form class="auth-form" id="register-form" method="post">
+                <label for="full-name">Nome<input id="full-name" name="displayName" type="text" autocomplete="name" placeholder="O teu nome" minlength="2" maxlength="120" required></label>
+                <label for="register-email">E-mail<input id="register-email" name="email" type="email" autocomplete="email" placeholder="nome@exemplo.com" maxlength="320" required></label>
                 <button class="button" type="submit">Criar a minha conta <span aria-hidden="true">↗</span></button>
                 <p class="auth-terms">Ao criar uma conta, concordas em participar com respeito e responsabilidade na comunidade IMPACTA.</p>
             </form>
+            <p class="auth-feedback" id="register-status" role="status" aria-live="polite" hidden></p>
+            <form class="auth-form" id="verification-form" method="post" hidden>
+                <p class="auth-subtitle">Introduz o código enviado para este endereço:</p>
+                <label for="verification-email">E-mail<input id="verification-email" name="email" type="email" autocomplete="email" readonly required></label>
+                <label for="verification-code">Código de verificação<input id="verification-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="000000" required></label>
+                <label for="verification-name">Nome<input id="verification-name" name="displayName" type="text" autocomplete="name" minlength="2" maxlength="120" required></label>
+                <label for="verification-password">Escolhe uma palavra-passe<input id="verification-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" placeholder="Pelo menos 12 caracteres" required></label>
+                <label for="verification-password-confirm">Confirma a palavra-passe<input id="verification-password-confirm" name="passwordConfirmation" type="password" autocomplete="new-password" minlength="12" maxlength="128" placeholder="Repete a palavra-passe" required></label>
+                <button class="button" type="submit">Confirmar email <span aria-hidden="true">&#8599;</span></button>
+                <button class="auth-text-button" id="resend-code" type="button">Enviar outro código</button>
+                <button class="auth-text-button" id="back-register" type="button">Voltar aos dados da conta</button>
+                <p class="auth-feedback" id="verification-status" role="status" aria-live="polite" hidden></p>
+            </form>
+            <section id="registration-success" class="auth-success" aria-live="polite" hidden>
+                <p>Endereço confirmado. A tua conta IMPACTA está ativa.</p>
+                <a class="button" href="login.html">Iniciar sessão</a>
+            </section>
             <p class="auth-switch">Já tens uma conta? <a href="login.html">Entrar</a></p>
         </section>
     </main>

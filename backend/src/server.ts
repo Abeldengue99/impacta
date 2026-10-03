@@ -3,6 +3,7 @@ import 'dotenv/config';
 import Fastify, { type FastifySchema } from 'fastify';
 import { Pool, type PoolConfig } from 'pg';
 import { readFileSync } from 'node:fs';
+import { registerAuthRoutes } from './auth-routes.js';
 import { registerCommunityRoutes } from './community-routes.js';
 
 type EnvironmentName = 'development' | 'production';
@@ -167,6 +168,8 @@ const requiredRelations = [
     'role_permissions',
     'user_roles',
     'auth_sessions',
+    'auth_tokens',
+    'auth_events',
     'mfa_credentials',
     'admin_audit_log',
     'impact_areas',
@@ -193,7 +196,7 @@ server.addHook('onRequest', async (request, reply) => {
         .header('vary', 'Origin');
     if (request.method === 'OPTIONS') {
         return reply
-            .header('access-control-allow-methods', 'GET, POST, OPTIONS')
+            .header('access-control-allow-methods', 'GET, POST, DELETE, OPTIONS')
             .header('access-control-allow-headers', 'content-type, x-csrf-token')
             .header('access-control-max-age', '600')
             .code(204)
@@ -234,6 +237,17 @@ server.get('/api/v1/health/ready', { schema: readyRouteSchema }, async (request,
             });
         }
 
+        for (const query of [
+            'SELECT id, email, password_hash, display_name, status, email_verified_at, mfa_required FROM impacta.users LIMIT 0',
+            'SELECT id, user_id, token_hash, purpose, created_at, expires_at, consumed_at FROM impacta.auth_tokens LIMIT 0',
+            'SELECT user_id, event_type, occurred_at, ip_address FROM impacta.auth_events LIMIT 0',
+            'SELECT id, code FROM impacta.roles LIMIT 0',
+            'SELECT user_id FROM impacta.user_profiles LIMIT 0',
+            'SELECT token_hash, revoked_at FROM impacta.auth_sessions LIMIT 0'
+        ]) {
+            await pool.query(query);
+        }
+
         return { status: 'ready' };
     } catch (error) {
         const code = typeof error === 'object' && error !== null && 'code' in error
@@ -242,12 +256,15 @@ server.get('/api/v1/health/ready', { schema: readyRouteSchema }, async (request,
         request.log.error({ event: 'postgres_readiness_failed', code }, 'PostgreSQL readiness check failed');
         return reply.code(503).send({
             status: 'not_ready',
-            message: 'PostgreSQL connection is unavailable.'
+            message: code === '42501'
+                ? 'Database is connected; application permissions are incomplete.'
+                : 'PostgreSQL connection is unavailable.'
         });
     }
 });
 
 registerCommunityRoutes(server, pool);
+registerAuthRoutes(server, pool);
 
 server.setNotFoundHandler(async (_request, reply) => {
     return reply.code(404).send({ error: 'not_found' });
