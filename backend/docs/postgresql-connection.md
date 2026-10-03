@@ -37,6 +37,8 @@ Na raiz do projeto, executa:
     npm.cmd run build
     npm.cmd start
 
+Para carregar contas e publicações locais de demonstração no feed, segue [Dados de demonstração locais](demo-data.md). O seed é manual e exige a conta proprietária da base.
+
 Abre http://127.0.0.1:3001/api/v1/health/ready.
 
 - status ready confirma ligação e presença das tabelas usadas pela API pública.
