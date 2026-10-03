@@ -111,6 +111,12 @@ body.feed-page { min-height: 100vh; background: #f4f6f1; }
 .widget > p:not(.widget-status) { margin: 0; color: #77877e; font-size: .7rem; line-height: 1.65; }
 .button-full { width: 100%; min-height: 38px; margin-top: 14px; border-radius: 5px; font-size: .7rem; }
 .widget-status { min-height: 0; margin: 0; color: var(--green); font-size: .68rem; }
+.challenge-entry { margin-top: 10px; padding: 12px; border: 1px solid #edf1eb; border-radius: 5px; background: #fafbf9; }
+.challenge-entry .tag { margin: 0 0 8px; }
+.challenge-entry h3 { margin: 0 0 6px; font: 700 .85rem/1.35 var(--font-display); letter-spacing: -.025em; }
+.challenge-entry p { margin: 0; color: #77877e; font-size: .68rem; line-height: 1.55; }
+.challenge-entry small { display: block; margin-top: 9px; color: #87938b; font-size: .62rem; }
+.challenge-entry .button { margin-top: 10px; }
 .widget-status:not(:empty) { margin-top: 9px; }
 .project-row { display: flex; align-items: center; gap: 9px; padding: 10px 0; border-top: 1px solid #eff2ee; }
 .project-row:hover strong { color: var(--green); }

@@ -1,10 +1,21 @@
 const postList = document.querySelector('#post-list');
 const searchField = document.querySelector('#feed-search');
 const sortField = document.querySelector('#feed-sort');
-const composer = document.querySelector('#composer');
-const postText = document.querySelector('#post-text');
-const composerStatus = document.querySelector('#composer-status');
 const emptyState = document.querySelector('#empty-state');
+const feedStatus = document.querySelector('#feed-status');
+const challengeList = document.querySelector('#challenge-list');
+const projectList = document.querySelector('#projects-list');
+
+const element = (tag, className, text) => {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+};
+
+function initials(name) {
+    return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toLocaleUpperCase('pt');
+}
 
 function updateEmptyState() {
     if (!emptyState || !postList) return;
@@ -12,166 +23,111 @@ function updateEmptyState() {
     emptyState.hidden = visiblePosts.length > 0;
 }
 
-function bindPostActions(post) {
-    const supportButton = post.querySelector('[data-support]');
-    if (supportButton) {
-        supportButton.addEventListener('click', () => {
-            const isSupported = supportButton.getAttribute('aria-pressed') === 'true';
-            const count = supportButton.querySelector('.support-count');
-            const nextCount = Number(count.textContent) + (isSupported ? -1 : 1);
-            count.textContent = String(Math.max(0, nextCount));
-            post.dataset.supports = count.textContent;
-            supportButton.setAttribute('aria-pressed', String(!isSupported));
-        });
-    }
-
-    const shareButton = post.querySelector('[data-share]');
-    if (shareButton) {
-        shareButton.addEventListener('click', async () => {
-            const copy = post.querySelector('.post-copy')?.textContent?.trim() || window.location.href;
-            try {
-                await navigator.clipboard.writeText(copy);
-                shareButton.innerHTML = '<span aria-hidden="true">✓</span> Copiado';
-                window.setTimeout(() => {
-                    shareButton.innerHTML = '<span aria-hidden="true">↗</span> Partilhar';
-                }, 1700);
-            } catch {
-                shareButton.setAttribute('aria-label', 'Copia manualmente o texto desta publicação');
-            }
-        });
-    }
-
-    const commentButton = post.querySelector('[data-comment]');
-    if (commentButton) {
-        commentButton.addEventListener('click', () => {
-            const existing = post.querySelector('.comment-entry');
-            if (existing) {
-                existing.remove();
-                commentButton.setAttribute('aria-expanded', 'false');
-                return;
-            }
-
-            const entry = document.createElement('form');
-            entry.className = 'comment-entry';
-            const field = document.createElement('input');
-            field.type = 'text';
-            field.name = 'comment';
-            field.maxLength = 240;
-            field.placeholder = 'Escreve um comentário…';
-            field.setAttribute('aria-label', 'Escreve um comentário');
-            field.required = true;
-            const submit = document.createElement('button');
-            submit.type = 'submit';
-            submit.textContent = 'Enviar';
-            entry.append(field, submit);
-            entry.addEventListener('submit', (event) => {
-                event.preventDefault();
-                const comment = document.createElement('p');
-                comment.className = 'inline-comment';
-                comment.textContent = `IS: ${field.value.trim()}`;
-                entry.replaceWith(comment);
-                commentButton.setAttribute('aria-expanded', 'false');
-            });
-            post.querySelector('.post-actions').before(entry);
-            commentButton.setAttribute('aria-expanded', 'true');
-            field.focus();
-        });
-    }
-}
-
-function createPost(content) {
-    const post = document.createElement('article');
-    post.className = 'post-card panel';
+function createPost(postData) {
+    const post = element('article', 'post-card panel');
     post.dataset.post = '';
-    post.dataset.supports = '0';
+    post.dataset.supports = String(postData.support_count);
+    post.dataset.order = String(new Date(postData.created_at).getTime());
 
-    const heading = document.createElement('div');
-    heading.className = 'post-heading';
-    const avatar = document.createElement('span');
-    avatar.className = 'avatar avatar-user';
-    avatar.textContent = 'IS';
-    const author = document.createElement('div');
-    author.className = 'post-author';
-    const name = document.createElement('strong');
-    name.textContent = 'Participante IMPACTA';
-    const detail = document.createElement('span');
-    detail.textContent = 'Comunidade IMPACTA · agora';
-    author.append(name, detail);
-    heading.append(avatar, author);
+    const heading = element('div', 'post-heading');
+    heading.append(element('span', 'avatar avatar-user', initials(postData.author) || 'I'));
+    const author = element('div', 'post-author');
+    author.append(element('strong', '', postData.author));
+    const detail = [postData.community, new Date(postData.created_at).toLocaleString('pt-AO')].filter(Boolean).join(' · ');
+    author.append(element('span', '', detail));
+    heading.append(author);
 
-    const tag = document.createElement('span');
-    tag.className = 'post-tag tag-green';
-    tag.textContent = 'Ideia partilhada';
-    const copy = document.createElement('p');
-    copy.className = 'post-copy';
-    copy.textContent = content;
-
-    const actions = document.createElement('div');
-    actions.className = 'post-actions';
-    actions.innerHTML = '<button class="support-button" type="button" data-support aria-pressed="false"><span aria-hidden="true">♡</span> Apoiar <span class="support-count">0</span></button><button type="button" class="comment-button" data-comment aria-expanded="false"><span aria-hidden="true">◌</span> Comentar <span>0</span></button><button type="button" class="share-button" data-share><span aria-hidden="true">↗</span> Partilhar</button>';
+    const tag = element('span', 'post-tag tag-green', 'Publicação da comunidade');
+    const copy = element('p', 'post-copy', postData.body);
+    const actions = element('div', 'post-actions');
+    const support = element('button', 'support-button', `Apoiar ${postData.support_count}`);
+    support.type = 'button';
+    support.disabled = true;
+    support.title = 'Apoios ficam disponíveis quando a autenticação estiver ligada.';
+    const comments = element('button', 'comment-button', `Comentários ${postData.comment_count}`);
+    comments.type = 'button';
+    comments.disabled = true;
+    comments.title = 'Comentários ficam disponíveis quando a autenticação estiver ligada.';
+    const share = element('button', 'share-button', 'Partilhar');
+    share.type = 'button';
+    share.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}#publicacao-${postData.id}`);
+            share.textContent = 'Ligação copiada';
+        } catch {
+            share.textContent = 'Copia o endereço da página';
+        }
+        window.setTimeout(() => { share.textContent = 'Partilhar'; }, 1800);
+    });
+    actions.append(support, comments, share);
+    post.id = `publicacao-${postData.id}`;
     post.append(heading, tag, copy, actions);
-    bindPostActions(post);
     return post;
 }
 
-if (postList) {
-    postList.querySelectorAll('[data-post]').forEach((post, index) => {
-        post.dataset.order = String(Date.now() - index);
-        bindPostActions(post);
-    });
+function createChallenge(challenge) {
+    const card = element('article', 'challenge-entry');
+    card.append(element('span', 'tag tag-green', challenge.impact_area || 'Desafio comunitário'));
+    card.append(element('h3', '', challenge.title));
+    if (challenge.description) card.append(element('p', '', challenge.description));
+    const participants = Number(challenge.participant_count);
+    card.append(element('small', '', `${participants} ${participants === 1 ? 'participante' : 'participantes'}`));
+    const button = element('button', 'button button-full challenge-button', 'Participar');
+    button.type = 'button';
+    button.disabled = true;
+    button.title = 'A participação fica disponível quando a autenticação estiver ligada.';
+    card.append(button);
+    return card;
 }
 
-if (composer && postText && postList) {
-    composer.addEventListener('submit', (event) => {
-        event.preventDefault();
-        const content = postText.value.trim();
-        if (!content) return;
-        const post = createPost(content);
-        post.dataset.order = String(Date.now());
-        postList.prepend(post);
-        postText.value = '';
-        composerStatus.textContent = 'A tua ideia foi publicada.';
-        window.setTimeout(() => { composerStatus.textContent = ''; }, 2800);
-        if (searchField) searchField.value = '';
-        postList.querySelectorAll('[data-post]').forEach((item) => { item.hidden = false; });
-        updateEmptyState();
-    });
+function createProject(project) {
+    const link = element('div', 'project-row');
+    link.append(element('span', 'project-icon project-icon-green', '↗'));
+    const copy = element('span');
+    copy.append(element('strong', '', project.title));
+    const detail = [project.impact_area, `${project.participant_count} participantes`].filter(Boolean).join(' · ');
+    copy.append(element('small', '', detail));
+    link.append(copy);
+    return link;
 }
 
-if (searchField && postList) {
-    searchField.addEventListener('input', () => {
-        const query = searchField.value.trim().toLocaleLowerCase('pt');
-        postList.querySelectorAll('[data-post]').forEach((post) => {
-            post.hidden = !post.textContent.toLocaleLowerCase('pt').includes(query);
-        });
-        updateEmptyState();
+function applyFilterAndSort() {
+    const query = searchField?.value.trim().toLocaleLowerCase('pt') || '';
+    const posts = [...(postList?.querySelectorAll('[data-post]') || [])];
+    posts.forEach((post) => {
+        post.hidden = !post.textContent.toLocaleLowerCase('pt').includes(query);
     });
+    posts.sort((a, b) => sortField?.value === 'supported'
+        ? Number(b.dataset.supports) - Number(a.dataset.supports)
+        : Number(b.dataset.order) - Number(a.dataset.order));
+    posts.forEach((post) => postList.append(post));
+    updateEmptyState();
 }
 
-if (sortField && postList) {
-    sortField.addEventListener('change', () => {
-        const posts = [...postList.querySelectorAll('[data-post]')];
-        if (sortField.value === 'supported') {
-            posts.sort((a, b) => Number(b.dataset.supports) - Number(a.dataset.supports));
-        } else {
-            posts.sort((a, b) => Number(b.dataset.order) - Number(a.dataset.order));
-        }
-        posts.forEach((post) => postList.append(post));
-    });
+async function loadCommunity() {
+    try {
+        const [posts, challenges, projects] = await Promise.all([
+            window.ImpactaAPI.get('/feed/posts'),
+            window.ImpactaAPI.get('/challenges'),
+            window.ImpactaAPI.get('/projects')
+        ]);
+
+        posts.forEach((post) => postList.append(createPost(post)));
+        challenges.forEach((challenge) => challengeList.append(createChallenge(challenge)));
+        projects.forEach((project) => projectList.append(createProject(project)));
+        if (posts.length === 0) emptyState.hidden = false;
+        if (challenges.length === 0) challengeList.append(element('p', 'empty-state', 'Não há desafios abertos neste momento.'));
+        if (projects.length === 0) projectList.append(element('p', 'empty-state', 'Ainda não há projetos ativos para mostrar.'));
+        feedStatus.hidden = true;
+        applyFilterAndSort();
+    } catch {
+        feedStatus.textContent = 'Não foi possível carregar dados da comunidade. A API ou a ligação à base de dados não está disponível.';
+        emptyState.hidden = true;
+        challengeList.replaceChildren(element('p', 'empty-state', 'Não foi possível carregar os desafios.'));
+        projectList.replaceChildren(element('p', 'empty-state', 'Não foi possível carregar os projetos.'));
+    }
 }
 
-const challengeButton = document.querySelector('[data-challenge]');
-const challengeStatus = document.querySelector('#challenge-status');
-
-if (challengeButton && challengeStatus) {
-    challengeButton.addEventListener('click', () => {
-        const joined = challengeButton.getAttribute('aria-pressed') === 'true';
-        challengeButton.setAttribute('aria-pressed', String(!joined));
-        challengeButton.innerHTML = joined
-            ? 'Quero participar <span aria-hidden="true">→</span>'
-            : 'Inscrição registada <span aria-hidden="true">✓</span>';
-        challengeStatus.textContent = joined ? '' : 'Já estás na lista de participantes.';
-    });
-}
-
-updateEmptyState();
+searchField?.addEventListener('input', applyFilterAndSort);
+sortField?.addEventListener('change', applyFilterAndSort);
+loadCommunity();

@@ -3,6 +3,7 @@ import 'dotenv/config';
 import Fastify, { type FastifySchema } from 'fastify';
 import { Pool, type PoolConfig } from 'pg';
 import { readFileSync } from 'node:fs';
+import { registerCommunityRoutes } from './community-routes.js';
 
 type EnvironmentName = 'development' | 'production';
 
@@ -10,6 +11,7 @@ interface RuntimeConfig {
     environment: EnvironmentName;
     host: string;
     port: number;
+    frontendOrigins: string[];
     postgres: PoolConfig;
 }
 
@@ -65,10 +67,30 @@ function loadRuntimeConfig(): RuntimeConfig {
         }
     }
 
+    const configuredOrigins = process.env.FRONTEND_ORIGINS;
+    if (environment === 'production' && !configuredOrigins) {
+        throw new Error('FRONTEND_ORIGINS is required when APP_ENV=production');
+    }
+    const frontendOrigins = (configuredOrigins ?? 'http://localhost,http://127.0.0.1,http://localhost:3001,http://127.0.0.1:3001')
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter(Boolean);
+    if (frontendOrigins.some((origin) => {
+        try {
+            const parsed = new URL(origin);
+            return parsed.origin !== origin || !['http:', 'https:'].includes(parsed.protocol);
+        } catch {
+            return true;
+        }
+    })) {
+        throw new Error('FRONTEND_ORIGINS must contain exact HTTP or HTTPS origins');
+    }
+
     return {
         environment,
         host: process.env.API_HOST ?? '127.0.0.1',
         port: parsePort('API_PORT', 3001),
+        frontendOrigins,
         postgres: {
             host: requiredEnvironmentValue('PGHOST'),
             port: parsePort('PGPORT', 5432),
@@ -139,14 +161,45 @@ const readyRouteSchema: FastifySchema = {
 
 const requiredRelations = [
     'users',
+    'user_profiles',
     'roles',
     'permissions',
     'role_permissions',
     'user_roles',
     'auth_sessions',
     'mfa_credentials',
-    'admin_audit_log'
+    'admin_audit_log',
+    'impact_areas',
+    'communities',
+    'projects',
+    'project_members',
+    'challenges',
+    'challenge_participations',
+    'posts',
+    'comments',
+    'reactions'
 ];
+
+server.addHook('onRequest', async (request, reply) => {
+    const origin = request.headers.origin;
+    if (!origin) return;
+    if (!config.frontendOrigins.includes(origin)) {
+        return reply.code(403).send({ error: 'origin_not_allowed' });
+    }
+
+    reply
+        .header('access-control-allow-origin', origin)
+        .header('access-control-allow-credentials', 'true')
+        .header('vary', 'Origin');
+    if (request.method === 'OPTIONS') {
+        return reply
+            .header('access-control-allow-methods', 'GET, POST, OPTIONS')
+            .header('access-control-allow-headers', 'content-type, x-csrf-token')
+            .header('access-control-max-age', '600')
+            .code(204)
+            .send();
+    }
+});
 
 server.addHook('onSend', async (_request, reply, payload) => {
     reply
@@ -193,6 +246,8 @@ server.get('/api/v1/health/ready', { schema: readyRouteSchema }, async (request,
         });
     }
 });
+
+registerCommunityRoutes(server, pool);
 
 server.setNotFoundHandler(async (_request, reply) => {
     return reply.code(404).send({ error: 'not_found' });

@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../styles/main.css">
     <link rel="stylesheet" href="../styles/feed.css">
+    <script src="../scripts/api.js" defer></script>
     <script src="../scripts/feed.js" defer></script>
 </head>
 <body class="feed-page">
@@ -21,12 +22,12 @@
             <a href="#desafios">Desafios</a>
             <a href="#projetos">Projetos</a>
         </nav>
-        <div class="feed-header-actions"><a class="header-icon" href="#comunidade" aria-label="Notificações">♧<span class="notification-dot"></span></a><a class="user-chip" href="login.html" aria-label="Entrar na conta">IS</a></div>
+        <div class="feed-header-actions"><a class="user-chip" href="login.html" aria-label="Entrar na conta">Entrar</a></div>
     </header>
 
     <main class="feed-layout" id="feed">
         <aside class="feed-sidebar sidebar-left">
-            <a class="mini-profile" href="login.html"><span class="avatar avatar-user">IS</span><span><strong>Olá, participante</strong><small>Faz parte da comunidade</small></span></a>
+            <a class="mini-profile" href="login.html"><span class="avatar avatar-user">i</span><span><strong>Entra na tua conta</strong><small>Para participar na comunidade</small></span></a>
             <p class="sidebar-label">A tua comunidade</p>
             <nav class="side-nav" aria-label="Secções da comunidade">
                 <a class="side-nav-active" href="#feed"><span>⌂</span> O teu feed</a>
@@ -44,47 +45,26 @@
                 <span class="welcome-mark" aria-hidden="true">✳</span>
             </div>
 
-            <form class="composer panel" id="composer">
-                <div class="composer-top"><span class="avatar avatar-user">IS</span><label class="composer-input-wrap" for="post-text"><span class="visually-hidden">A tua publicação</span><textarea id="post-text" name="content" rows="2" maxlength="500" placeholder="Que ideia, solução ou progresso queres partilhar?" required></textarea></label></div>
-                <div class="composer-bottom"><div class="composer-hint"><span class="composer-hint-dot"></span> A comunidade cresce com a tua participação</div><button class="button button-small" type="submit"><span aria-hidden="true">↗</span> Publicar</button></div>
-                <p class="form-status" id="composer-status" aria-live="polite"></p>
-            </form>
+            <div class="composer panel" id="composer">
+                <p class="composer-hint">A publicação será ativada com a autenticação segura da conta.</p>
+                <a class="button button-small" href="login.html">Entrar para participar</a>
+            </div>
 
             <div class="feed-toolbar"><div><span class="eyebrow">PARTILHAS DA COMUNIDADE</span><h2>Em destaque</h2></div><label class="sort-control">Ordenar <select id="feed-sort" aria-label="Ordenar publicações"><option value="recent">Mais recentes</option><option value="supported">Mais apoiadas</option></select></label></div>
-            <div class="post-list" id="post-list">
-                <article class="post-card panel" data-post data-supports="18">
-                    <div class="post-heading"><span class="avatar avatar-terracotta">MR</span><div class="post-author"><strong>Maria Rodrigues</strong><span>Comunidade de Educação <i aria-hidden="true">·</i> há 2 horas</span></div><span class="post-menu" aria-hidden="true">···</span></div>
-                    <span class="post-tag tag-green">Desafio concluído <b>+50 XP</b></span>
-                    <p class="post-copy">Esta semana acompanhei três estudantes nas suas dúvidas de Matemática. Uma hora de conversa abriu espaço para novas perguntas, confiança e vontade de continuar a aprender.</p>
-                    <div class="post-context"><span class="context-icon">✳</span><span><strong>Mentoria Solidária</strong><small>Desafio · Educação</small></span><a href="#desafios" aria-label="Ver desafio Mentoria Solidária">↗</a></div>
-                    <div class="post-actions"><button class="support-button" type="button" data-support aria-pressed="false"><span aria-hidden="true">♡</span> Apoiar <span class="support-count">18</span></button><button type="button" class="comment-button" data-comment aria-expanded="false"><span aria-hidden="true">◌</span> Comentar <span>5</span></button><button type="button" class="share-button" data-share><span aria-hidden="true">↗</span> Partilhar</button></div>
-                </article>
-
-                <article class="post-card panel" data-post data-supports="12">
-                    <div class="post-heading"><span class="avatar avatar-blue">PT</span><div class="post-author"><strong>Projeto Tecnologia para Todos</strong><span>Área de Tecnologia <i aria-hidden="true">·</i> há 5 horas</span></div><span class="post-menu" aria-hidden="true">···</span></div>
-                    <span class="post-tag tag-blue">Procuramos voluntários</span>
-                    <p class="post-copy">Estamos a criar uma plataforma de código aberto para aproximar organizações sociais e pessoas da tecnologia. Procuramos quem queira ajudar com HTML, CSS ou simplesmente testar as primeiras ideias.</p>
-                    <div class="post-context"><span class="context-icon context-icon-blue">↗</span><span><strong>Tecnologia para Todos</strong><small>Projeto colaborativo · 4 participantes</small></span><a href="#projetos" aria-label="Ver projeto Tecnologia para Todos">↗</a></div>
-                    <div class="post-actions"><button class="support-button" type="button" data-support aria-pressed="false"><span aria-hidden="true">♡</span> Apoiar <span class="support-count">12</span></button><button type="button" class="comment-button" data-comment aria-expanded="false"><span aria-hidden="true">◌</span> Comentar <span>8</span></button><button type="button" class="share-button" data-share><span aria-hidden="true">↗</span> Partilhar</button></div>
-                </article>
-            </div>
-            <p class="empty-state panel" id="empty-state" hidden>Nenhuma publicação corresponde à pesquisa.</p>
+            <div class="post-list" id="post-list" aria-live="polite"></div>
+            <p class="empty-state panel" id="feed-status" role="status">A carregar publicações da base de dados…</p>
+            <p class="empty-state panel" id="empty-state" hidden>Não há publicações para mostrar neste momento.</p>
         </section>
 
         <aside class="feed-sidebar sidebar-right">
             <section class="widget panel" id="desafios">
                 <div class="widget-heading"><div><span class="eyebrow">PEQUENAS AÇÕES</span><h2>Desafio da semana</h2></div><span class="widget-symbol">✳</span></div>
-                <div class="challenge-art" aria-hidden="true"><span class="challenge-sun"></span><span class="challenge-leaf leaf-a">♧</span><span class="challenge-leaf leaf-b">♧</span><span class="challenge-ground"></span></div>
-                <span class="tag tag-green">Ambiente</span><h3>Um espaço mais limpo</h3><p>Identifica um espaço comum que precisa de cuidado e convida mais alguém para agir contigo.</p>
-                <button class="button button-full challenge-button" type="button" data-challenge>Quero participar <span aria-hidden="true">→</span></button>
-                <p class="widget-status" id="challenge-status" aria-live="polite"></p>
+                <div id="challenge-list"><p>A carregar desafios…</p></div>
             </section>
 
             <section class="widget panel" id="projetos">
                 <div class="widget-heading"><div><span class="eyebrow">IDEIAS EM AÇÃO</span><h2>Projetos da comunidade</h2></div><a class="widget-more" href="#feed" aria-label="Ver todos os projetos">↗</a></div>
-                <a class="project-row" href="#feed"><span class="project-icon project-icon-green">♧</span><span><strong>Biblioteca de Bairro</strong><small>Educação <i>·</i> 6 participantes</small></span></a>
-                <a class="project-row" href="#feed"><span class="project-icon project-icon-yellow">☼</span><span><strong>Horta partilhada</strong><small>Ambiente <i>·</i> 9 participantes</small></span></a>
-                <a class="project-row" href="#feed"><span class="project-icon project-icon-blue">◎</span><span><strong>Tecnologia para Todos</strong><small>Tecnologia <i>·</i> 4 participantes</small></span></a>
+                <div id="projects-list"><p>A carregar projetos…</p></div>
             </section>
 
             <section class="community-note" id="comunidade"><span class="note-spark">✦</span><p>O impacto não se mede só em números. Começa quando alguém decide participar.</p></section>
