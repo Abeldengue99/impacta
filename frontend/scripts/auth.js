@@ -217,3 +217,33 @@ if (resetRequestForm && resetConfirmForm) {
         }
     });
 }
+
+const authImageCarousel = document.querySelector('.auth-image-carousel');
+if (authImageCarousel) {
+    const authImageSlides = [...authImageCarousel.querySelectorAll('.auth-image-slide')];
+    const authReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let authImageIndex = 0;
+    let authCarouselTimer = null;
+
+    const stopAuthCarousel = () => {
+        if (authCarouselTimer !== null) {
+            window.clearInterval(authCarouselTimer);
+            authCarouselTimer = null;
+        }
+    };
+
+    const startAuthCarousel = () => {
+        if (authReducedMotion || document.hidden || authCarouselTimer !== null || authImageSlides.length < 2) return;
+        authCarouselTimer = window.setInterval(() => {
+            authImageSlides[authImageIndex].classList.remove('is-active');
+            authImageIndex = (authImageIndex + 1) % authImageSlides.length;
+            authImageSlides[authImageIndex].classList.add('is-active');
+        }, 5600);
+    };
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stopAuthCarousel();
+        else startAuthCarousel();
+    });
+    startAuthCarousel();
+}
