@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../styles/main.css?v=impacta-hero-2">
+    <link rel="stylesheet" href="../styles/main.css?v=hero-carousel-1">
 </head>
 <body>
     <header class="site-header">
@@ -30,20 +30,60 @@
     </header>
 
     <main>
-        <section class="hero" id="inicio">
+        <section class="hero" id="inicio" data-hero-carousel aria-label="Histórias de impacto do IMPACTA">
             <div class="hero-video-backdrop" aria-hidden="true">
-                <!-- Clipe Pexels 4771342: https://www.pexels.com/video/group-of-diverse-individuals-volunteers-together-for-a-mural-project-4771342/ -->
-                <video class="hero-video" autoplay muted loop playsinline preload="auto" poster="https://images.pexels.com/videos/4771342/pexels-photo-4771342.jpeg?auto=compress&amp;dpr=1&amp;h=750&amp;w=1260" tabindex="-1">
-                    <source src="https://videos.pexels.com/video-files/4771342/4771342-hd_1920_1080_24fps.mp4" type="video/mp4">
-                </video>
+                <div class="hero-video-slide is-active" data-eyebrow="COMUNIDADE EM MOVIMENTO" data-title="A tua voz" data-highlight="faz a diferença." data-description="Liga-te a pessoas que querem agir e melhorar a vida na sua comunidade.">
+                    <video class="hero-video" muted loop playsinline preload="none" poster="../videos/posters/4771342-uhd_3840_2160_24fps.jpg" tabindex="-1">
+                        <source data-src="../videos/optimized/4771342-uhd_3840_2160_24fps.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="hero-video-slide" data-eyebrow="CONHECIMENTO PARTILHADO" data-title="O que sabes" data-highlight="pode abrir caminhos." data-description="Partilha experiência e ajuda outras pessoas a transformar ideias em soluções.">
+                    <video class="hero-video" muted loop playsinline preload="none" poster="../videos/posters/7692919-hd_1920_1080_25fps.jpg" tabindex="-1">
+                        <source data-src="../videos/optimized/7692919-hd_1920_1080_25fps.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="hero-video-slide" data-eyebrow="INOVAÇÃO COM PROPÓSITO" data-title="Ideias novas" data-highlight="criam novas soluções." data-description="Liga criatividade e tecnologia aos desafios reais da tua comunidade.">
+                    <video class="hero-video" muted loop playsinline preload="none" poster="../videos/posters/8328040-uhd_3840_2160_25fps.jpg" tabindex="-1">
+                        <source data-src="../videos/optimized/8328040-uhd_3840_2160_25fps.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="hero-video-slide" data-eyebrow="IDEIAS QUE AVANÇAM" data-title="Planeia uma ideia." data-highlight="Transforma-a em impacto." data-description="Organiza recursos, define prioridades e acompanha o progresso de cada projeto.">
+                    <video class="hero-video" muted loop playsinline preload="none" poster="../videos/posters/8348714-uhd_3840_2160_25fps.jpg" tabindex="-1">
+                        <source data-src="../videos/optimized/8348714-uhd_3840_2160_25fps.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="hero-video-slide hero-video-slide-portrait" data-eyebrow="LIDERANÇA PARTILHADA" data-title="Cada voz" data-highlight="pode inspirar." data-description="Quando alguém partilha conhecimento, abre espaço para novas oportunidades.">
+                    <video class="hero-video" muted loop playsinline preload="none" poster="../videos/posters/8348717-uhd_2160_3840_25fps.jpg" tabindex="-1">
+                        <source data-src="../videos/optimized/8348717-uhd_2160_3840_25fps.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="hero-video-slide" data-eyebrow="COLABORAÇÃO EM AÇÃO" data-title="Juntos, fazemos" data-highlight="mais acontecer." data-description="Reúne competências diferentes e transforma objetivos em soluções.">
+                    <video class="hero-video" muted loop playsinline preload="none" poster="../videos/posters/8348720-uhd_3840_2160_25fps.jpg" tabindex="-1">
+                        <source data-src="../videos/optimized/8348720-uhd_3840_2160_25fps.mp4" type="video/mp4">
+                    </video>
+                </div>
             </div>
-            <div class="hero-copy">
-                <h1>O teu conhecimento pode <span>mudar realidades.</span></h1>
-                <p class="hero-description">Encontra pessoas, partilha soluções e participa em projetos que respondem a desafios reais da tua comunidade.</p>
+            <div class="hero-copy" data-hero-copy>
+                <p class="eyebrow" data-hero-eyebrow>COMUNIDADE EM MOVIMENTO</p>
+                <h1><span data-hero-title>A tua voz</span><br><span data-hero-highlight>faz a diferença.</span></h1>
+                <p class="hero-description" data-hero-description>Encontra pessoas que querem melhorar a comunidade e participa em ações concretas.</p>
                 <div class="hero-actions">
                     <a class="button" href="register.html">Fazer parte <span aria-hidden="true">↗</span></a>
                     <a class="button button-quiet" href="feed.html">Explorar a comunidade <span aria-hidden="true">→</span></a>
                 </div>
+            </div>
+            <div class="carousel-controls hero-carousel-controls" role="group" aria-label="Controlos do carrossel de vídeos">
+                <button class="carousel-arrow" type="button" data-hero-previous aria-label="Vídeo anterior">←</button>
+                <div class="carousel-indicators" role="group" aria-label="Escolher vídeo">
+                    <button type="button" data-hero-indicator="0" aria-label="Mostrar vídeo 1" aria-current="true"></button>
+                    <button type="button" data-hero-indicator="1" aria-label="Mostrar vídeo 2"></button>
+                    <button type="button" data-hero-indicator="2" aria-label="Mostrar vídeo 3"></button>
+                    <button type="button" data-hero-indicator="3" aria-label="Mostrar vídeo 4"></button>
+                    <button type="button" data-hero-indicator="4" aria-label="Mostrar vídeo 5"></button>
+                    <button type="button" data-hero-indicator="5" aria-label="Mostrar vídeo 6"></button>
+                </div>
+                <button class="carousel-arrow carousel-pause" type="button" data-hero-toggle aria-label="Pausar carrossel" aria-pressed="false"><span aria-hidden="true">Ⅱ</span></button>
+                <button class="carousel-arrow" type="button" data-hero-next aria-label="Próximo vídeo">→</button>
             </div>
         </section>
 
@@ -101,6 +141,6 @@
         <p>Aprende. Colabora. Impacta.</p>
         <span>© <span id="year">2026</span> IMPACTA</span>
     </footer>
-    <script src="../scripts/site.js?v=impacta-hero-2" defer></script>
+    <script src="../scripts/site.js?v=hero-carousel-1" defer></script>
 </body>
 </html>

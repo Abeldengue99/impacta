@@ -32,3 +32,6 @@ coverage/
 # Logs
 backend/storage/logs/*.log
 *.log
+
+# Keep original source videos local; commit optimized web copies.
+frontend/videos/*.mp4
