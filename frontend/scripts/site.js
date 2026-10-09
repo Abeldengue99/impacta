@@ -40,10 +40,9 @@ const heroVideoSource = heroVideo?.querySelector('source[data-src]');
 const reducedMotionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
 const networkConnection = navigator.connection;
 const slowOrMeteredConnection = networkConnection?.saveData
-    || ['slow-2g', '2g', '3g'].includes(networkConnection?.effectiveType);
-const narrowScreen = window.matchMedia('(max-width: 720px)').matches;
+    || ['slow-2g', '2g'].includes(networkConnection?.effectiveType);
 
-if (hero && heroVideo && heroVideoSource && !reducedMotionPreference.matches && !slowOrMeteredConnection && !narrowScreen) {
+if (hero && heroVideo && heroVideoSource && !reducedMotionPreference.matches && !slowOrMeteredConnection) {
     let videoRequested = false;
 
     const startHeroVideo = () => {
@@ -60,15 +59,12 @@ if (hero && heroVideo && heroVideoSource && !reducedMotionPreference.matches && 
         });
     };
 
-    heroVideo.addEventListener('playing', () => hero.classList.add('is-video-ready'), { once: true });
-    heroVideo.addEventListener('error', () => hero.classList.remove('is-video-ready'));
     reducedMotionPreference.addEventListener('change', (event) => {
         if (!event.matches) return;
         heroVideo.pause();
         heroVideo.removeAttribute('src');
         heroVideoSource.removeAttribute('src');
         heroVideo.load();
-        hero.classList.remove('is-video-ready');
     });
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) heroVideo.pause();
@@ -147,7 +143,7 @@ if (impactCarousel) {
     } else startRotation();
 }
 const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
-const revealElements = [...document.querySelectorAll('.hero-copy, .hero-art, .section-heading, .feature-card, .closing-content, .closing-banner > .button')];
+const revealElements = [...document.querySelectorAll('.hero-copy, .section-heading, .feature-card, .closing-content, .closing-banner > .button')];
 
 if (!motionPreference.matches && 'IntersectionObserver' in window && revealElements.length) {
     const revealObserver = new IntersectionObserver((entries, observer) => {
