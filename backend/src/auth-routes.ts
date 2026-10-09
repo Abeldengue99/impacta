@@ -8,13 +8,14 @@ import {
 } from 'node:crypto';
 import type { FastifyInstance, FastifySchema } from 'fastify';
 import { Pool, type PoolClient } from 'pg';
-import { isVerificationEmailConfigured, sendVerificationEmail } from './email.js';
+import { isEmailDeliveryConfigured, sendPasswordResetEmail, sendVerificationEmail } from './email.js';
 
 const SCRYPT_N = 32768;
 const SCRYPT_R = 8;
 const SCRYPT_P = 1;
 const SCRYPT_KEY_LENGTH = 64;
 const VERIFICATION_TTL_MINUTES = 10;
+const PASSWORD_RESET_TTL_MINUTES = 30;
 
 interface RegisterBody {
     displayName: string;
@@ -36,6 +37,20 @@ interface VerifyBody {
 interface LoginBody {
     email: string;
     password: string;
+}
+
+interface PasswordResetRequestBody {
+    email: string;
+}
+
+interface PasswordResetConfirmBody {
+    token: string;
+    password: string;
+    passwordConfirmation: string;
+}
+
+interface PasswordResetTokenRecord {
+    user_id: string;
 }
 
 interface UserRecord {
@@ -206,6 +221,65 @@ async function issueVerification(
     }
 }
 
+async function issuePasswordReset(
+    pool: Pool,
+    email: string,
+    frontendBaseUrl: string,
+    ipAddress: string
+): Promise<{ email: string; resetUrl: string } | undefined> {
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        await client.query(
+            "SELECT pg_advisory_xact_lock(hashtextextended('impacta:password-reset:' || $1, 0))",
+            [email]
+        );
+        const userResult = await client.query<{ id: string; status: string; email_verified_at: Date | null }>(
+            `SELECT id::text AS id, status, email_verified_at
+             FROM impacta.users WHERE lower(email) = $1`,
+            [email]
+        );
+        const user = userResult.rows[0];
+        if (!user || user.status !== 'active' || !user.email_verified_at) {
+            await client.query('COMMIT');
+            return undefined;
+        }
+
+        const recentRequests = await client.query<{ count: number }>(
+            `SELECT count(*)::int AS count FROM impacta.auth_events
+             WHERE user_id = $1 AND event_type = 'password_reset_requested'
+               AND occurred_at > now() - interval '1 hour'`,
+            [user.id]
+        );
+        await client.query(
+            `INSERT INTO impacta.auth_events (user_id, event_type, ip_address)
+             VALUES ($1, 'password_reset_requested', $2::inet)`,
+            [user.id, ipAddress]
+        );
+        if ((recentRequests.rows[0]?.count ?? 0) >= 3) {
+            await client.query('COMMIT');
+            return undefined;
+        }
+
+        const token = randomBytes(32).toString('hex');
+        await client.query(
+            `INSERT INTO impacta.auth_tokens (user_id, token_hash, purpose, expires_at)
+             VALUES ($1, $2, 'reset_password', now() + ($3::int * interval '1 minute'))`,
+            [user.id, tokenHash(token), PASSWORD_RESET_TTL_MINUTES]
+        );
+        await client.query('COMMIT');
+
+        const resetLink = new URL(frontendBaseUrl + '/frontend/pages/password-reset.html');
+        resetLink.searchParams.set('token', token);
+        return { email, resetUrl: resetLink.toString() };
+    } catch (error) {
+        await client.query('ROLLBACK').catch(() => undefined);
+        throw error;
+    } finally {
+        client.release();
+    }
+}
+
 async function recordUserAuthEvent(client: PoolClient, userId: string, eventType: string, ipAddress: string): Promise<void> {
     await client.query(
         'INSERT INTO impacta.auth_events (user_id, event_type, ip_address) VALUES ($1, $2, $3::inet)',
@@ -261,7 +335,27 @@ const loginSchema: FastifySchema = {
     }
 };
 
-export function registerAuthRoutes(server: FastifyInstance, pool: Pool): void {
+const passwordResetRequestSchema: FastifySchema = {
+    body: {
+        type: 'object', required: ['email'], additionalProperties: false,
+        properties: { email: { type: 'string', minLength: 3, maxLength: 320 } }
+    }
+};
+
+const passwordResetConfirmSchema: FastifySchema = {
+    body: {
+        type: 'object',
+        required: ['token', 'password', 'passwordConfirmation'],
+        additionalProperties: false,
+        properties: {
+            token: { type: 'string', pattern: '^[a-f0-9]{64}$' },
+            password: { type: 'string', minLength: 12, maxLength: 128 },
+            passwordConfirmation: { type: 'string', minLength: 12, maxLength: 128 }
+        }
+    }
+};
+
+export function registerAuthRoutes(server: FastifyInstance, pool: Pool, frontendBaseUrl: string): void {
     server.post<{ Body: RegisterBody }>('/api/v1/auth/register', { schema: registrationSchema }, async (request, reply) => {
         const displayName = request.body.displayName.trim();
         const email = normalizeEmail(request.body.email);
@@ -271,7 +365,7 @@ export function registerAuthRoutes(server: FastifyInstance, pool: Pool): void {
 
         const pepper = validatePepper();
         if (!pepper) return reply.code(503).send({ error: 'auth_configuration_unavailable' });
-        if (!isVerificationEmailConfigured()) {
+        if (!isEmailDeliveryConfigured()) {
             return reply.code(503).send({ error: 'email_delivery_unavailable' });
         }
 
@@ -304,7 +398,7 @@ export function registerAuthRoutes(server: FastifyInstance, pool: Pool): void {
         if (!validEmail(email)) return reply.code(400).send({ error: 'invalid_request' });
         const pepper = validatePepper();
         if (!pepper) return reply.code(503).send({ error: 'auth_configuration_unavailable' });
-        if (!isVerificationEmailConfigured()) {
+        if (!isEmailDeliveryConfigured()) {
             return reply.code(503).send({ error: 'email_delivery_unavailable' });
         }
 
@@ -431,6 +525,112 @@ export function registerAuthRoutes(server: FastifyInstance, pool: Pool): void {
             return reply.code(500).send({ error: 'verification_unavailable' });
         }
     });
+
+    server.post<{ Body: PasswordResetRequestBody }>(
+        '/api/v1/auth/password/reset/request',
+        { schema: passwordResetRequestSchema },
+        async (request, reply) => {
+            const email = normalizeEmail(request.body.email);
+            if (!validEmail(email)) return reply.code(400).send({ error: 'invalid_request' });
+            if (!isEmailDeliveryConfigured()) {
+                return reply.code(503).send({ error: 'email_delivery_unavailable' });
+            }
+
+            try {
+                if (!await reserveIpAttempt(pool, request.ip, 'password_reset_request', 5, 10)) {
+                    return reply.code(429).send({ error: 'too_many_requests' });
+                }
+                let delivery: { email: string; resetUrl: string } | undefined;
+                try {
+                    delivery = await issuePasswordReset(pool, email, frontendBaseUrl, request.ip);
+                } catch (error) {
+                    request.log.error(
+                        { event: 'password_reset_token_issue_failed', code: errorCode(error) },
+                        'Password reset token could not be issued'
+                    );
+                }
+                if (delivery) {
+                    void sendPasswordResetEmail(delivery).catch((error) => {
+                        request.log.error(
+                            { event: 'password_reset_email_delivery_failed', code: errorCode(error) },
+                            'Password reset email could not be delivered'
+                        );
+                    });
+                }
+                return reply.code(202).send({
+                    status: 'reset_requested',
+                    message: 'Se existir uma conta ativa com este email, receberás uma mensagem com os próximos passos.'
+                });
+            } catch (error) {
+                request.log.error({ event: 'password_reset_request_failed', code: errorCode(error) }, 'Password reset could not be requested');
+                return reply.code(500).send({ error: 'password_reset_unavailable' });
+            }
+        }
+    );
+
+    server.post<{ Body: PasswordResetConfirmBody }>(
+        '/api/v1/auth/password/reset/confirm',
+        { schema: passwordResetConfirmSchema },
+        async (request, reply) => {
+            if (request.body.password !== request.body.passwordConfirmation) {
+                return reply.code(400).send({ error: 'invalid_registration' });
+            }
+
+            try {
+                if (!await reserveIpAttempt(pool, request.ip, 'password_reset_attempt', 10, 30)) {
+                    return reply.code(429).send({ error: 'too_many_requests' });
+                }
+                const client = await pool.connect();
+                try {
+                    await client.query('BEGIN');
+                    const tokenResult = await client.query<PasswordResetTokenRecord>(
+                        `SELECT auth_token.id::text AS id, auth_token.user_id::text AS user_id
+                         FROM impacta.auth_tokens AS auth_token
+                         JOIN impacta.users AS user_account ON user_account.id = auth_token.user_id
+                         WHERE auth_token.token_hash = $1
+                           AND auth_token.purpose = 'reset_password'
+                           AND auth_token.consumed_at IS NULL
+                           AND auth_token.expires_at > now()
+                           AND user_account.status = 'active'
+                           AND user_account.email_verified_at IS NOT NULL
+                         FOR UPDATE OF auth_token, user_account`,
+                        [tokenHash(request.body.token)]
+                    );
+                    const resetToken = tokenResult.rows[0];
+                    if (!resetToken) {
+                        await client.query('COMMIT');
+                        return reply.code(400).send({ error: 'password_reset_invalid_or_expired' });
+                    }
+
+                    const passwordHash = await hashPassword(request.body.password);
+                    await client.query(
+                        `UPDATE impacta.auth_tokens SET consumed_at = now()
+                         WHERE user_id = $1 AND purpose = 'reset_password' AND consumed_at IS NULL`,
+                        [resetToken.user_id]
+                    );
+                    await client.query(
+                        'UPDATE impacta.users SET password_hash = $2 WHERE id = $1',
+                        [resetToken.user_id, passwordHash]
+                    );
+                    await client.query(
+                        'UPDATE impacta.auth_sessions SET revoked_at = now() WHERE user_id = $1 AND revoked_at IS NULL',
+                        [resetToken.user_id]
+                    );
+                    await recordUserAuthEvent(client, resetToken.user_id, 'password_reset_completed', request.ip);
+                    await client.query('COMMIT');
+                    return { status: 'password_reset', message: 'Palavra-passe atualizada. Inicia sessão com a nova palavra-passe.' };
+                } catch (error) {
+                    await client.query('ROLLBACK').catch(() => undefined);
+                    throw error;
+                } finally {
+                    client.release();
+                }
+            } catch (error) {
+                request.log.error({ event: 'password_reset_failed', code: errorCode(error) }, 'Password reset failed');
+                return reply.code(500).send({ error: 'password_reset_unavailable' });
+            }
+        }
+    );
 
     server.post<{ Body: LoginBody }>('/api/v1/auth/login', { schema: loginSchema }, async (request, reply) => {
         const email = normalizeEmail(request.body.email);

@@ -13,6 +13,7 @@ interface RuntimeConfig {
     host: string;
     port: number;
     frontendOrigins: string[];
+    frontendBaseUrl: string;
     postgres: PoolConfig;
 }
 
@@ -87,11 +88,31 @@ function loadRuntimeConfig(): RuntimeConfig {
         throw new Error('FRONTEND_ORIGINS must contain exact HTTP or HTTPS origins');
     }
 
+    const configuredFrontendBase = process.env.FRONTEND_BASE_URL
+        ?? (environment === 'development' ? 'http://localhost/Impacta' : undefined);
+    if (!configuredFrontendBase) {
+        throw new Error('FRONTEND_BASE_URL is required in production');
+    }
+    let frontendBase: URL;
+    try {
+        frontendBase = new URL(configuredFrontendBase);
+    } catch {
+        throw new Error('FRONTEND_BASE_URL must be an absolute HTTP or HTTPS URL');
+    }
+    if (!['http:', 'https:'].includes(frontendBase.protocol)
+        || frontendBase.username || frontendBase.password || frontendBase.search || frontendBase.hash
+        || !frontendOrigins.includes(frontendBase.origin)
+        || (environment === 'production' && frontendBase.protocol !== 'https:')) {
+        throw new Error('FRONTEND_BASE_URL must be a path on an allowed frontend origin');
+    }
+    const frontendBaseUrl = frontendBase.origin + frontendBase.pathname.replace(/\/+$/, '');
+
     return {
         environment,
         host: process.env.API_HOST ?? '127.0.0.1',
         port: parsePort('API_PORT', 3001),
         frontendOrigins,
+        frontendBaseUrl,
         postgres: {
             host: requiredEnvironmentValue('PGHOST'),
             port: parsePort('PGPORT', 5432),
@@ -243,7 +264,7 @@ server.get('/api/v1/health/ready', { schema: readyRouteSchema }, async (request,
             'SELECT user_id, event_type, occurred_at, ip_address FROM impacta.auth_events LIMIT 0',
             'SELECT id, code FROM impacta.roles LIMIT 0',
             'SELECT user_id FROM impacta.user_profiles LIMIT 0',
-            'SELECT token_hash, revoked_at FROM impacta.auth_sessions LIMIT 0'
+            'SELECT user_id, token_hash, revoked_at FROM impacta.auth_sessions LIMIT 0'
         ]) {
             await pool.query(query);
         }
@@ -264,7 +285,7 @@ server.get('/api/v1/health/ready', { schema: readyRouteSchema }, async (request,
 });
 
 registerCommunityRoutes(server, pool);
-registerAuthRoutes(server, pool);
+registerAuthRoutes(server, pool, config.frontendBaseUrl);
 
 server.setNotFoundHandler(async (_request, reply) => {
     return reply.code(404).send({ error: 'not_found' });

@@ -14,7 +14,9 @@ function authErrorMessage(error) {
         invalid_registration: 'Confirma o nome, o email e se as palavras-passe coincidem.',
         verification_invalid_or_expired: 'O código está incorreto ou expirou. Pede outro código.',
         invalid_credentials: 'Email ou palavra-passe incorretos.',
-        email_not_verified: 'Confirma o email antes de iniciares sessão. Volta a criar a conta com este email para receber outro código.',
+        password_reset_invalid_or_expired: 'Este link já foi usado ou expirou. Pede um novo link.',
+        password_reset_unavailable: 'Não foi possível alterar a palavra-passe. Tenta novamente.',
+        email_not_verified: 'Confirma o email antes de iniciares sessão. Podes pedir outro código ao iniciar novamente o registo com o mesmo email.',
         mfa_required: 'Esta conta requer autenticação multifator, ainda não ativada nesta versão.',
         api_unavailable: 'Não foi possível contactar a API. Confirma se o backend está ativo.'
     };
@@ -138,6 +140,80 @@ if (loginForm) {
             showAuthStatus(status, authErrorMessage(error));
         } finally {
             button.disabled = false;
+        }
+    });
+}
+
+const resetRequestForm = document.querySelector('#reset-request-form');
+const resetConfirmForm = document.querySelector('#reset-confirm-form');
+if (resetRequestForm && resetConfirmForm) {
+    const requestStatus = document.querySelector('#reset-request-status');
+    const confirmStatus = document.querySelector('#reset-confirm-status');
+    const resetSuccess = document.querySelector('#reset-success');
+    const hadResetParameter = window.location.search.length > 0;
+    const resetToken = new URLSearchParams(window.location.search).get('token') || '';
+    const validResetToken = /^[a-f0-9]{64}$/.test(resetToken);
+    const resetRequestButton = resetRequestForm.querySelector('button[type="submit"]');
+    const resetConfirmButton = resetConfirmForm.querySelector('button[type="submit"]');
+    const newPassword = resetConfirmForm.elements.password;
+    const confirmPassword = resetConfirmForm.elements.passwordConfirmation;
+
+    window.history.replaceState(null, '', window.location.pathname);
+    if (validResetToken) {
+        resetRequestForm.hidden = true;
+        resetConfirmForm.hidden = false;
+        document.querySelector('#auth-title').textContent = 'Escolhe uma nova palavra-passe.';
+        document.querySelector('#reset-subtitle').textContent = 'O link é válido por 30 minutos e só pode ser usado uma vez.';
+    } else if (hadResetParameter) {
+        showAuthStatus(requestStatus, 'O link não é válido. Podes pedir um novo abaixo.');
+    }
+
+    const validateResetPasswords = () => {
+        confirmPassword.setCustomValidity(
+            confirmPassword.value && confirmPassword.value !== newPassword.value
+                ? 'As palavras-passe não coincidem.'
+                : ''
+        );
+    };
+    newPassword.addEventListener('input', validateResetPasswords);
+    confirmPassword.addEventListener('input', validateResetPasswords);
+
+    resetRequestForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!resetRequestForm.reportValidity()) return;
+        resetRequestButton.disabled = true;
+        showAuthStatus(requestStatus, 'A enviar o pedido...');
+        try {
+            const payload = await authPost('/password/reset/request', {
+                email: resetRequestForm.elements.email.value
+            });
+            showAuthStatus(requestStatus, payload.message || 'Se existir uma conta ativa com este email, receberás os próximos passos.');
+        } catch (error) {
+            showAuthStatus(requestStatus, authErrorMessage(error));
+        } finally {
+            resetRequestButton.disabled = false;
+        }
+    });
+
+    resetConfirmForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        validateResetPasswords();
+        if (!resetConfirmForm.reportValidity()) return;
+        resetConfirmButton.disabled = true;
+        showAuthStatus(confirmStatus, 'A atualizar a palavra-passe...');
+        try {
+            await authPost('/password/reset/confirm', {
+                token: resetToken,
+                password: newPassword.value,
+                passwordConfirmation: confirmPassword.value
+            });
+            resetConfirmForm.hidden = true;
+            resetSuccess.hidden = false;
+            document.querySelector('#auth-title').textContent = 'Acesso recuperado.';
+        } catch (error) {
+            showAuthStatus(confirmStatus, authErrorMessage(error));
+        } finally {
+            resetConfirmButton.disabled = false;
         }
     });
 }

@@ -32,6 +32,10 @@ Confirma no pgAdmin a capitaliza��o exata do nome da base. Se aparecer como 
 
 ## Iniciar e confirmar
 
+Define `FRONTEND_BASE_URL` com o caminho base da aplicação, por exemplo, `http://localhost/Impacta`. Em produção, usa HTTPS e uma origem presente em `FRONTEND_ORIGINS`.
+
+Antes de usar a recuperação de palavra-passe com o login `impacta_app`, executa como proprietária da base a migração `backend/database/migrations/20261009-password-reset.sql`. O link de recuperação é enviado por email, expira em 30 minutos, só pode ser usado uma vez e a palavra-passe nova revoga as sessões existentes. A API apresenta um estado de prontidão incompleto enquanto faltar a permissão dessa migração.
+
 Na raiz do projeto, executa:
 
     npm.cmd run build
