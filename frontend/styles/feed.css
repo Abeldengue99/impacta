@@ -200,3 +200,59 @@ body.feed-page { min-height: 100vh; background: #f4f6f1; }
     .composer-hint { max-width: 150px; }
     .post-actions button { font-size: .56rem; }
 }
+
+/* Interactive community cards and clear loading/error states. */
+.feed-page [hidden] { display: none !important; }
+.composer { padding-bottom: 0; }
+.composer textarea:disabled { cursor: not-allowed; opacity: .68; }
+.composer-bottom { flex-wrap: wrap; }
+.composer-hint { flex: 1 1 210px; margin: 0; }
+.character-count { color: #91a097; font-size: .61rem; white-space: nowrap; }
+.composer .button:disabled, .post-actions button:disabled, .action-form button:disabled,
+.project-join:disabled, .community-join:disabled { cursor: wait; opacity: .6; }
+.composer .form-status:not(:empty) { margin: 0; padding: 0 0 13px 52px; }
+.retry-button { display: block; margin: 12px auto 0; }
+.post-feedback { margin: 0 0 8px 49px; }
+.post-comments { padding: 12px 0 3px 49px; border-top: 1px solid #edf0ec; }
+.comments-list { display: grid; gap: 8px; }
+.inline-comment { display: grid; gap: 3px; margin: 0; padding: 9px 10px; }
+.inline-comment-author { color: #233d31; font-size: .66rem; }
+.inline-comment > span { overflow-wrap: anywhere; line-height: 1.5; }
+.inline-comment > small { color: #96a198; font-size: .58rem; }
+.comment-status { margin: 7px 0; }
+.comment-entry { margin: 10px 0 7px; align-items: end; }
+.comment-entry textarea, .action-input, .report-form textarea, .report-reason {
+    min-width: 0; width: 100%; padding: 8px 10px; border: 1px solid #e4eae3; border-radius: 5px;
+    outline: none; background: #fafbf9; color: var(--ink); font: 400 .68rem/1.5 var(--font-body);
+}
+.comment-entry textarea { flex: 1; resize: vertical; }
+.comment-entry textarea:focus, .action-input:focus, .report-form textarea:focus, .report-reason:focus { border-color: #80b39a; }
+.comment-login { display: inline-flex; margin: 8px 0; color: var(--green); font-size: .68rem; font-weight: 700; }
+.post-utility-actions { display: flex; justify-content: flex-end; margin: 0 -18px; padding: 0 12px 6px; }
+.post-utility-actions button { padding: 4px 7px; border: 0; background: transparent; color: #89958d; cursor: pointer; font: 600 .6rem/1.4 var(--font-body); }
+.post-utility-actions button:hover { color: #a24e43; }
+.report-form { display: grid; gap: 8px; margin: 0 0 10px 49px; padding: 10px; border: 1px solid #e8ece6; border-radius: 5px; background: #fafbf9; }
+.report-form textarea { resize: vertical; }
+.inline-form-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.button-quiet { padding: 0 10px; border: 1px solid #e0e7df; border-radius: 5px; background: white; color: #64776c; cursor: pointer; font-size: .68rem; }
+.action-form { display: grid; gap: 8px; margin-top: 9px; }
+.action-input { resize: vertical; }
+.participation-done { display: block; margin: 9px 0 0; color: #277453; font-size: .65rem; font-weight: 700; line-height: 1.5; }
+.project-card { padding: 0 0 9px; border-top: 1px solid #eff2ee; }
+.project-card .project-row { border-top: 0; }
+.project-description, .project-community { display: block; margin: 0 0 6px 43px; color: #77877e; font-size: .64rem; line-height: 1.55; }
+.project-join, .community-join { display: inline-flex; margin: 5px 0 0 43px; padding: 0; border: 0; background: transparent; color: var(--green); cursor: pointer; font: 700 .65rem/1.5 var(--font-body); }
+.community-entry { display: grid; gap: 6px; padding: 10px 0; border-top: 1px solid #eff2ee; }
+.community-entry-top { display: grid; gap: 3px; }
+.community-entry-top strong { font-size: .7rem; }
+.community-entry-top small, .community-entry p { margin: 0; color: #87938b; font-size: .61rem; line-height: 1.5; }
+.community-entry .community-join { margin-left: 0; }
+.widget .empty-state { padding: 12px 4px; font-size: .68rem; }
+
+@media (max-width: 720px) {
+    .composer-hint { flex-basis: 100%; }
+    .character-count { margin-left: auto; }
+    .post-comments { padding-left: 42px; }
+    .post-feedback, .report-form { margin-left: 42px; }
+    .post-utility-actions { margin-inline: -12px; }
+}

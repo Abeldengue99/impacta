@@ -36,6 +36,10 @@ Define `FRONTEND_BASE_URL` com o caminho base da aplicação, por exemplo, `http
 
 Antes de usar a recuperação de palavra-passe com o login `impacta_app`, executa como proprietária da base a migração `backend/database/migrations/20261009-password-reset.sql`. O link de recuperação é enviado por email, expira em 30 minutos, só pode ser usado uma vez e a palavra-passe nova revoga as sessões existentes. A API apresenta um estado de prontidão incompleto enquanto faltar a permissão dessa migração.
 
+Para ativar publicação, comentários, apoios, denúncias, participação em desafios, adesão a projetos e comunidades, executa como proprietária `backend/database/migrations/20261009-community-interactions.sql`. Esta migração concede apenas as permissões necessárias ao `impacta_app`, cria índices usados pelas consultas do feed e habilita a renovação do prazo inativo da sessão. A prontidão da API permanece incompleta até todas as permissões estarem aplicadas.
+
+Para remover as publicações locais fictícias do seed, executa uma vez `backend/database/migrations/20261009-remove-demo-posts.sql` como proprietária da base. O script só aceita a base local `Impacta` e elimina publicações com o marcador `[TESTE IMPACTA]` da comunidade de demonstração, associadas às contas de demonstração reservadas. Não elimina contas, comunidades nem publicações reais.
+
 Na raiz do projeto, executa:
 
     npm.cmd run build
@@ -55,6 +59,6 @@ O feed e as listas de desafios/projetos consultam as tabelas `posts`, `challenge
 
 O registo cria a conta com estado `pending`. Um código aleatório de seis dígitos, válido por dez minutos e armazenado como HMAC, é enviado por email. Só a confirmação válida ativa a conta e atribui o papel padrão `member`. Os códigos têm limites de tentativas e os endpoints não revelam se um email já está registado.
 
-O início de sessão usa scrypt para validar a senha e grava sessões revogáveis no PostgreSQL. Os cookies da sessão são HttpOnly; em produção também são Secure. Contas que exijam MFA não iniciam sessão até ao fluxo MFA ser implementado. Publicações, reações, comentários e funções administrativas ainda não têm rotas de escrita.
+O início de sessão usa scrypt para validar a senha e grava sessões revogáveis no PostgreSQL. Os cookies de sessão são HttpOnly; em produção também são Secure. O feed consulta publicações, desafios, projetos e comunidades no PostgreSQL. Com uma sessão ativa, é possível publicar, apoiar ou retirar apoio, comentar, denunciar uma publicação, apagar as próprias publicações, participar em desafios e aderir a projetos e comunidades públicas. Escritas exigem token CSRF, usam consultas parametrizadas e têm limites de tamanho e frequência. As funções administrativas permanecem separadas do feed.
 
 Se o nome da base ou a conta ainda não corresponderem a estas instruções, ajusta as variáveis locais do .env. Não coloques dados secretos neste ficheiro de documentação.

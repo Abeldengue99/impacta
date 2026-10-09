@@ -195,13 +195,15 @@ const requiredRelations = [
     'admin_audit_log',
     'impact_areas',
     'communities',
+    'community_members',
     'projects',
     'project_members',
     'challenges',
     'challenge_participations',
     'posts',
     'comments',
-    'reactions'
+    'reactions',
+    'content_reports'
 ];
 
 server.addHook('onRequest', async (request, reply) => {
@@ -264,9 +266,58 @@ server.get('/api/v1/health/ready', { schema: readyRouteSchema }, async (request,
             'SELECT user_id, event_type, occurred_at, ip_address FROM impacta.auth_events LIMIT 0',
             'SELECT id, code FROM impacta.roles LIMIT 0',
             'SELECT user_id FROM impacta.user_profiles LIMIT 0',
-            'SELECT user_id, token_hash, revoked_at, idle_expires_at, absolute_expires_at FROM impacta.auth_sessions LIMIT 0'
+            'SELECT user_id, token_hash, csrf_token_hash, revoked_at, idle_expires_at, absolute_expires_at FROM impacta.auth_sessions LIMIT 0',
+            'SELECT last_seen_at FROM impacta.auth_sessions LIMIT 0',
+            'SELECT slug, description, impact_area_id FROM impacta.communities LIMIT 0',
+            'SELECT community_id, user_id, status FROM impacta.community_members LIMIT 0',
+            'SELECT id, body, created_at, author_user_id, post_id, status, deleted_at FROM impacta.comments LIMIT 0',
+            'SELECT user_id, submitted_at FROM impacta.challenge_participations LIMIT 0',
+            'SELECT user_id FROM impacta.project_members LIMIT 0'
         ]) {
             await pool.query(query);
+        }
+
+        const writePrivileges = await pool.query<{ ready: boolean }>(
+            `SELECT
+                has_column_privilege(current_user, 'impacta.posts', 'author_user_id', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.posts', 'body', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.posts', 'status', 'UPDATE')
+                AND has_column_privilege(current_user, 'impacta.posts', 'deleted_at', 'UPDATE')
+                AND has_column_privilege(current_user, 'impacta.comments', 'post_id', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.comments', 'author_user_id', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.comments', 'body', 'INSERT')
+                AND has_table_privilege(current_user, 'impacta.reactions', 'DELETE')
+                AND has_column_privilege(current_user, 'impacta.reactions', 'user_id', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.reactions', 'post_id', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.reactions', 'reaction_type', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.challenge_participations', 'challenge_id', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.challenge_participations', 'user_id', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.challenge_participations', 'submission', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.project_members', 'project_id', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.project_members', 'user_id', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.community_members', 'community_id', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.community_members', 'user_id', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.community_members', 'status', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.content_reports', 'reporter_user_id', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.content_reports', 'post_id', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.content_reports', 'reason_code', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.content_reports', 'details', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.content_reports', 'reporter_user_id', 'SELECT')
+                AND has_column_privilege(current_user, 'impacta.content_reports', 'created_at', 'SELECT')
+                AND has_column_privilege(current_user, 'impacta.auth_sessions', 'last_seen_at', 'UPDATE')
+                AND has_column_privilege(current_user, 'impacta.auth_sessions', 'idle_expires_at', 'UPDATE')
+                AND has_sequence_privilege(current_user, 'impacta.posts_id_seq', 'USAGE')
+                AND has_sequence_privilege(current_user, 'impacta.comments_id_seq', 'USAGE')
+                AND has_sequence_privilege(current_user, 'impacta.challenge_participations_id_seq', 'USAGE')
+                AND has_sequence_privilege(current_user, 'impacta.content_reports_id_seq', 'USAGE')
+                AS ready`
+        );
+        if (!writePrivileges.rows[0]?.ready) {
+            request.log.warn({ event: 'community_permissions_incomplete' }, 'Community write permissions are not ready');
+            return reply.code(503).send({
+                status: 'not_ready',
+                message: 'Database is connected; community permissions are incomplete.'
+            });
         }
 
         return { status: 'ready' };

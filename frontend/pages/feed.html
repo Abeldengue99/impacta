@@ -9,9 +9,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../styles/main.css">
-    <link rel="stylesheet" href="../styles/feed.css">
-    <script src="../scripts/api.js" defer></script>
-    <script src="../scripts/feed.js" defer></script>
+    <link rel="stylesheet" href="../styles/feed.css?v=feed-20261009-2">
+    <script src="../scripts/api.js?v=feed-20261009-2" defer></script>
+    <script src="../scripts/feed.js?v=feed-20261009-2" defer></script>
 </head>
 <body class="feed-page">
     <header class="feed-header">
@@ -33,7 +33,7 @@
                 <a class="side-nav-active" href="#feed"><span>⌂</span> O teu feed</a>
                 <a href="#desafios"><span>✳</span> Desafios</a>
                 <a href="#projetos"><span>↗</span> Projetos</a>
-                <a href="#comunidade"><span>◎</span> Comunidades</a>
+                <a href="#comunidades"><span>◎</span> Comunidades</a>
             </nav>
             <div class="sidebar-callout"><span class="callout-icon">✦</span><h3>Uma ideia pode ser o início.</h3><p>Partilha algo que possa ajudar a tua comunidade.</p><a href="#composer">Partilhar uma ideia <span>→</span></a></div>
             <a class="back-home" href="index.html"><span>←</span> Voltar à página inicial</a>
@@ -45,10 +45,21 @@
                 <span class="welcome-mark" aria-hidden="true">✳</span>
             </div>
 
-            <div class="composer panel" id="composer">
-                <p class="composer-hint">A publicação será ativada com a autenticação segura da conta.</p>
-                <a class="button button-small" href="login.html">Entrar para participar</a>
-            </div>
+            <form class="composer panel" id="composer">
+                <div class="composer-top">
+                    <span class="avatar avatar-user composer-avatar" aria-hidden="true">I</span>
+                    <label class="composer-input-wrap" for="post-body">
+                        <textarea id="post-body" name="body" maxlength="2000" rows="2" placeholder="Partilha uma ideia, uma aprendizagem ou uma iniciativa…" required disabled></textarea>
+                    </label>
+                </div>
+                <div class="composer-bottom">
+                    <p class="composer-hint" id="composer-hint" role="status">Entra na tua conta para partilhar com a comunidade.</p>
+                    <span class="character-count" id="post-character-count">0/2000</span>
+                    <button class="button button-small" id="publish-post" type="submit" disabled>Publicar <span aria-hidden="true">↗</span></button>
+                    <a class="button button-small composer-login" href="login.html">Entrar para participar</a>
+                </div>
+                <p class="form-status" id="composer-status" role="status" aria-live="polite"></p>
+            </form>
 
             <div class="feed-toolbar"><div><span class="eyebrow">PARTILHAS DA COMUNIDADE</span><h2>Em destaque</h2></div><label class="sort-control">Ordenar <select id="feed-sort" aria-label="Ordenar publicações"><option value="recent">Mais recentes</option><option value="supported">Mais apoiadas</option></select></label></div>
             <div class="post-list" id="post-list" aria-live="polite"></div>
@@ -67,7 +78,12 @@
                 <div id="projects-list"><p>A carregar projetos…</p></div>
             </section>
 
-            <section class="community-note" id="comunidade"><span class="note-spark">✦</span><p>O impacto não se mede só em números. Começa quando alguém decide participar.</p></section>
+            <section class="widget panel" id="comunidades">
+                <div class="widget-heading"><div><span class="eyebrow">PESSOAS EM CONJUNTO</span><h2>Comunidades</h2></div><span class="widget-symbol" aria-hidden="true">◎</span></div>
+                <div id="community-list"><p>A carregar comunidades…</p></div>
+            </section>
+
+            <section class="community-note"><span class="note-spark">✦</span><p>O impacto não se mede só em números. Começa quando alguém decide participar.</p></section>
             <footer class="feed-footer"><a href="index.html">Sobre o IMPACTA</a><span>·</span><a href="#feed">Ajuda</a><span>·</span><span>© IMPACTA 2026</span></footer>
         </aside>
     </main>

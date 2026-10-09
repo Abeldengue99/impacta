@@ -717,19 +717,40 @@ export function registerAuthRoutes(server: FastifyInstance, pool: Pool, frontend
         }
 
         try {
-            const result = await pool.query<{ display_name: string }>(
-                `SELECT account.display_name
-                 FROM impacta.auth_sessions AS auth_session
-                 JOIN impacta.users AS account ON account.id = auth_session.user_id
-                 WHERE auth_session.token_hash = $1
+            let accounts: { display_name: string }[];
+            try {
+                const result = await pool.query<{ display_name: string }>(
+                    `UPDATE impacta.auth_sessions AS auth_session
+                 SET last_seen_at = now(),
+                     idle_expires_at = LEAST(auth_session.absolute_expires_at, now() + interval '30 minutes')
+                 FROM impacta.users AS account
+                 WHERE account.id = auth_session.user_id
+                   AND auth_session.token_hash = $1
                    AND auth_session.revoked_at IS NULL
                    AND auth_session.idle_expires_at > now()
                    AND auth_session.absolute_expires_at > now()
                    AND account.status = 'active'
-                 LIMIT 1`,
-                [tokenHash(sessionToken)]
-            );
-            const account = result.rows[0];
+                     RETURNING account.display_name`,
+                    [tokenHash(sessionToken)]
+                );
+                accounts = result.rows;
+            } catch (error) {
+                if (errorCode(error) !== '42501') throw error;
+                const result = await pool.query<{ display_name: string }>(
+                    `SELECT account.display_name
+                     FROM impacta.auth_sessions AS auth_session
+                     JOIN impacta.users AS account ON account.id = auth_session.user_id
+                     WHERE auth_session.token_hash = $1
+                       AND auth_session.revoked_at IS NULL
+                       AND auth_session.idle_expires_at > now()
+                       AND auth_session.absolute_expires_at > now()
+                       AND account.status = 'active'
+                     LIMIT 1`,
+                    [tokenHash(sessionToken)]
+                );
+                accounts = result.rows;
+            }
+            const account = accounts[0];
             return account
                 ? { authenticated: true, user: { displayName: account.display_name } }
                 : { authenticated: false };
@@ -743,6 +764,24 @@ export function registerAuthRoutes(server: FastifyInstance, pool: Pool, frontend
         const session = readCookie(request.headers.cookie, 'impacta_session');
         if (session && /^[a-f0-9]{64}$/i.test(session)) {
             try {
+                const csrfCookie = readCookie(request.headers.cookie, 'impacta_csrf');
+                const csrfHeader = request.headers['x-csrf-token'];
+                const activeSession = await pool.query<{ csrf_token_hash: string }>(
+                    `SELECT csrf_token_hash FROM impacta.auth_sessions
+                     WHERE token_hash = $1 AND revoked_at IS NULL
+                       AND idle_expires_at > now() AND absolute_expires_at > now()
+                     LIMIT 1`,
+                    [tokenHash(session)]
+                );
+                if (activeSession.rows[0]) {
+                    const matchingTokens = typeof csrfHeader === 'string'
+                        && Boolean(csrfCookie)
+                        && /^[a-f0-9]{64}$/i.test(csrfCookie ?? '')
+                        && /^[a-f0-9]{64}$/i.test(csrfHeader)
+                        && equalHash(tokenHash(csrfCookie ?? ''), tokenHash(csrfHeader))
+                        && equalHash(activeSession.rows[0].csrf_token_hash, tokenHash(csrfCookie ?? ''));
+                    if (!matchingTokens) return reply.code(403).send({ error: 'csrf_validation_failed' });
+                }
                 await pool.query(
                     'UPDATE impacta.auth_sessions SET revoked_at = now() WHERE token_hash = $1 AND revoked_at IS NULL',
                     [tokenHash(session)]
