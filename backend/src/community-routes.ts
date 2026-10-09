@@ -187,7 +187,11 @@ export function registerCommunityRoutes(server: FastifyInstance, pool: Pool): vo
             `SELECT post.id::text AS id,
                     post.body,
                     post.created_at,
+                    author.id::text AS author_id,
                     COALESCE(author.display_name, 'Conta encerrada') AS author,
+                    profile.headline AS author_headline,
+                    profile.is_public AS author_profile_public,
+                    avatar.id::text AS avatar_id,
                     community.name AS community,
                     (post.author_user_id = $1::bigint) AS is_author,
                     EXISTS (SELECT 1 FROM impacta.reactions AS viewer_reaction
@@ -200,6 +204,9 @@ export function registerCommunityRoutes(server: FastifyInstance, pool: Pool): vo
                        AND comment.deleted_at IS NULL) AS comment_count
              FROM impacta.posts AS post
              LEFT JOIN impacta.users AS author ON author.id = post.author_user_id
+             LEFT JOIN impacta.user_profiles AS profile ON profile.user_id = author.id AND profile.is_public
+             LEFT JOIN impacta.media AS avatar ON avatar.id = profile.avatar_media_id
+                 AND avatar.status = 'available' AND avatar.media_type = 'image'
              LEFT JOIN impacta.communities AS community ON community.id = post.community_id
              WHERE post.status = 'published' AND post.deleted_at IS NULL
                AND (post.author_user_id IS NULL OR author.status = 'active')
@@ -234,6 +241,10 @@ export function registerCommunityRoutes(server: FastifyInstance, pool: Pool): vo
             body,
             created_at: post.created_at,
             author: session.displayName,
+            author_id: session.userId,
+            author_headline: null,
+            author_profile_public: false,
+            avatar_id: null,
             community: null,
             is_author: true,
             supported_by_viewer: false,

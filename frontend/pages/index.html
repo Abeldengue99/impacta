@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../styles/main.css?v=hero-carousel-1">
+    <link rel="stylesheet" href="../styles/main.css?v=icons-profile-1">
 </head>
 <body>
     <header class="site-header">
@@ -18,9 +18,18 @@
             <span>impacta<span class="brand-period">.</span></span>
         </a>
         <nav class="site-nav" aria-label="Navegação principal">
-            <a href="#como-funciona">Como funciona</a>
-            <a href="#frentes">Áreas de impacto</a>
-            <a href="feed.html">Comunidade</a>
+            <a class="icon-nav-link" href="#como-funciona" aria-label="Como funciona" data-tooltip="Como funciona">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3 3.5 7.4v9.2L12 21l8.5-4.4V7.4L12 3Z"/><path d="M8.5 12h7M12 8.5v7"/></svg>
+                <span class="visually-hidden icon-nav-label">Como funciona</span>
+            </a>
+            <a class="icon-nav-link" href="#frentes" aria-label="Áreas de impacto" data-tooltip="Áreas de impacto">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg>
+                <span class="visually-hidden icon-nav-label">Áreas de impacto</span>
+            </a>
+            <a class="icon-nav-link" href="feed.html" aria-label="Comunidade" data-tooltip="Comunidade">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20"/><circle cx="9.5" cy="7.5" r="4"/><path d="M17 11a4 4 0 0 0 0-7.8M21 20v-1.5a4 4 0 0 0-3-3.9"/></svg>
+                <span class="visually-hidden icon-nav-label">Comunidade</span>
+            </a>
         </nav>
         <div class="header-actions">
             <a class="text-link" href="login.html">Entrar</a>

@@ -32,6 +32,8 @@ body.feed-page { min-height: 100vh; background: #f4f6f1; }
 .side-nav { display: grid; gap: 4px; }
 .side-nav a { display: flex; min-height: 41px; align-items: center; gap: 12px; padding: 0 11px; border-radius: 5px; color: #67786e; font-size: .77rem; font-weight: 600; }
 .side-nav a > span { width: 18px; color: #819087; font-size: 1.05rem; text-align: center; }
+.side-nav a > span { display: grid; place-items: center; }
+.side-nav a > span svg { display: block; width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .side-nav a:hover, .side-nav .side-nav-active { background: #e4eee6; color: #1c6d4d; }
 .side-nav .side-nav-active > span { color: #1c6d4d; }
 .sidebar-callout { margin-top: 30px; padding: 18px 15px 17px; border: 1px solid #e5eade; border-radius: 7px; background: #edf3e9; }
@@ -135,6 +137,100 @@ body.feed-page { min-height: 100vh; background: #f4f6f1; }
 .community-note p { margin: 0; color: #756b4f; font-size: .67rem; line-height: 1.65; }
 .feed-footer { display: flex; flex-wrap: wrap; gap: 7px; margin: 19px 2px; color: #99a39c; font-size: .61rem; }
 .feed-footer a:hover { color: var(--green); }
+
+/* The tooltip carries the accessible name when feed controls show only an icon. */
+.post-actions .icon-action,
+.post-utility-actions .icon-action {
+    position: relative;
+    display: inline-flex;
+    min-width: 42px;
+    min-height: 36px;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 6px 9px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: #738178;
+    cursor: pointer;
+}
+.post-actions .icon-action svg,
+.post-utility-actions .icon-action svg { width: 19px; height: 19px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.post-actions .icon-action .action-count { color: #91a097; font-size: .65rem; font-weight: 700; }
+.post-actions .icon-action:hover,
+.post-actions .icon-action:focus-visible,
+.post-utility-actions .icon-action:hover,
+.post-utility-actions .icon-action:focus-visible { background: #f3f6f2; color: var(--green); }
+.post-actions .support-button[aria-pressed="true"] { color: #c36f59; }
+.post-actions .support-button[aria-pressed="true"] .action-count { color: #bd745f; }
+.post-actions .icon-action::after,
+.post-utility-actions .icon-action::after {
+    position: absolute;
+    z-index: 8;
+    bottom: calc(100% + 7px);
+    left: 50%;
+    width: max-content;
+    max-width: 220px;
+    padding: 7px 9px;
+    transform: translate(-50%, 3px);
+    border-radius: 5px;
+    background: #18332a;
+    box-shadow: 0 5px 14px rgba(16, 35, 29, .15);
+    color: white;
+    content: attr(data-tooltip);
+    font: 600 .65rem/1.25 var(--font-body);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s ease, transform .15s ease;
+}
+.post-actions .icon-action:hover::after,
+.post-actions .icon-action:focus-visible::after,
+.post-utility-actions .icon-action:hover::after,
+.post-utility-actions .icon-action:focus-visible::after { transform: translate(-50%, 0); opacity: 1; }
+.post-profile-avatar, .post-author-link { color: inherit; }
+.post-profile-avatar { display: grid; flex: 0 0 auto; border-radius: 50%; }
+.post-author-link:hover { color: var(--green); }
+.avatar img, .user-chip img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
+.user-chip.profile-chip { position: relative; overflow: visible; padding: 0; }
+.post-utility-actions .icon-action { min-width: 35px; min-height: 30px; color: #89958d; }
+.post-utility-actions .icon-action:hover { color: #a24e43; }
+.feed-header-actions .profile-chip[data-tooltip]::after {
+    position: absolute;
+    z-index: 12;
+    top: calc(100% + 8px);
+    right: 0;
+    width: max-content;
+    padding: 7px 9px;
+    border-radius: 5px;
+    background: #18332a;
+    color: white;
+    content: attr(data-tooltip);
+    font: 600 .65rem/1.2 var(--font-body);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s ease;
+}
+.feed-header-actions .profile-chip[data-tooltip]:hover::after,
+.feed-header-actions .profile-chip[data-tooltip]:focus-visible::after { opacity: 1; }
+.widget-more[data-tooltip] { position: relative; }
+.widget-more[data-tooltip]::after {
+    position: absolute;
+    z-index: 8;
+    top: calc(100% + 6px);
+    right: 0;
+    width: max-content;
+    padding: 7px 9px;
+    border-radius: 5px;
+    background: #18332a;
+    color: white;
+    content: attr(data-tooltip);
+    font: 600 .64rem/1.2 var(--font-body);
+    opacity: 0;
+    pointer-events: none;
+}
+.widget-more[data-tooltip]:hover::after,
+.widget-more[data-tooltip]:focus-visible::after { opacity: 1; }
 
 @media (max-width: 1100px) {
     .feed-layout { grid-template-columns: 192px minmax(0, 1fr); width: min(100% - 48px, 900px); gap: 22px; }
@@ -255,4 +351,12 @@ body.feed-page { min-height: 100vh; background: #f4f6f1; }
     .post-comments { padding-left: 42px; }
     .post-feedback, .report-form { margin-left: 42px; }
     .post-utility-actions { margin-inline: -12px; }
+    .post-actions .icon-action { min-width: 35px; padding-inline: 5px; }
+    .post-actions .icon-action svg { width: 17px; height: 17px; }
+    .post-actions .icon-action .action-count { font-size: .58rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .post-actions .icon-action::after,
+    .post-utility-actions .icon-action::after { transition: none; }
 }

@@ -5,6 +5,7 @@ import { Pool, type PoolConfig } from 'pg';
 import { readFileSync } from 'node:fs';
 import { registerAuthRoutes } from './auth-routes.js';
 import { registerCommunityRoutes } from './community-routes.js';
+import { registerProfileRoutes } from './profile-routes.js';
 
 type EnvironmentName = 'development' | 'production';
 
@@ -159,6 +160,12 @@ const server = Fastify({
     }
 });
 
+server.addContentTypeParser(
+    ['image/png', 'image/jpeg'],
+    { parseAs: 'buffer', bodyLimit: 2 * 1024 * 1024 },
+    (_request, body, done) => done(null, body)
+);
+
 const liveResponseSchema = {
     type: 'object',
     required: ['status'],
@@ -184,6 +191,7 @@ const readyRouteSchema: FastifySchema = {
 const requiredRelations = [
     'users',
     'user_profiles',
+    'media',
     'roles',
     'permissions',
     'role_permissions',
@@ -219,7 +227,7 @@ server.addHook('onRequest', async (request, reply) => {
         .header('vary', 'Origin');
     if (request.method === 'OPTIONS') {
         return reply
-            .header('access-control-allow-methods', 'GET, POST, DELETE, OPTIONS')
+            .header('access-control-allow-methods', 'GET, POST, PUT, DELETE, OPTIONS')
             .header('access-control-allow-headers', 'content-type, x-csrf-token')
             .header('access-control-max-age', '600')
             .code(204)
@@ -266,6 +274,8 @@ server.get('/api/v1/health/ready', { schema: readyRouteSchema }, async (request,
             'SELECT user_id, event_type, occurred_at, ip_address FROM impacta.auth_events LIMIT 0',
             'SELECT id, code FROM impacta.roles LIMIT 0',
             'SELECT user_id FROM impacta.user_profiles LIMIT 0',
+            'SELECT user_id, headline, bio, location, occupation, organization, website_url, skills, impact_area_id, is_public, avatar_media_id FROM impacta.user_profiles LIMIT 0',
+            'SELECT id, owner_user_id, storage_key, media_type, mime_type, byte_size, checksum_sha256, status FROM impacta.media LIMIT 0',
             'SELECT user_id, token_hash, csrf_token_hash, revoked_at, idle_expires_at, absolute_expires_at FROM impacta.auth_sessions LIMIT 0',
             'SELECT last_seen_at FROM impacta.auth_sessions LIMIT 0',
             'SELECT slug, description, impact_area_id FROM impacta.communities LIMIT 0',
@@ -306,10 +316,19 @@ server.get('/api/v1/health/ready', { schema: readyRouteSchema }, async (request,
                 AND has_column_privilege(current_user, 'impacta.content_reports', 'created_at', 'SELECT')
                 AND has_column_privilege(current_user, 'impacta.auth_sessions', 'last_seen_at', 'UPDATE')
                 AND has_column_privilege(current_user, 'impacta.auth_sessions', 'idle_expires_at', 'UPDATE')
+                AND has_column_privilege(current_user, 'impacta.auth_sessions', 'csrf_token_hash', 'SELECT')
+                AND has_column_privilege(current_user, 'impacta.users', 'display_name', 'UPDATE')
+                AND has_column_privilege(current_user, 'impacta.user_profiles', 'headline', 'UPDATE')
+                AND has_column_privilege(current_user, 'impacta.user_profiles', 'bio', 'UPDATE')
+                AND has_column_privilege(current_user, 'impacta.user_profiles', 'avatar_media_id', 'UPDATE')
+                AND has_column_privilege(current_user, 'impacta.media', 'owner_user_id', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.media', 'storage_key', 'INSERT')
+                AND has_column_privilege(current_user, 'impacta.media', 'status', 'UPDATE')
                 AND has_sequence_privilege(current_user, 'impacta.posts_id_seq', 'USAGE')
                 AND has_sequence_privilege(current_user, 'impacta.comments_id_seq', 'USAGE')
                 AND has_sequence_privilege(current_user, 'impacta.challenge_participations_id_seq', 'USAGE')
                 AND has_sequence_privilege(current_user, 'impacta.content_reports_id_seq', 'USAGE')
+                AND has_sequence_privilege(current_user, 'impacta.media_id_seq', 'USAGE')
                 AS ready`
         );
         if (!writePrivileges.rows[0]?.ready) {
@@ -336,6 +355,7 @@ server.get('/api/v1/health/ready', { schema: readyRouteSchema }, async (request,
 });
 
 registerCommunityRoutes(server, pool);
+registerProfileRoutes(server, pool);
 registerAuthRoutes(server, pool, config.frontendBaseUrl);
 
 server.setNotFoundHandler(async (_request, reply) => {

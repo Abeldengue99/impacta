@@ -8,21 +8,21 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../styles/main.css">
-    <link rel="stylesheet" href="../styles/feed.css?v=feed-20261009-2">
-    <script src="../scripts/api.js?v=feed-20261009-2" defer></script>
-    <script src="../scripts/feed.js?v=feed-20261009-2" defer></script>
+    <link rel="stylesheet" href="../styles/main.css?v=icons-profile-1">
+    <link rel="stylesheet" href="../styles/feed.css?v=profile-20261009-1">
+    <script src="../scripts/api.js?v=profile-20261009-1" defer></script>
+    <script src="../scripts/feed.js?v=profile-20261009-1" defer></script>
 </head>
 <body class="feed-page">
     <header class="feed-header">
         <a class="brand" href="index.html" aria-label="IMPACTA, página inicial"><span class="brand-mark" aria-hidden="true">i</span><span>impacta<span class="brand-period">.</span></span></a>
-        <label class="feed-search"><span aria-hidden="true">⌕</span><input id="feed-search" type="search" placeholder="Pesquisar ideias e projetos" aria-label="Pesquisar publicações"></label>
+        <label class="feed-search"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg><input id="feed-search" type="search" placeholder="Pesquisar ideias e projetos" aria-label="Pesquisar publicações"></label>
         <nav class="feed-top-nav" aria-label="Navegação da comunidade">
-            <a class="top-nav-active" href="#feed" aria-label="Início">Início</a>
-            <a href="#desafios">Desafios</a>
-            <a href="#projetos">Projetos</a>
+            <a class="top-nav-active icon-nav-link" href="#feed" aria-label="Início" data-tooltip="Início"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m3.5 10 8.5-7 8.5 7"/><path d="M5.5 9v11h13V9M9.5 20v-6h5v6"/></svg><span class="visually-hidden icon-nav-label">Início</span></a>
+            <a class="icon-nav-link" href="#desafios" aria-label="Desafios" data-tooltip="Desafios"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2.5v19M3.8 7.2l16.4 9.6M3.8 16.8l16.4-9.6M5 5l14 14M19 5 5 19"/></svg><span class="visually-hidden icon-nav-label">Desafios</span></a>
+            <a class="icon-nav-link" href="#projetos" aria-label="Projetos" data-tooltip="Projetos"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 19 19 5M8 5h11v11"/></svg><span class="visually-hidden icon-nav-label">Projetos</span></a>
         </nav>
-        <div class="feed-header-actions"><a class="user-chip" href="login.html" aria-label="Entrar na conta">Entrar</a></div>
+        <div class="feed-header-actions"><a class="user-chip" href="login.html" aria-label="Entrar na conta" data-tooltip="Entrar">Entrar</a></div>
     </header>
 
     <main class="feed-layout" id="feed">
@@ -30,10 +30,10 @@
             <a class="mini-profile" href="login.html"><span class="avatar avatar-user">i</span><span><strong>Entra na tua conta</strong><small>Para participar na comunidade</small></span></a>
             <p class="sidebar-label">A tua comunidade</p>
             <nav class="side-nav" aria-label="Secções da comunidade">
-                <a class="side-nav-active" href="#feed"><span>⌂</span> O teu feed</a>
-                <a href="#desafios"><span>✳</span> Desafios</a>
-                <a href="#projetos"><span>↗</span> Projetos</a>
-                <a href="#comunidades"><span>◎</span> Comunidades</a>
+                <a class="side-nav-active" href="#feed"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3.5 10 8.5-7 8.5 7"/><path d="M5.5 9v11h13V9M9.5 20v-6h5v6"/></svg></span> O teu feed</a>
+                <a href="#desafios"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.5v19M3.8 7.2l16.4 9.6M3.8 16.8l16.4-9.6"/></svg></span> Desafios</a>
+                <a href="#projetos"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19 19 5M8 5h11v11"/></svg></span> Projetos</a>
+                <a href="#comunidades"><span aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/></svg></span> Comunidades</a>
             </nav>
             <div class="sidebar-callout"><span class="callout-icon">✦</span><h3>Uma ideia pode ser o início.</h3><p>Partilha algo que possa ajudar a tua comunidade.</p><a href="#composer">Partilhar uma ideia <span>→</span></a></div>
             <a class="back-home" href="index.html"><span>←</span> Voltar à página inicial</a>
@@ -74,7 +74,7 @@
             </section>
 
             <section class="widget panel" id="projetos">
-                <div class="widget-heading"><div><span class="eyebrow">IDEIAS EM AÇÃO</span><h2>Projetos da comunidade</h2></div><a class="widget-more" href="#feed" aria-label="Ver todos os projetos">↗</a></div>
+                <div class="widget-heading"><div><span class="eyebrow">IDEIAS EM AÇÃO</span><h2>Projetos da comunidade</h2></div><a class="widget-more" href="#feed" aria-label="Ver todos os projetos" data-tooltip="Ver todos os projetos">↗</a></div>
                 <div id="projects-list"><p>A carregar projetos…</p></div>
             </section>
 

@@ -15,7 +15,8 @@
 
     const request = async (path, method = 'GET', body) => {
         const headers = { Accept: 'application/json' };
-        if (body !== undefined) headers['Content-Type'] = 'application/json';
+        const isBinary = typeof Blob !== 'undefined' && body instanceof Blob;
+        if (body !== undefined) headers['Content-Type'] = isBinary ? body.type : 'application/json';
         if (method !== 'GET') {
             const csrfToken = readCookie('impacta_csrf');
             if (csrfToken) headers['x-csrf-token'] = csrfToken;
@@ -28,7 +29,7 @@
                 headers,
                 credentials: 'include',
                 cache: 'no-store',
-                body: body === undefined ? undefined : JSON.stringify(body)
+                body: body === undefined ? undefined : (isBinary ? body : JSON.stringify(body))
             });
         } catch {
             throw Object.assign(new Error('api_unavailable'), { code: 'api_unavailable' });
@@ -58,8 +59,11 @@
     window.ImpactaAPI = Object.freeze({
         get,
         request,
+        assetUrl: (path) => `${window.location.protocol}//${window.location.hostname}:${apiPort}${path}`,
         currentSession: () => request('/auth/session'),
         post: (path, body) => request(path, 'POST', body),
+        put: (path, body) => request(path, 'PUT', body),
+        upload: (path, file) => request(path, 'POST', file),
         delete: (path) => request(path, 'DELETE')
     });
 })();

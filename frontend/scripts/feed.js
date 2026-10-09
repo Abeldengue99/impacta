@@ -15,12 +15,69 @@ const characterCount = document.querySelector('#post-character-count');
 
 let currentUser = null;
 
+const iconMarkup = Object.freeze({
+    support: '<path d="M20.5 8.8c0 5-8.5 10.1-8.5 10.1S3.5 13.8 3.5 8.8a4.2 4.2 0 0 1 8.5-.3 4.2 4.2 0 0 1 8.5.3Z"/>',
+    comment: '<path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l-1-4a7.5 7.5 0 1 1 16-3.5Z"/><path d="M8 11.5h8M8 14.5h5"/>',
+    share: '<path d="M5 19 19 5M8 5h11v11"/>',
+    trash: '<path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7m3 3v7m6-7v7"/>',
+    report: '<path d="M12 3 21 20H3L12 3Z"/><path d="M12 9v5m0 3h.01"/>',
+    profile: '<circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>',
+    home: '<path d="m3.5 10 8.5-7 8.5 7"/><path d="M5.5 9v11h13V9M9.5 20v-6h5v6"/>',
+    challenge: '<path d="M12 2.5v19M3.8 7.2l16.4 9.6M3.8 16.8l16.4-9.6"/>',
+    project: '<path d="M5 19 19 5M8 5h11v11"/>',
+    community: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/>'
+});
+
 const element = (tag, className, text) => {
     const node = document.createElement(tag);
     if (className) node.className = className;
     if (text !== undefined) node.textContent = text;
     return node;
 };
+
+function icon(name) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    svg.innerHTML = iconMarkup[name] || iconMarkup.profile;
+    return svg;
+}
+
+function iconButton(className, iconName, label, count) {
+    const button = element('button', `${className} icon-action`);
+    button.type = 'button';
+    button.dataset.tooltip = label;
+    button.setAttribute('aria-label', label);
+    const labelNode = element('span', 'visually-hidden action-label', label);
+    button.append(icon(iconName), labelNode);
+    if (count !== undefined) button.append(element('span', 'action-count', String(count)));
+    return button;
+}
+
+function updateIconButton(button, label, count) {
+    button.dataset.tooltip = label;
+    button.setAttribute('aria-label', label);
+    const labelNode = button.querySelector('.action-label');
+    if (labelNode) labelNode.textContent = label;
+    const countNode = button.querySelector('.action-count');
+    if (countNode && count !== undefined) countNode.textContent = String(count);
+}
+
+function avatarImage(node, url, name) {
+    if (!node) return;
+    node.replaceChildren();
+    node.textContent = initials(name);
+    if (!url) return;
+    const image = document.createElement('img');
+    image.crossOrigin = 'use-credentials';
+    image.src = window.ImpactaAPI.assetUrl(url);
+    image.alt = '';
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    image.addEventListener('error', () => { image.remove(); node.textContent = initials(name); }, { once: true });
+    node.replaceChildren(image);
+}
 
 function initials(name) {
     return String(name || '').split(/\s+/).filter(Boolean).slice(0, 2)
@@ -93,13 +150,21 @@ function setComposerAccess() {
             : 'Entra na tua conta para partilhar com a comunidade.';
     }
     const avatar = document.querySelector('.composer-avatar');
-    if (avatar && canPost) avatar.textContent = initials(currentUser.displayName);
+    if (avatar && canPost) avatarImage(avatar, currentUser.avatarUrl, currentUser.displayName);
 }
 
 async function loadCurrentAccount() {
     try {
         const session = await window.ImpactaAPI.currentSession();
         currentUser = session?.authenticated ? session.user : null;
+        if (currentUser) {
+            try {
+                const result = await window.ImpactaAPI.request('/profile');
+                currentUser = { ...currentUser, ...result.profile };
+            } catch {
+                // The feed and account session remain usable while profile details are unavailable.
+            }
+        }
     } catch {
         currentUser = null;
         if (composerHint) composerHint.textContent = 'Não foi possível confirmar a sessão. Atualiza a página ou entra novamente.';
@@ -111,9 +176,11 @@ async function loadCurrentAccount() {
     const accountActions = document.querySelector('.feed-header-actions');
     const loginLink = accountActions?.querySelector('.user-chip');
     if (accountActions && loginLink) {
-        const avatar = element('span', 'user-chip', initials(currentUser.displayName));
-        avatar.title = `Sessão iniciada como ${currentUser.displayName}`;
-        avatar.setAttribute('aria-label', `Sessão iniciada como ${currentUser.displayName}`);
+        const avatar = element('a', 'user-chip profile-chip');
+        avatar.href = 'profile.html';
+        avatar.dataset.tooltip = 'O teu perfil';
+        avatar.setAttribute('aria-label', `Abrir perfil de ${currentUser.displayName}`);
+        avatarImage(avatar, currentUser.avatarUrl, currentUser.displayName);
         const logoutButton = element('button', 'logout-button', 'Sair');
         logoutButton.type = 'button';
         logoutButton.addEventListener('click', async () => {
@@ -131,12 +198,12 @@ async function loadCurrentAccount() {
 
     const profile = document.querySelector('.mini-profile');
     if (profile) {
-        profile.removeAttribute('href');
+        profile.href = 'profile.html';
         profile.setAttribute('aria-label', `Conta autenticada: ${currentUser.displayName}`);
         const avatar = profile.querySelector('.avatar');
         const strong = profile.querySelector('strong');
         const small = profile.querySelector('small');
-        if (avatar) avatar.textContent = initials(currentUser.displayName);
+        if (avatar) avatarImage(avatar, currentUser.avatarUrl, currentUser.displayName);
         if (strong) strong.textContent = currentUser.displayName;
         if (small) small.textContent = 'Sessão autenticada';
     }
@@ -229,10 +296,32 @@ function createPost(postData) {
     post.id = `publicacao-${postData.id}`;
 
     const heading = element('div', 'post-heading');
-    heading.append(element('span', 'avatar avatar-user', initials(postData.author) || 'I'));
+    const publicProfile = Boolean(postData.author_id && postData.author_profile_public);
+    const authorAvatar = element('span', 'avatar avatar-user', initials(postData.author) || 'I');
+    const avatarUrl = postData.avatar_id
+        ? `/api/v1/media/${encodeURIComponent(postData.avatar_id)}`
+        : (postData.author_id && postData.author_id === currentUser?.id ? currentUser.avatarUrl : null);
+    avatarImage(authorAvatar, avatarUrl, postData.author);
+    if (publicProfile) {
+        const avatarLink = element('a', 'post-profile-avatar');
+        avatarLink.href = `profile.html?id=${encodeURIComponent(postData.author_id)}`;
+        avatarLink.setAttribute('aria-label', `Ver perfil público de ${postData.author}`);
+        avatarLink.append(authorAvatar);
+        heading.append(avatarLink);
+    } else {
+        heading.append(authorAvatar);
+    }
     const author = element('div', 'post-author');
-    author.append(element('strong', '', postData.author || 'Membro'));
-    const detail = [postData.community, formatDate(postData.created_at)].filter(Boolean).join(' · ');
+    const authorName = element('strong', '', postData.author || 'Membro');
+    if (publicProfile) {
+        const profileLink = element('a', 'post-author-link');
+        profileLink.href = `profile.html?id=${encodeURIComponent(postData.author_id)}`;
+        profileLink.append(authorName);
+        author.append(profileLink);
+    } else {
+        author.append(authorName);
+    }
+    const detail = [postData.author_headline, postData.community, formatDate(postData.created_at)].filter(Boolean).join(' · ');
     author.append(element('span', '', detail));
     heading.append(author);
 
@@ -272,7 +361,7 @@ function createPost(postData) {
                 commentStatus.textContent = '';
                 const count = Number(postData.comment_count) + 1;
                 postData.comment_count = count;
-                commentButton.textContent = `Comentários ${count}`;
+                updateIconButton(commentButton, `Comentários: ${count}`, count);
             } catch (error) {
                 commentStatus.textContent = friendlyError(error, 'Não foi possível publicar o comentário.');
             } finally {
@@ -287,10 +376,8 @@ function createPost(postData) {
     }
 
     const actions = element('div', 'post-actions');
-    const support = element('button', 'support-button');
-    support.type = 'button';
+    const support = iconButton('support-button', 'support', 'Apoiar publicação', Number(postData.support_count) || 0);
     support.setAttribute('aria-pressed', String(Boolean(postData.supported_by_viewer)));
-    support.textContent = `Apoiar ${Number(postData.support_count) || 0}`;
     support.addEventListener('click', async () => {
         if (!currentUser) {
             window.location.assign('login.html');
@@ -302,7 +389,7 @@ function createPost(postData) {
             postData.supported_by_viewer = result.supported;
             postData.support_count = result.supportCount;
             post.dataset.supports = String(result.supportCount);
-            support.textContent = `${result.supported ? 'Apoiado' : 'Apoiar'} ${result.supportCount}`;
+            updateIconButton(support, result.supported ? 'Retirar apoio' : 'Apoiar publicação', result.supportCount);
             support.setAttribute('aria-pressed', String(result.supported));
         } catch (error) {
             postFeedback.textContent = friendlyError(error, 'Não foi possível atualizar o apoio.');
@@ -311,8 +398,8 @@ function createPost(postData) {
         }
     });
 
-    const commentButton = element('button', 'comment-button', `Comentários ${Number(postData.comment_count) || 0}`);
-    commentButton.type = 'button';
+    const initialComments = Number(postData.comment_count) || 0;
+    const commentButton = iconButton('comment-button', 'comment', `Comentários: ${initialComments}`, initialComments);
     commentButton.setAttribute('aria-expanded', 'false');
     let commentsLoaded = false;
     commentButton.addEventListener('click', async () => {
@@ -324,32 +411,30 @@ function createPost(postData) {
         }
     });
 
-    const share = element('button', 'share-button', 'Partilhar');
-    share.type = 'button';
+    const share = iconButton('share-button', 'share', 'Partilhar publicação');
     share.addEventListener('click', async () => {
         const url = `${window.location.origin}${window.location.pathname}#publicacao-${postData.id}`;
         try {
             if (navigator.share) {
                 await navigator.share({ title: 'IMPACTA · publicação da comunidade', text: postData.body, url });
-                share.textContent = 'Partilhado';
+                updateIconButton(share, 'Publicação partilhada');
             } else if (navigator.clipboard?.writeText) {
                 await navigator.clipboard.writeText(url);
-                share.textContent = 'Ligação copiada';
+                updateIconButton(share, 'Ligação copiada');
             } else {
                 window.prompt('Copia a ligação desta publicação:', url);
-                share.textContent = 'Ligação pronta';
+                updateIconButton(share, 'Ligação pronta para copiar');
             }
         } catch (error) {
             if (error?.name === 'AbortError') return;
-            share.textContent = 'Não foi possível partilhar';
+            updateIconButton(share, 'Não foi possível partilhar');
         }
-        window.setTimeout(() => { share.textContent = 'Partilhar'; }, 1800);
+        window.setTimeout(() => { updateIconButton(share, 'Partilhar publicação'); }, 1800);
     });
 
     actions.append(support, commentButton, share);
     if (postData.is_author) {
-        const remove = element('button', 'delete-post-button', 'Apagar');
-        remove.type = 'button';
+        const remove = iconButton('delete-post-button', 'trash', 'Apagar publicação');
         remove.addEventListener('click', async () => {
             if (!window.confirm('Queres apagar esta publicação?')) return;
             remove.disabled = true;
@@ -365,8 +450,7 @@ function createPost(postData) {
         actions.append(remove);
     }
 
-    const report = element('button', 'report-button', 'Denunciar');
-    report.type = 'button';
+    const report = iconButton('report-button', 'report', 'Denunciar publicação');
     const reportForm = createReportForm(postData);
     report.addEventListener('click', () => {
         if (!currentUser) {

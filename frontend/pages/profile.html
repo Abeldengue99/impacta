@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="pt">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f6f1">
+    <title>Perfil · IMPACTA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/profile.css?v=profile-20261009-1">
+    <script src="../scripts/api.js?v=profile-20261009-1" defer></script>
+    <script src="../scripts/profile.js?v=profile-20261009-1" defer></script>
+</head>
+<body class="profile-page">
+    <header class="profile-header">
+        <a class="brand" href="index.html" aria-label="IMPACTA, página inicial"><span class="brand-mark" aria-hidden="true">i</span><span>impacta<span class="brand-period">.</span></span></a>
+        <a class="profile-back" href="feed.html" data-tooltip="Voltar à comunidade" aria-label="Voltar à comunidade">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m14.5 5-7 7 7 7M8 12h12"/></svg>
+            <span>Comunidade</span>
+        </a>
+    </header>
+    <main class="profile-main">
+        <p class="eyebrow">A TUA IDENTIDADE NA COMUNIDADE</p>
+        <h1 id="profile-heading">O teu perfil</h1>
+        <p class="profile-intro" id="profile-intro">Partilha um pouco sobre ti e sobre a forma como queres contribuir.</p>
+        <p class="profile-status panel" id="profile-status" role="status" aria-live="polite">A carregar perfil…</p>
+
+        <section class="profile-editor panel" id="profile-editor" hidden>
+            <div class="profile-avatar-row">
+                <div class="profile-avatar avatar" id="profile-avatar" aria-label="Fotografia de perfil">I</div>
+                <div class="profile-photo-actions">
+                    <strong>Fotografia de perfil</strong>
+                    <span>PNG ou JPEG · até 2 MB · máximo 4096 × 4096 px</span>
+                    <div class="profile-photo-buttons">
+                        <button class="button button-small" id="choose-avatar" type="button">Escolher fotografia</button>
+                        <button class="profile-text-button" id="remove-avatar" type="button" hidden>Remover fotografia</button>
+                    </div>
+                    <input id="avatar-file" type="file" accept="image/png,image/jpeg" hidden>
+                </div>
+            </div>
+            <form id="profile-form" class="profile-form">
+                <div class="profile-field-grid">
+                    <label class="profile-field profile-field-wide">Nome apresentado
+                        <input name="displayName" type="text" maxlength="80" autocomplete="name" required>
+                    </label>
+                    <label class="profile-field profile-field-wide">Frase curta sobre ti
+                        <input name="headline" type="text" maxlength="120" placeholder="Ex.: Educadora e mobilizadora comunitária">
+                    </label>
+                    <label class="profile-field profile-field-wide">Sobre ti
+                        <textarea name="bio" maxlength="600" rows="4" placeholder="Conta à comunidade o que te motiva e o que gostarias de construir."></textarea>
+                        <small><span id="bio-count">0</span>/600</small>
+                    </label>
+                    <label class="profile-field">Localização
+                        <input name="location" type="text" maxlength="120" autocomplete="address-level2" placeholder="Cidade ou província">
+                    </label>
+                    <label class="profile-field">Área de impacto
+                        <select name="impactAreaId"><option value="">Escolhe uma área</option></select>
+                    </label>
+                    <label class="profile-field">Profissão ou função
+                        <input name="occupation" type="text" maxlength="120" autocomplete="organization-title">
+                    </label>
+                    <label class="profile-field">Organização
+                        <input name="organization" type="text" maxlength="120" autocomplete="organization">
+                    </label>
+                    <label class="profile-field profile-field-wide">Site ou portefólio
+                        <input name="websiteUrl" type="url" maxlength="2048" placeholder="https://exemplo.com">
+                        <small>Apenas ligações HTTPS.</small>
+                    </label>
+                    <label class="profile-field profile-field-wide">Competências
+                        <input name="skills" type="text" maxlength="600" placeholder="Ex.: Ensino, programação, agricultura">
+                        <small>Separa até 12 competências por vírgulas.</small>
+                    </label>
+                </div>
+                <label class="profile-privacy"><input name="isPublic" type="checkbox"> <span>Mostrar a minha fotografia e os detalhes do perfil junto às minhas publicações.</span></label>
+                <p class="profile-account-email" id="profile-email"></p>
+                <div class="profile-form-footer">
+                    <p class="profile-feedback" id="profile-feedback" role="status" aria-live="polite"></p>
+                    <button class="button" id="save-profile" type="submit">Guardar perfil</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="public-profile panel" id="public-profile" hidden>
+            <div class="public-profile-heading">
+                <div class="profile-avatar avatar" id="public-avatar" aria-label="Fotografia de perfil"></div>
+                <div><h2 id="public-name"></h2><p id="public-headline"></p></div>
+            </div>
+            <p class="public-profile-bio" id="public-bio"></p>
+            <dl class="public-profile-details" id="public-details"></dl>
+            <div class="public-profile-skills" id="public-skills"></div>
+            <a class="public-profile-website" id="public-website" hidden target="_blank" rel="noopener noreferrer">Visitar site <span aria-hidden="true">↗</span></a>
+        </section>
+    </main>
+</body>
+</html>
