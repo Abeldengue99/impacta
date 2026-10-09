@@ -33,6 +33,7 @@
 
     window.ImpactaAPI = Object.freeze({
         get,
+        currentSession: () => request('/auth/session'),
         post: (path, body) => request(path, 'POST', body),
         delete: (path) => request(path, 'DELETE')
     });

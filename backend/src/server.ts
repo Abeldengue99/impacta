@@ -264,7 +264,7 @@ server.get('/api/v1/health/ready', { schema: readyRouteSchema }, async (request,
             'SELECT user_id, event_type, occurred_at, ip_address FROM impacta.auth_events LIMIT 0',
             'SELECT id, code FROM impacta.roles LIMIT 0',
             'SELECT user_id FROM impacta.user_profiles LIMIT 0',
-            'SELECT user_id, token_hash, revoked_at FROM impacta.auth_sessions LIMIT 0'
+            'SELECT user_id, token_hash, revoked_at, idle_expires_at, absolute_expires_at FROM impacta.auth_sessions LIMIT 0'
         ]) {
             await pool.query(query);
         }

@@ -148,19 +148,37 @@ async function reserveIpAttempt(
             "SELECT pg_advisory_xact_lock(hashtextextended('impacta:rate:' || $1 || ':' || $2, 0))",
             [eventType, ipAddress]
         );
-        const counts = await client.query<{ recent_count: number; daily_count: number }>(
-            `SELECT count(*) FILTER (WHERE occurred_at > now() - interval '15 minutes')::int AS recent_count,
-                    count(*) FILTER (WHERE occurred_at > now() - interval '24 hours')::int AS daily_count
-             FROM impacta.auth_events
-             WHERE ip_address = $1::inet AND event_type = $2`,
+        const counts = await client.query<{
+            recent_count: number;
+            daily_count: number;
+            checked_at: Date;
+        }>(
+            `WITH decision_time AS (SELECT clock_timestamp() AS checked_at)
+             SELECT decision_time.checked_at,
+                    (count(auth_event.event_type) FILTER (
+                        WHERE auth_event.occurred_at > decision_time.checked_at - interval '15 minutes'
+                    ))::int AS recent_count,
+                    (count(auth_event.event_type) FILTER (
+                        WHERE auth_event.occurred_at > decision_time.checked_at - interval '24 hours'
+                    ))::int AS daily_count
+             FROM decision_time
+             LEFT JOIN impacta.auth_events AS auth_event
+               ON auth_event.ip_address = $1::inet AND auth_event.event_type = $2
+             GROUP BY decision_time.checked_at`,
             [ipAddress, eventType]
         );
-        const allowed = (counts.rows[0]?.recent_count ?? 0) < recentLimit
-            && (counts.rows[0]?.daily_count ?? 0) < dailyLimit;
-        await client.query(
-            'INSERT INTO impacta.auth_events (event_type, ip_address) VALUES ($1, $2::inet)',
-            [eventType, ipAddress]
-        );
+        const decision = counts.rows[0];
+        const allowed = decision !== undefined
+            && decision.recent_count < recentLimit
+            && decision.daily_count < dailyLimit;
+        // Count admitted requests only. Recording denied requests here would
+        // keep a caller locked out indefinitely as each retry extends the window.
+        if (allowed) {
+            await client.query(
+                'INSERT INTO impacta.auth_events (event_type, ip_address, occurred_at) VALUES ($1, $2::inet, $3)',
+                [eventType, ipAddress, decision.checked_at]
+            );
+        }
         await client.query('COMMIT');
         return allowed;
     } catch (error) {
@@ -689,6 +707,35 @@ export function registerAuthRoutes(server: FastifyInstance, pool: Pool, frontend
         } catch (error) {
             request.log.error({ event: 'login_failed', code: errorCode(error) }, 'Login request failed');
             return reply.code(500).send({ error: 'login_unavailable' });
+        }
+    });
+
+    server.get('/api/v1/auth/session', async (request, reply) => {
+        const sessionToken = readCookie(request.headers.cookie, 'impacta_session');
+        if (!sessionToken || !/^[a-f0-9]{64}$/i.test(sessionToken)) {
+            return { authenticated: false };
+        }
+
+        try {
+            const result = await pool.query<{ display_name: string }>(
+                `SELECT account.display_name
+                 FROM impacta.auth_sessions AS auth_session
+                 JOIN impacta.users AS account ON account.id = auth_session.user_id
+                 WHERE auth_session.token_hash = $1
+                   AND auth_session.revoked_at IS NULL
+                   AND auth_session.idle_expires_at > now()
+                   AND auth_session.absolute_expires_at > now()
+                   AND account.status = 'active'
+                 LIMIT 1`,
+                [tokenHash(sessionToken)]
+            );
+            const account = result.rows[0];
+            return account
+                ? { authenticated: true, user: { displayName: account.display_name } }
+                : { authenticated: false };
+        } catch (error) {
+            request.log.error({ event: 'session_lookup_failed', code: errorCode(error) }, 'Session lookup failed');
+            return reply.code(503).send({ error: 'session_unavailable' });
         }
     });
 

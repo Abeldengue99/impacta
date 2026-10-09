@@ -10,6 +10,9 @@ body.feed-page { min-height: 100vh; background: #f4f6f1; }
 .feed-top-nav a:hover, .feed-top-nav .top-nav-active { color: var(--green); }
 .feed-top-nav .top-nav-active::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: var(--green); content: ''; }
 .feed-header-actions { display: flex; align-items: center; gap: 15px; }
+.logout-button { padding: 6px 4px; border: 0; background: transparent; color: #6f7d74; cursor: pointer; font: 700 .72rem/1 var(--font-body); }
+.logout-button:hover { color: var(--green); }
+.logout-button:disabled { cursor: wait; opacity: .65; }
 .header-icon { position: relative; display: grid; width: 37px; height: 37px; place-items: center; border-radius: 50%; background: #f0f4ef; color: var(--ink); font-size: 1.15rem; }
 .notification-dot { position: absolute; top: 7px; right: 7px; width: 6px; height: 6px; border: 1px solid white; border-radius: 50%; background: #dd916c; }
 .user-chip, .avatar { display: grid; flex: 0 0 auto; place-items: center; border-radius: 50%; background: #d9e9de; color: #236b4f; font-size: .71rem; font-weight: 800; }

@@ -17,6 +17,55 @@ function initials(name) {
     return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toLocaleUpperCase('pt');
 }
 
+async function loadCurrentAccount() {
+    try {
+        const session = await window.ImpactaAPI.currentSession();
+        const displayName = session?.authenticated ? session.user?.displayName?.trim() : '';
+        if (!displayName) return;
+
+        const accountActions = document.querySelector('.feed-header-actions');
+        const loginLink = accountActions?.querySelector('.user-chip');
+        if (accountActions && loginLink) {
+            const avatar = element('span', 'user-chip', initials(displayName));
+            avatar.title = `Sessão iniciada como ${displayName}`;
+            avatar.setAttribute('aria-label', `Sessão iniciada como ${displayName}`);
+
+            const logoutButton = element('button', 'logout-button', 'Sair');
+            logoutButton.type = 'button';
+            logoutButton.addEventListener('click', async () => {
+                logoutButton.disabled = true;
+                try {
+                    await window.ImpactaAPI.delete('/auth/session');
+                    window.location.assign('login.html');
+                } catch {
+                    logoutButton.disabled = false;
+                    const composerHint = document.querySelector('.composer-hint');
+                    if (composerHint) composerHint.textContent = 'Não foi possível terminar a sessão. Tenta novamente.';
+                }
+            });
+            accountActions.replaceChildren(avatar, logoutButton);
+        }
+
+        const profile = document.querySelector('.mini-profile');
+        if (profile) {
+            profile.removeAttribute('href');
+            profile.setAttribute('aria-label', `Conta autenticada: ${displayName}`);
+            const avatar = profile.querySelector('.avatar');
+            const strong = profile.querySelector('strong');
+            const small = profile.querySelector('small');
+            if (avatar) avatar.textContent = initials(displayName);
+            if (strong) strong.textContent = displayName;
+            if (small) small.textContent = 'Sessão autenticada';
+        }
+
+        const composerHint = document.querySelector('.composer-hint');
+        if (composerHint) composerHint.textContent = `Sessão iniciada como ${displayName}.`;
+        document.querySelector('.composer > a')?.remove();
+    } catch {
+        // Keep the public feed available when there is no valid session.
+    }
+}
+
 function updateEmptyState() {
     if (!emptyState || !postList) return;
     const visiblePosts = [...postList.querySelectorAll('[data-post]')].filter((post) => !post.hidden);
@@ -130,4 +179,5 @@ async function loadCommunity() {
 
 searchField?.addEventListener('input', applyFilterAndSort);
 sortField?.addEventListener('change', applyFilterAndSort);
+loadCurrentAccount();
 loadCommunity();
