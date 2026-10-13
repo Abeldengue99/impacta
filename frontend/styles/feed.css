@@ -266,17 +266,35 @@ body.feed-page { min-height: 100vh; background: #f4f6f1; }
 .widget > .tag { margin-bottom: 8px; }
 .widget > h3 { margin: 0 0 6px; font: 700 .94rem/1.3 var(--font-display); letter-spacing: -.03em; }
 .widget > p:not(.widget-status) { margin: 0; color: #77877e; font-size: .7rem; line-height: 1.65; }
+.widget > .challenge-widget-intro { margin: -3px 0 10px; color: #77877e; font-size: .64rem; line-height: 1.5; }
 .button-full { width: 100%; min-height: 38px; margin-top: 14px; border-radius: 5px; font-size: .7rem; }
 .widget-status { min-height: 0; margin: 0; color: var(--green); font-size: .68rem; }
 .challenge-entry { margin-top: 10px; padding: 12px; border: 1px solid #edf1eb; border-radius: 5px; background: #fafbf9; }
+.challenge-weekly-label { display: inline-flex; margin: 0 0 8px; padding: 5px 8px; border-radius: 999px; background: #dff1e5; color: #176b4d; font-size: .59rem; font-weight: 800; letter-spacing: .035em; }
 .challenge-entry .tag { margin: 0 0 8px; }
 .challenge-entry h3 { margin: 0 0 6px; font: 700 .85rem/1.35 var(--font-display); letter-spacing: -.025em; }
 .challenge-entry p { margin: 0; color: #77877e; font-size: .68rem; line-height: 1.55; }
+.challenge-entry .challenge-project-name { color: #47735c; font-weight: 700; }
 .challenge-description-group { margin-top: 6px; }
 .challenge-entry .challenge-description-group p { margin: 0; }
 .challenge-entry small { display: block; margin-top: 9px; color: #87938b; font-size: .62rem; }
 .challenge-scheduled-state { margin-top: 8px !important; color: #6d7f73 !important; font-weight: 600; }
 .challenge-entry .button { margin-top: 10px; }
+.challenge-review-reason { margin-top: 8px !important; padding: 8px 9px; border-left: 3px solid #d6a758; border-radius: 4px; background: #fbf6e9; color: #6b5a35 !important; white-space: pre-wrap; overflow-wrap: anywhere; }
+.challenge-participation-note { display: block; margin-top: 5px; color: #77877e; font-size: .62rem; line-height: 1.5; }
+.challenge-evidence-control { display: grid; gap: 6px; margin-top: 10px; padding: 9px; border: 1px dashed #cfe0d2; border-radius: 7px; background: #f4f8f4; }
+.challenge-evidence-label { display: grid; gap: 6px; color: #345d49; font-size: .66rem; font-weight: 750; }
+.challenge-evidence-input { width: 100%; max-width: 100%; color: #6d7f73; font: inherit; font-size: .63rem; }
+.challenge-evidence-control small, .challenge-evidence-status { margin: 0 !important; color: #77877e; font-size: .6rem !important; line-height: 1.45; }
+.challenge-evidence-status:not(:empty) { color: #176b4d; }
+.challenge-evidence-gallery { display: grid; gap: 5px; margin-top: 9px; }
+.challenge-evidence-title { color: #345d49; font-size: .62rem; }
+.challenge-evidence-items { display: flex; flex-wrap: wrap; gap: 6px; }
+.challenge-evidence-item { display: block; width: min(112px, calc(50% - 3px)); overflow: hidden; border: 1px solid #dce7dd; border-radius: 6px; background: #fff; }
+.challenge-evidence-item img, .challenge-evidence-item video { display: block; width: 100%; height: 82px; object-fit: cover; }
+.challenge-delivery-form { display: grid; gap: 7px; margin-top: 10px; }
+.challenge-delivery-form label { display: grid; gap: 6px; color: #345d49; font-size: .65rem; font-weight: 700; }
+.challenge-share-result { width: 100%; }
 .widget-status:not(:empty) { margin-top: 9px; }
 .project-row { display: flex; align-items: center; gap: 9px; padding: 10px 0; border-top: 1px solid #eff2ee; }
 .project-row:hover strong { color: var(--green); }
@@ -312,6 +330,9 @@ body.feed-page { min-height: 100vh; background: #f4f6f1; }
 .project-review-item p { margin: 0; color: #65786c; font-size: .66rem; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
 .project-review-item small, .project-review-status { margin: 0; color: #87938b; font-size: .61rem; line-height: 1.45; }
 .project-review-item .project-review-decision { color: #167353; font-weight: 700; }
+.project-review-delivery-title { margin-top: 5px; }
+.project-review-reason-form { display: grid; gap: 6px; width: 100%; }
+.project-review-reason-form textarea { min-height: 66px; }
 .project-review-status.is-error { color: #a64437; }
 .project-review-actions { display: flex; flex-wrap: wrap; gap: 7px; }
 .project-review-more { min-height: 32px; border: 1px solid #d7e7da; border-radius: 6px; background: #fff; color: #167353; cursor: pointer; font: 700 .63rem/1.3 var(--font-body); }
@@ -1513,7 +1534,7 @@ body.feed-page { min-height: 100vh; background: #f4f6f1; }
 }
 .composer-category-control, .composer-project-control { flex: 1 1 260px; }
 .composer-category-control { justify-content: space-between; gap: 14px; }
-.composer-project-control { display: flex; align-items: center; justify-content: space-between; gap: 14px; color: #547261; font-weight: 700; }
+.composer-project-control { display: flex; align-items: center; justify-content: space-between; gap: 14px; color: #547261; font: 700 .64rem/1.3 var(--font-body); }
 .composer-category-control select {
     min-width: 210px;
     min-height: 40px;

@@ -42,4 +42,5 @@ frontend/videos/*.mp4
 !.env.example
 
 # Local recovery snapshots are not deployable source.
+local-recovery/
 preserved-local-*.html

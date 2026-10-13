@@ -7,6 +7,7 @@ if (assistantForm && assistantInput && assistantMessages && assistantStatus) {
     const conversation = [];
     const sendButton = assistantForm.querySelector('button[type="submit"]');
     let generativeAssistantAvailable = false;
+    const suggestionButtons = Array.from(document.querySelectorAll('.assistant-suggestions [data-assistant-question]'));
 
     const localAnswers = [
         {
@@ -14,11 +15,19 @@ if (assistantForm && assistantInput && assistantMessages && assistantStatus) {
             answer: 'Para partilhar um problema da tua zona, publica-o no feed ou numa comunidade local. Indica o bairro, município ou província e explica o impacto; não publiques moradas exactas nem dados de outras pessoas. Se ainda não existir uma comunidade da zona, podes propor uma.'
         },
         {
-            terms: ['criar comunidade', 'propor comunidade', 'comunidade local', 'grupo de moradores', 'nova comunidade'],
+            terms: ['criar comunidade', 'criar uma comunidade', 'propor comunidade', 'comunidade local', 'grupo de moradores', 'nova comunidade'],
             answer: 'Na área Comunidades, escolhe “Propor uma comunidade”. Indica o nome, o propósito e a zona aproximada. Depois da análise, as pessoas poderão pedir adesão e conversar no espaço da comunidade.'
         },
         {
-            terms: ['criar projecto', 'propor projecto', 'criar projeto', 'propor projeto', 'novo projecto', 'nova iniciativa'],
+            terms: ['pedir adesao', 'adesao a uma comunidade', 'entrar numa comunidade', 'entrar na comunidade', 'aderir a comunidade', 'pedido de adesao'],
+            answer: 'Abre a comunidade e escolhe a opção de adesão. Se o espaço exigir aprovação, aguarda a decisão da pessoa responsável. Depois de te tornares membro, poderás abrir a conversa e participar segundo as regras do grupo.'
+        },
+        {
+            terms: ['pedidos de adesao', 'pedidos de adesao da minha comunidade', 'acompanhar pedidos de adesao', 'analisar pedidos de adesao', 'aprovar entrada', 'pedido de adesao pendente'],
+            answer: 'Se fores responsável ou moderador, abre a comunidade e selecciona “Analisar pedidos de adesão”. Consulta cada pedido e aprova ou recusa a entrada. A pessoa que pediu para entrar verá o estado actualizado.'
+        },
+        {
+            terms: ['criar projecto', 'criar projeto', 'propor projecto', 'propor projeto', 'proponho um projecto', 'proponho um projeto', 'novo projecto', 'nova iniciativa'],
             answer: 'Na área Projectos, escolhe “Propor um projecto à comunidade”. Explica o objectivo, as actividades, a zona e como outras pessoas podem participar. Depois acompanha o estado da proposta e as actualizações na própria área.'
         },
         {
@@ -30,8 +39,12 @@ if (assistantForm && assistantInput && assistantMessages && assistantStatus) {
             answer: 'Para entrar, usa o teu e-mail e palavra-passe. Se te esqueceste da palavra-passe, abre “Esqueceste a palavra-passe?” no ecrã de entrada e segue o link enviado para o teu e-mail. Se a conta for nova, confirma primeiro o e-mail com o código recebido.'
         },
         {
-            terms: ['criar conta', 'registo', 'cadastrar', 'cadastro', 'registar', 'conta nova'],
+            terms: ['criar conta', 'criar uma conta', 'crio uma conta', 'registo', 'cadastrar', 'cadastro', 'registar', 'conta nova'],
             answer: 'Escolhe “Criar conta”, indica o teu nome e e-mail e confirma o endereço com o código enviado. Depois define e confirma a tua palavra-passe para activares a conta.'
+        },
+        {
+            terms: ['editar perfil', 'actualizar perfil', 'atualizar perfil', 'alterar perfil', 'fotografia de perfil', 'foto de perfil'],
+            answer: 'Abre o teu perfil a partir do avatar e escolhe a opção de edição. Aí podes actualizar os dados disponíveis e gerir a fotografia; guarda as alterações antes de sair da página.'
         },
         {
             terms: ['publicar', 'publicacao', 'partilhar', 'post', 'ideia', 'anexar', 'imagem', 'video'],
@@ -56,8 +69,27 @@ if (assistantForm && assistantInput && assistantMessages && assistantStatus) {
         {
             terms: ['erro', 'falha', 'nao funciona', 'não funciona', 'carregar', 'carregar categoria'],
             answer: 'Atualiza a página e tenta novamente. Se o erro continuar, confirma que a API está ativa e que as migrações necessárias foram aplicadas. Guarda o texto do erro para facilitar o diagnóstico e nunca partilhes a tua palavra-passe.'
-        }
-    ];
+        },
+        {
+            terms: ['criar desafio', 'criar um desafio', 'crio um desafio', 'propor desafio', 'novo desafio', 'desafio para o meu projecto', 'desafio para o meu projeto'],
+            answer: 'Abre o projecto que geres e escolhe “Criar desafio para este projecto”. Define uma tarefa concreta, explica o resultado esperado e indica um prazo realista. Só responsáveis e moderadores do projecto podem criar desafios.'
+        },
+        {
+            terms: ['rever participacao', 'revejo participacao', 'revejo uma participacao', 'como revejo uma participacao', 'avaliar participacao', 'rever respostas', 'submissao do desafio', 'resposta recusada', 'participacao recusada'],
+            answer: 'A pessoa responsável pelo projecto pode abrir “Rever participações dos desafios” no cartão do projecto e analisar cada resposta. Se uma resposta for recusada, a pessoa participante pode corrigi-la e voltar a enviar enquanto o desafio estiver aberto.'
+        },
+        {
+            terms: ['conversa privada do projecto', 'conversa do projecto', 'conversa do projeto', 'chat do projecto', 'chat do projeto', 'mensagens do projecto', 'mensagens do projeto', 'falar com os participantes'],
+            answer: 'Abre o projecto e selecciona “Abrir conversa do projecto”. A conversa é privada e só pode ser lida por participantes e responsáveis autorizados. Serve para combinar tarefas e próximos passos; o IMPACTA não abre mensagens directas entre quaisquer contas.'
+        },
+        {
+            terms: ['actualizacao do projecto', 'atualizacao do projeto', 'publicar resultado', 'partilhar resultado', 'resultados do projecto', 'resultados do projeto', 'mostrar o impacto', 'progresso do projecto'],
+            answer: 'Para mostrar o que o projecto fez, cria uma publicação no feed e associa-a ao projecto quando essa opção estiver disponível. Explica a actividade, o resultado, o impacto observado e o próximo passo. Publica apenas imagens e informações que tens autorização para partilhar.'
+        },
+        {
+            terms: ['privacidade', 'dados pessoais', 'quem pode ver', 'apagar a conta', 'bloquear utilizador'],
+            answer: 'Partilha apenas a informação necessária para a iniciativa. Não publiques palavras-passe, códigos, documentos de identidade, contactos privados ou moradas exactas. Para pedidos sobre a tua conta ou dados, usa as opções do perfil ou contacta a equipa através da página Contacto.'
+        },    ];
 
     function normalize(value) {
         return value.toLocaleLowerCase('pt').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -68,7 +100,10 @@ if (assistantForm && assistantInput && assistantMessages && assistantStatus) {
         const match = localAnswers
             .map((entry) => ({
                 answer: entry.answer,
-                score: entry.terms.reduce((total, term) => total + (normalized.includes(normalize(term)) ? 1 : 0), 0)
+                score: entry.terms.reduce((total, term) => {
+                    const normalizedTerm = normalize(term);
+                    return normalized.includes(normalizedTerm) ? total + normalizedTerm.length : total;
+                }, 0)
             }))
             .sort((first, second) => second.score - first.score)[0];
 
@@ -91,13 +126,13 @@ if (assistantForm && assistantInput && assistantMessages && assistantStatus) {
         return message;
     }
 
-    async function sendQuestion(question) {
+    async function sendQuestion(question, { focusInput = true } = {}) {
         const cleanQuestion = question.trim();
         if (!cleanQuestion || sendButton?.disabled) return;
 
         assistantInput.value = '';
         assistantInput.style.height = '';
-        assistantForm.querySelectorAll('[data-assistant-question]').forEach((button) => { button.disabled = true; });
+        suggestionButtons.forEach((button) => { button.disabled = true; });
         if (sendButton) sendButton.disabled = true;
         appendMessage('user', cleanQuestion, 'Tu');
         conversation.push({ role: 'user', content: cleanQuestion });
@@ -130,8 +165,8 @@ if (assistantForm && assistantInput && assistantMessages && assistantStatus) {
         conversation.push({ role: 'assistant', content: answer });
         assistantStatus.textContent = generativeAssistantAvailable ? 'Assistente do IMPACTA disponível' : 'Ajuda rápida disponível';
         if (sendButton) sendButton.disabled = false;
-        assistantForm.querySelectorAll('[data-assistant-question]').forEach((button) => { button.disabled = false; });
-        assistantInput.focus();
+        suggestionButtons.forEach((button) => { button.disabled = false; });
+        if (focusInput) assistantInput.focus();
     }
 
     assistantForm.addEventListener('submit', (event) => {
@@ -148,8 +183,8 @@ if (assistantForm && assistantInput && assistantMessages && assistantStatus) {
             assistantForm.requestSubmit();
         }
     });
-    document.querySelectorAll('[data-assistant-question]').forEach((button) => {
-        button.addEventListener('click', () => void sendQuestion(button.dataset.assistantQuestion || ''));
+    suggestionButtons.forEach((button) => {
+        button.addEventListener('click', () => void sendQuestion(button.dataset.assistantQuestion || '', { focusInput: false }));
     });
 
     if (window.ImpactaAPI?.request) {

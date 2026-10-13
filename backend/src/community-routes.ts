@@ -7,11 +7,13 @@ import { findFeedPolicyViolation } from './community-content-policy.js';
 import {
     MAX_POST_IMAGE_BYTES,
     MAX_POST_VIDEO_BYTES,
+    CHALLENGE_EVIDENCE_DIRECTORY,
     COMMUNITY_CHAT_MEDIA_DIRECTORY,
     MediaProcessingError,
     acquireVideoProcessingSlot,
     POST_MEDIA_DIRECTORY,
     communityChatMediaStoragePath,
+    challengeEvidenceStoragePath,
     optimizePostImage,
     optimizePostVideo,
     postMediaStoragePath,
@@ -44,7 +46,7 @@ function releaseVideoProcessingSlotForRequest(request: FastifyRequest): void {
 const POST_CATEGORY_CODE = /^[a-z][a-z0-9_]{0,39}$/;
 const PROJECT_ACTIVITY_NOTIFICATION_TYPES = [
     'project_member_joined', 'project_challenge_created', 'project_challenge_submission',
-    'project_challenge_participation_reviewed'
+    'project_challenge_participation_reviewed', 'project_challenge_delivery'
 ];
 
 function readCookie(header: string | undefined, name: string): string | undefined {
@@ -353,7 +355,7 @@ async function beginLimitedWrite(
         )::int AS count`,
         project_edit: "SELECT count(*)::int AS count FROM impacta.projects WHERE owner_user_id = $1 AND updated_at > now() - interval '1 hour'",
         report: 'SELECT count(*)::int AS count FROM impacta.content_reports WHERE reporter_user_id = $1 AND created_at > now() - interval \'1 hour\'',
-        media: 'SELECT count(*)::int AS count FROM impacta.media WHERE owner_user_id = $1 AND storage_key LIKE \'posts/%\' AND status <> \'deleted\' AND created_at > now() - interval \'1 hour\'',
+        media: "SELECT count(*)::int AS count FROM impacta.media WHERE owner_user_id = $1 AND storage_key LIKE ANY(ARRAY['posts/%', 'challenge-evidence/%']) AND status <> 'deleted' AND created_at > now() - interval '1 hour'",
         community_media: 'SELECT count(*)::int AS count FROM impacta.media WHERE owner_user_id = $1 AND storage_key LIKE \'community-chat/%\' AND status <> \'deleted\' AND created_at > now() - interval \'1 hour\'',
         community_message: `SELECT count(*)::int AS count FROM impacta.community_messages
                             WHERE (author_user_id = $1 AND created_at > now() - interval '1 hour')
@@ -388,16 +390,19 @@ async function transaction<T>(pool: Pool, action: (client: PoolClient) => Promis
 async function cleanupOrphanPostMedia(pool: Pool, server: FastifyInstance): Promise<void> {
     const expired = await pool.query<{ storage_key: string }>(
         `UPDATE impacta.media AS media SET status = 'deleted'
-         WHERE media.storage_key LIKE ANY(ARRAY['posts/%', 'community-chat/%']) AND media.status IN ('available', 'pending_scan')
+         WHERE media.storage_key LIKE ANY(ARRAY['posts/%', 'community-chat/%', 'challenge-evidence/%']) AND media.status IN ('available', 'pending_scan')
            AND media.created_at < now() - interval '24 hours'
            AND NOT EXISTS (SELECT 1 FROM impacta.post_media AS relation WHERE relation.media_id = media.id)
            AND NOT EXISTS (SELECT 1 FROM impacta.community_messages AS message WHERE message.media_id = media.id)
+           AND NOT EXISTS (SELECT 1 FROM impacta.challenge_participation_media AS relation WHERE relation.media_id = media.id)
          RETURNING media.storage_key`
     );
     await Promise.all(expired.rows.map(async (item) => {
         const path = item.storage_key.startsWith('community-chat/')
             ? communityChatMediaStoragePath(item.storage_key)
-            : postMediaStoragePath(item.storage_key);
+            : item.storage_key.startsWith('challenge-evidence/')
+                ? challengeEvidenceStoragePath(item.storage_key)
+                : postMediaStoragePath(item.storage_key);
         if (path) await unlink(path).catch(() => undefined);
     }));
     if (expired.rowCount) server.log.info({ event: 'orphan_post_media_removed', count: expired.rowCount }, 'Expired unattached post media removed');
@@ -558,6 +563,194 @@ export function registerCommunityRoutes(server: FastifyInstance, pool: Pool): vo
         const path = postMediaStoragePath(media.storage_key);
         if (path) await unlink(path).catch(() => undefined);
         return { status: 'removed' };
+    });
+
+    server.post<{ Params: { participationId: string } }>('/api/v1/challenge-participations/:participationId/evidence', {
+        bodyLimit: MAX_POST_VIDEO_BYTES,
+        handlerTimeout: 180_000,
+        onRequest: async (request, reply) => {
+            const session = await requireSession(request, reply, pool, true);
+            if (!session) return;
+            const participationId = requestId(request, 'participationId');
+            const stage = request.headers['x-challenge-evidence-stage'];
+            if (!participationId || (stage !== 'proposal' && stage !== 'delivery')) {
+                return reply.code(400).send({ error: 'invalid_challenge_evidence' });
+            }
+            const eligible = await pool.query(
+                `SELECT participation.id
+                 FROM impacta.challenge_participations AS participation
+                 JOIN impacta.challenges AS challenge ON challenge.id = participation.challenge_id
+                 JOIN impacta.projects AS project ON project.id = challenge.project_id
+                 WHERE participation.id = $1 AND participation.user_id = $2
+                   AND (($3 = 'proposal' AND participation.status = 'submitted'
+                         AND challenge.status IN ('open', 'draft')
+                         AND (challenge.opens_at IS NULL OR challenge.opens_at <= now())
+                         AND (challenge.closes_at IS NULL OR challenge.closes_at > now())
+                         AND project.status = 'active')
+                     OR ($3 = 'delivery' AND participation.status IN ('approved', 'changes_requested', 'delivery_submitted')
+                         AND project.status IN ('active', 'completed')))` ,
+                [participationId, session.userId, stage]
+            );
+            if (!eligible.rowCount) return reply.code(403).send({ error: 'challenge_evidence_not_allowed' });
+            if (request.headers['content-type']?.split(';', 1)[0]?.trim().toLowerCase().startsWith('video/')) {
+                const release = acquireVideoProcessingSlot();
+                if (!release) return reply.header('retry-after', '30').code(429).send({ error: 'video_processing_busy' });
+                videoProcessingSlots.set(request, release);
+            }
+        },
+        onResponse: async (request) => releaseVideoProcessingSlotForRequest(request)
+    }, async (request, reply) => {
+        const session = await requireSession(request, reply, pool, true);
+        if (!session) return;
+        const participationId = requestId(request, 'participationId');
+        const stage = request.headers['x-challenge-evidence-stage'];
+        if (!participationId || (stage !== 'proposal' && stage !== 'delivery')) {
+            return reply.code(400).send({ error: 'invalid_challenge_evidence' });
+        }
+        const mimeType = request.headers['content-type']?.split(';', 1)[0]?.trim().toLowerCase();
+        const isImage = ['image/jpeg', 'image/png', 'image/webp'].includes(mimeType ?? '');
+        const isVideo = ['video/mp4', 'video/quicktime'].includes(mimeType ?? '');
+        if (!isImage && !isVideo) return reply.code(415).send({ error: 'unsupported_challenge_evidence_type' });
+        if (!Buffer.isBuffer(request.body) || !request.body.length) {
+            return reply.code(400).send({ error: 'invalid_challenge_evidence' });
+        }
+        const maximumBytes = isImage ? MAX_POST_IMAGE_BYTES : MAX_POST_VIDEO_BYTES;
+        if (request.body.length > maximumBytes) return reply.code(413).send({ error: 'challenge_evidence_too_large' });
+
+        let processed: ProcessedPostMedia;
+        try {
+            processed = isImage ? await optimizePostImage(request.body) : await optimizePostVideo(request.body);
+        } catch (error) {
+            if (error instanceof MediaProcessingError) return reply.code(error.statusCode).send({ error: error.code });
+            throw error;
+        }
+
+        const storageKey = `challenge-evidence/${randomUUID()}.${processed.extension}`;
+        const path = challengeEvidenceStoragePath(storageKey);
+        if (!path) return reply.code(500).send({ error: 'media_storage_unavailable' });
+        await mkdir(CHALLENGE_EVIDENCE_DIRECTORY, { recursive: true, mode: 0o700 });
+        await writeFile(path, processed.bytes, { flag: 'wx', mode: 0o600 });
+        try {
+            const outcome = await transaction(pool, async (client) => {
+                if (!await beginLimitedWrite(client, session.userId, 'media', 20)) return { status: 'rate_limit' as const };
+                const participation = await client.query(
+                    `SELECT participation.id
+                     FROM impacta.challenge_participations AS participation
+                     JOIN impacta.challenges AS challenge ON challenge.id = participation.challenge_id
+                     JOIN impacta.projects AS project ON project.id = challenge.project_id
+                     WHERE participation.id = $1 AND participation.user_id = $2
+                       AND (($3 = 'proposal' AND participation.status = 'submitted'
+                             AND challenge.status IN ('open', 'draft')
+                             AND (challenge.opens_at IS NULL OR challenge.opens_at <= now())
+                             AND (challenge.closes_at IS NULL OR challenge.closes_at > now())
+                             AND project.status = 'active')
+                         OR ($3 = 'delivery' AND participation.status IN ('approved', 'changes_requested', 'delivery_submitted')
+                             AND project.status IN ('active', 'completed')))
+                     FOR UPDATE`,
+                    [participationId, session.userId, stage]
+                );
+                if (!participation.rowCount) return { status: 'not_allowed' as const };
+                const counts = await client.query<{ images: number; videos: number }>(
+                    `SELECT count(*) FILTER (WHERE media.media_type = 'image')::int AS images,
+                            count(*) FILTER (WHERE media.media_type = 'video')::int AS videos
+                     FROM impacta.challenge_participation_media AS evidence
+                     JOIN impacta.media AS media ON media.id = evidence.media_id
+                     WHERE evidence.participation_id = $1 AND evidence.stage = $2 AND media.status = 'available'`,
+                    [participationId, stage]
+                );
+                const images = counts.rows[0]?.images ?? 0;
+                const videos = counts.rows[0]?.videos ?? 0;
+                if ((isImage && (videos > 0 || images >= 4)) || (isVideo && (videos > 0 || images > 0))) {
+                    return { status: 'evidence_limit' as const };
+                }
+                const media = await client.query<{ id: string }>(
+                    `INSERT INTO impacta.media
+                        (owner_user_id, storage_key, media_type, mime_type, byte_size, checksum_sha256, status)
+                     VALUES ($1, $2, $3, $4, $5, $6, 'available')
+                     RETURNING id::text AS id`,
+                    [session.userId, storageKey, processed.mediaType, processed.mimeType,
+                        processed.bytes.length, createHash('sha256').update(processed.bytes).digest('hex')]
+                );
+                await client.query(
+                    `INSERT INTO impacta.challenge_participation_media (participation_id, media_id, stage, uploader_user_id)
+                     VALUES ($1, $2, $3, $4)`,
+                    [participationId, media.rows[0].id, stage, session.userId]
+                );
+                return { status: 'uploaded' as const, id: media.rows[0].id };
+            });
+            if (outcome.status !== 'uploaded') {
+                await unlink(path).catch(() => undefined);
+                if (outcome.status === 'rate_limit') return reply.code(429).send({ error: 'media_rate_limit' });
+                if (outcome.status === 'evidence_limit') return reply.code(409).send({ error: 'challenge_evidence_limit' });
+                return reply.code(403).send({ error: 'challenge_evidence_not_allowed' });
+            }
+            return reply.code(201).send({
+                id: outcome.id,
+                url: `/api/v1/challenge-evidence/${encodeURIComponent(outcome.id)}`,
+                mediaType: processed.mediaType,
+                byteSize: processed.bytes.length
+            });
+        } catch (error) {
+            await unlink(path).catch(() => undefined);
+            throw error;
+        }
+    });
+
+    server.get<{ Params: { mediaId: string } }>('/api/v1/challenge-evidence/:mediaId', async (request, reply) => {
+        const session = await requireSession(request, reply, pool, false);
+        if (!session) return;
+        const mediaId = requestId(request, 'mediaId');
+        if (!mediaId) return reply.code(404).send({ error: 'media_not_found' });
+        const result = await pool.query<{ storage_key: string; mime_type: string; media_type: string }>(
+            `SELECT media.storage_key, media.mime_type, media.media_type
+             FROM impacta.media AS media
+             JOIN impacta.challenge_participation_media AS evidence ON evidence.media_id = media.id
+             JOIN impacta.challenge_participations AS participation ON participation.id = evidence.participation_id
+             JOIN impacta.challenges AS challenge ON challenge.id = participation.challenge_id
+             JOIN impacta.projects AS project ON project.id = challenge.project_id
+             LEFT JOIN impacta.communities AS community ON community.id = project.community_id
+             WHERE media.id = $1 AND media.status = 'available'
+               AND (participation.user_id = $2 OR project.owner_user_id = $2 OR community.owner_user_id = $2
+                 OR EXISTS (SELECT 1 FROM impacta.community_members AS manager
+                            WHERE manager.community_id = community.id AND manager.user_id = $2
+                              AND manager.status = 'active' AND manager.membership_role IN ('manager', 'moderator'))
+                 OR EXISTS (SELECT 1 FROM impacta.user_roles AS assignment
+                            JOIN impacta.roles AS role ON role.id = assignment.role_id
+                            JOIN impacta.role_permissions AS role_permission ON role_permission.role_id = role.id
+                            JOIN impacta.permissions AS permission ON permission.id = role_permission.permission_id
+                            WHERE assignment.user_id = $2 AND permission.code = 'projects.review'
+                              AND ((assignment.scope_type = 'platform' AND assignment.scope_id IS NULL)
+                                OR (assignment.scope_type = 'community' AND assignment.scope_id = community.id))))
+             LIMIT 1`, [mediaId, session.userId]
+        );
+        const item = result.rows[0];
+        const path = item ? challengeEvidenceStoragePath(item.storage_key) : null;
+        if (!item || !path) return reply.code(404).send({ error: 'media_not_found' });
+        try {
+            const file = await stat(path);
+            reply.header('cache-control', 'private, no-store').header('x-content-type-options', 'nosniff');
+            if (item.media_type === 'video') {
+                const range = request.headers.range;
+                if (range) {
+                    const match = /^bytes=(\d*)-(\d*)$/.exec(range);
+                    if (!match || (!match[1] && !match[2])) return reply.code(416).header('content-range', `bytes */${file.size}`).send();
+                    const start = match[1] ? Number(match[1]) : Math.max(0, file.size - Number(match[2]));
+                    let end = match[2] && match[1] ? Number(match[2]) : file.size - 1;
+                    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start < 0 || start >= file.size || end < start) {
+                        return reply.code(416).header('content-range', `bytes */${file.size}`).send();
+                    }
+                    end = Math.min(end, file.size - 1);
+                    return reply.code(206).type(item.mime_type).header('accept-ranges', 'bytes')
+                        .header('content-range', `bytes ${start}-${end}/${file.size}`).header('content-length', String(end - start + 1))
+                        .send(createReadStream(path, { start, end }));
+                }
+                return reply.type(item.mime_type).header('accept-ranges', 'bytes').header('content-length', String(file.size))
+                    .send(createReadStream(path));
+            }
+            return reply.type(item.mime_type).send(createReadStream(path));
+        } catch {
+            return reply.code(404).send({ error: 'media_not_found' });
+        }
     });
 
     server.post<{ Params: { communityId: string } }>('/api/v1/communities/:communityId/media', {
@@ -2366,11 +2559,71 @@ export function registerCommunityRoutes(server: FastifyInstance, pool: Pool): vo
         const offset = resourceOffset(request.query.offset);
         if (offset === null) return reply.code(400).send({ error: 'invalid_resource_offset' });
         const session = await findSession(request, pool, false);
+        const featured = await pool.query<{ id: string }>(
+            `WITH week AS (
+                 SELECT date_trunc('week', now() AT TIME ZONE 'Africa/Luanda')::date AS week_start
+             ), candidate AS (
+                 SELECT challenge.id
+                 FROM impacta.challenges AS challenge
+                 JOIN impacta.projects AS project ON project.id = challenge.project_id
+                 LEFT JOIN impacta.communities AS community ON community.id = project.community_id
+                 CROSS JOIN week
+                 WHERE challenge.status = 'open'
+                   AND (challenge.opens_at IS NULL OR challenge.opens_at <= now())
+                   AND (challenge.closes_at IS NULL OR challenge.closes_at > now())
+                   AND project.status = 'active' AND (project.ends_at IS NULL OR project.ends_at >= now())
+                   AND (project.community_id IS NULL OR (community.status = 'active' AND community.visibility = 'public'))
+                 ORDER BY md5(week.week_start::text || ':' || challenge.id::text), challenge.id
+                 LIMIT 1
+             ), assigned AS (
+                 INSERT INTO impacta.challenge_weekly_highlights AS highlight (week_start, challenge_id)
+                 SELECT week.week_start, candidate.id FROM week CROSS JOIN candidate WHERE true
+                 ON CONFLICT (week_start) DO UPDATE
+                 SET challenge_id = EXCLUDED.challenge_id, assigned_at = now()
+                 WHERE NOT EXISTS (
+                     SELECT 1
+                     FROM impacta.challenges AS current_challenge
+                     JOIN impacta.projects AS current_project ON current_project.id = current_challenge.project_id
+                     LEFT JOIN impacta.communities AS current_community ON current_community.id = current_project.community_id
+                     WHERE current_challenge.id = highlight.challenge_id
+                       AND current_challenge.status = 'open'
+                       AND (current_challenge.opens_at IS NULL OR current_challenge.opens_at <= now())
+                       AND (current_challenge.closes_at IS NULL OR current_challenge.closes_at > now())
+                       AND current_project.status = 'active'
+                       AND (current_project.ends_at IS NULL OR current_project.ends_at >= now())
+                       AND (current_project.community_id IS NULL OR
+                            (current_community.status = 'active' AND current_community.visibility = 'public'))
+                 )
+                 RETURNING challenge_id
+             )
+             SELECT COALESCE(
+                 (SELECT assigned.challenge_id::text FROM assigned LIMIT 1),
+                 (SELECT highlight.challenge_id::text
+                  FROM impacta.challenge_weekly_highlights AS highlight
+                  CROSS JOIN week
+                  JOIN impacta.challenges AS challenge ON challenge.id = highlight.challenge_id
+                  JOIN impacta.projects AS project ON project.id = challenge.project_id
+                  LEFT JOIN impacta.communities AS community ON community.id = project.community_id
+                  WHERE highlight.week_start = week.week_start
+                    AND challenge.status = 'open'
+                    AND (challenge.opens_at IS NULL OR challenge.opens_at <= now())
+                    AND (challenge.closes_at IS NULL OR challenge.closes_at > now())
+                    AND project.status = 'active' AND (project.ends_at IS NULL OR project.ends_at >= now())
+                    AND (project.community_id IS NULL OR (community.status = 'active' AND community.visibility = 'public'))
+                  LIMIT 1)
+             ) AS id
+             FROM week`,
+            []
+        );
+        const weeklyChallengeId = featured.rows[0]?.id ?? null;
         const result = await pool.query(
             `SELECT challenge.id::text AS id,
+                    challenge.project_id::text AS project_id,
+                    project.title AS project_title,
                     challenge.title,
                     challenge.description,
                     challenge.status,
+                    COALESCE(challenge.id = $5::bigint, false) AS is_weekly_featured,
                     to_char(challenge.opens_at AT TIME ZONE 'Africa/Luanda', 'YYYY-MM-DD') AS opens_at,
                     CASE WHEN challenge.closes_at IS NULL THEN NULL
                          ELSE to_char((challenge.closes_at - interval '1 millisecond') AT TIME ZONE 'Africa/Luanda', 'YYYY-MM-DD')
@@ -2381,6 +2634,23 @@ export function registerCommunityRoutes(server: FastifyInstance, pool: Pool): vo
                     project.location_municipality,
                     project.location_commune,
                     project.location_province,
+                    (SELECT mine.id::text FROM impacta.challenge_participations AS mine
+                     WHERE mine.challenge_id = challenge.id AND mine.user_id = $1::bigint) AS viewer_participation_id,
+                    (SELECT mine.submission FROM impacta.challenge_participations AS mine
+                     WHERE mine.challenge_id = challenge.id AND mine.user_id = $1::bigint) AS viewer_submission,
+                    (SELECT mine.review_reason FROM impacta.challenge_participations AS mine
+                     WHERE mine.challenge_id = challenge.id AND mine.user_id = $1::bigint) AS viewer_review_reason,
+                    (SELECT mine.delivery_submission FROM impacta.challenge_participations AS mine
+                     WHERE mine.challenge_id = challenge.id AND mine.user_id = $1::bigint) AS viewer_delivery_submission,
+                    (SELECT mine.completed_at FROM impacta.challenge_participations AS mine
+                     WHERE mine.challenge_id = challenge.id AND mine.user_id = $1::bigint) AS viewer_completed_at,
+                    COALESCE((SELECT json_agg(json_build_object(
+                        'id', media.id::text, 'stage', evidence.stage, 'media_type', media.media_type
+                    ) ORDER BY evidence.created_at)
+                     FROM impacta.challenge_participations AS mine
+                     JOIN impacta.challenge_participation_media AS evidence ON evidence.participation_id = mine.id
+                     JOIN impacta.media AS media ON media.id = evidence.media_id AND media.status = 'available'
+                     WHERE mine.challenge_id = challenge.id AND mine.user_id = $1::bigint), '[]'::json) AS viewer_evidence,
                     (challenge.status IN ('open', 'draft')
                      AND (challenge.opens_at IS NULL OR challenge.opens_at <= now())
                      AND (challenge.closes_at IS NULL OR challenge.closes_at > now())) AS can_participate,
@@ -2388,10 +2658,10 @@ export function registerCommunityRoutes(server: FastifyInstance, pool: Pool): vo
                      WHERE mine.challenge_id = challenge.id AND mine.user_id = $1::bigint) AS viewer_participation_status,
                     EXISTS (SELECT 1 FROM impacta.challenge_participations AS mine
                             WHERE mine.challenge_id = challenge.id AND mine.user_id = $1::bigint
-                              AND mine.status IN ('submitted', 'approved')) AS viewer_participates,
+                              AND mine.status IN ('submitted', 'approved', 'delivery_submitted', 'changes_requested', 'completed')) AS viewer_participates,
                     (SELECT count(participation.id)::int FROM impacta.challenge_participations AS participation
                      WHERE participation.challenge_id = challenge.id
-                       AND participation.status IN ('submitted', 'approved')) AS participant_count
+                       AND participation.status IN ('submitted', 'approved', 'delivery_submitted', 'changes_requested', 'completed')) AS participant_count
              FROM impacta.challenges AS challenge
              LEFT JOIN impacta.projects AS project ON project.id = challenge.project_id
              LEFT JOIN impacta.communities AS community ON community.id = project.community_id
@@ -2406,9 +2676,10 @@ export function registerCommunityRoutes(server: FastifyInstance, pool: Pool): vo
                     project.location_municipality, project.location_province) ILIKE '%' || $3 || '%')
                AND (project.community_id IS NULL OR
                     (community.status = 'active' AND community.visibility = 'public'))
-             ORDER BY challenge.opens_at NULLS FIRST, challenge.id DESC
+             ORDER BY COALESCE(challenge.id = $5::bigint, false) DESC,
+                      challenge.opens_at NULLS FIRST, challenge.id DESC
              LIMIT 31 OFFSET $4`,
-            [session?.userId ?? null, areaId, location, offset]
+            [session?.userId ?? null, areaId, location, offset, weeklyChallengeId]
         );
         return { items: result.rows.slice(0, 30), hasMore: result.rows.length > 30 };
     });
@@ -2424,7 +2695,7 @@ export function registerCommunityRoutes(server: FastifyInstance, pool: Pool): vo
             if (findFeedPolicyViolation(submission)) return reply.code(422).send({ error: 'feed_content_not_allowed' });
 
             const status = await transaction(pool, async (client) => {
-                if (!await beginLimitedWrite(client, session.userId, 'challenge', 10)) return 'rate_limit';
+                if (!await beginLimitedWrite(client, session.userId, 'challenge', 10)) return { status: 'rate_limit' as const };
                 const open = await client.query<{ project_id: string | null }>(
                     `SELECT challenge.project_id::text AS project_id FROM impacta.challenges AS challenge
                      LEFT JOIN impacta.projects AS project ON project.id = challenge.project_id
@@ -2439,18 +2710,19 @@ export function registerCommunityRoutes(server: FastifyInstance, pool: Pool): vo
                             (community.status = 'active' AND community.visibility = 'public'))`,
                     [challengeId]
                 );
-                if (open.rowCount === 0) return 'not_found';
-                const inserted = await client.query(
+                if (open.rowCount === 0) return { status: 'not_found' as const };
+                const inserted = await client.query<{ id: string; xmax: string }>(
                     `INSERT INTO impacta.challenge_participations AS existing (challenge_id, user_id, submission)
                      VALUES ($1, $2, $3)
                      ON CONFLICT (challenge_id, user_id) DO UPDATE
                      SET submission = EXCLUDED.submission, status = 'submitted', submitted_at = now(),
-                         reviewed_by_user_id = NULL, reviewed_at = NULL, review_reason = NULL
+                         reviewed_by_user_id = NULL, reviewed_at = NULL, review_reason = NULL,
+                         delivery_submission = NULL, delivery_submitted_at = NULL, completed_at = NULL
                      WHERE existing.status IN ('rejected', 'withdrawn')
-                     RETURNING id`,
+                     RETURNING id::text AS id, xmax::text AS xmax`,
                     [challengeId, session.userId, submission]
                 );
-                if (!inserted.rowCount) return 'already_participating';
+                if (!inserted.rowCount) return { status: 'already_participating' as const };
                 const projectId = open.rows[0]?.project_id;
                 if (projectId) {
                     await client.query(
@@ -2472,17 +2744,74 @@ export function registerCommunityRoutes(server: FastifyInstance, pool: Pool): vo
                         [projectId, session.userId, challengeId]
                     );
                 }
-                return 'submitted';
+                return { status: 'submitted' as const, id: inserted.rows[0].id };
             }).catch((error: unknown) => {
                 if (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505') {
-                    return 'already_participating';
+                    return { status: 'already_participating' as const };
                 }
                 throw error;
             });
-            if (status === 'rate_limit') return reply.code(429).send({ error: 'challenge_rate_limit' });
-            if (status === 'not_found') return reply.code(404).send({ error: 'challenge_not_found' });
-            if (status === 'already_participating') return reply.code(409).send({ error: 'already_participating' });
-            return reply.code(201).send({ status });
+            if (status.status === 'rate_limit') return reply.code(429).send({ error: 'challenge_rate_limit' });
+            if (status.status === 'not_found') return reply.code(404).send({ error: 'challenge_not_found' });
+            if (status.status === 'already_participating') return reply.code(409).send({ error: 'already_participating' });
+            return reply.code(201).send({ status: status.status, id: status.id });
+        }
+    );
+
+    server.post<{ Params: { challengeId: string }; Body: { submission?: unknown } }>(
+        '/api/v1/challenges/:challengeId/participation/delivery', async (request, reply) => {
+            const session = await requireSession(request, reply, pool, true);
+            if (!session) return;
+            const challengeId = requestId(request, 'challengeId');
+            const submission = cleanText(request.body?.submission, 3000);
+            if (!challengeId) return reply.code(400).send({ error: 'invalid_challenge_id' });
+            if (!submission) return reply.code(400).send({ error: 'invalid_challenge_delivery' });
+            if (findFeedPolicyViolation(submission)) return reply.code(422).send({ error: 'feed_content_not_allowed' });
+            const outcome = await transaction(pool, async (client) => {
+                if (!await beginLimitedWrite(client, session.userId, 'challenge', 10)) return { status: 'rate_limit' as const };
+                const participation = await client.query<{ id: string; project_id: string; title: string }>(
+                    `SELECT participation.id::text AS id, project.id::text AS project_id, challenge.title
+                     FROM impacta.challenge_participations AS participation
+                     JOIN impacta.challenges AS challenge ON challenge.id = participation.challenge_id
+                     JOIN impacta.projects AS project ON project.id = challenge.project_id
+                     WHERE challenge.id = $1 AND participation.user_id = $2
+                       AND participation.status IN ('approved', 'changes_requested')
+                       AND project.status IN ('active', 'completed')
+                     FOR UPDATE OF participation`,
+                    [challengeId, session.userId]
+                );
+                const item = participation.rows[0];
+                if (!item) return { status: 'not_allowed' as const };
+                await client.query(
+                    `UPDATE impacta.challenge_participations
+                     SET status = 'delivery_submitted', delivery_submission = $2,
+                         delivery_submitted_at = now(), review_reason = NULL
+                     WHERE id = $1`, [item.id, submission]
+                );
+                await client.query(
+                    `INSERT INTO impacta.notifications (user_id, notification_type, payload)
+                     SELECT DISTINCT recipient.user_id, 'project_challenge_delivery',
+                            jsonb_build_object('actor_user_id', $2::text, 'project_id', $1::text,
+                                               'challenge_id', $3::text, 'activity', 'delivery_submitted')
+                     FROM (
+                         SELECT project.owner_user_id AS user_id FROM impacta.projects AS project
+                         WHERE project.id = $1 AND project.owner_user_id IS NOT NULL
+                         UNION SELECT community.owner_user_id AS user_id FROM impacta.projects AS project
+                         JOIN impacta.communities AS community ON community.id = project.community_id
+                         WHERE project.id = $1 AND community.owner_user_id IS NOT NULL
+                         UNION SELECT manager.user_id FROM impacta.projects AS project
+                         JOIN impacta.community_members AS manager ON manager.community_id = project.community_id
+                         WHERE project.id = $1 AND manager.status = 'active'
+                           AND manager.membership_role IN ('manager', 'moderator')
+                     ) AS recipient
+                     WHERE recipient.user_id <> $2::bigint`,
+                    [item.project_id, session.userId, challengeId]
+                );
+                return { status: 'submitted' as const, id: item.id };
+            });
+            if (outcome.status === 'rate_limit') return reply.code(429).send({ error: 'challenge_rate_limit' });
+            if (outcome.status === 'not_allowed') return reply.code(409).send({ error: 'challenge_delivery_not_allowed' });
+            return reply.code(201).send({ status: outcome.status, id: outcome.id });
         }
     );
 
@@ -2602,10 +2931,14 @@ export function registerCommunityRoutes(server: FastifyInstance, pool: Pool): vo
                 if (!await beginLimitedWrite(client, session.userId, 'challenge_create', 5)) return { status: 'rate_limit' as const };
                 const manageable = await client.query<{ registration_open: boolean; challenge_schedule_open: boolean }>(
                     `SELECT (project.ends_at IS NULL OR project.ends_at >= now()) AS registration_open,
-                            (project.ends_at IS NULL OR
-                             (COALESCE($3::date::timestamp AT TIME ZONE 'Africa/Luanda', now()) < project.ends_at
-                              AND ($4::date IS NULL OR
-                                   (($4::date + 1)::timestamp AT TIME ZONE 'Africa/Luanda') <= project.ends_at))) AS challenge_schedule_open
+                            (COALESCE(project.starts_at, '-infinity'::timestamptz) <=
+                               COALESCE($3::date::timestamp AT TIME ZONE 'Africa/Luanda', GREATEST(COALESCE(project.starts_at, now()), now()))
+                             AND (COALESCE(($4::date + 1)::timestamp AT TIME ZONE 'Africa/Luanda', project.ends_at) IS NULL
+                                  OR COALESCE(($4::date + 1)::timestamp AT TIME ZONE 'Africa/Luanda', project.ends_at) >
+                                     COALESCE($3::date::timestamp AT TIME ZONE 'Africa/Luanda', GREATEST(COALESCE(project.starts_at, now()), now())))
+                             AND (project.ends_at IS NULL OR
+                               (COALESCE($3::date::timestamp AT TIME ZONE 'Africa/Luanda', GREATEST(COALESCE(project.starts_at, now()), now())) < project.ends_at
+                                AND COALESCE(($4::date + 1)::timestamp AT TIME ZONE 'Africa/Luanda', project.ends_at) <= project.ends_at))) AS challenge_schedule_open
                      FROM impacta.projects AS project
                      LEFT JOIN impacta.communities AS community ON community.id = project.community_id
                      WHERE project.id = $1 AND project.status = 'active'
@@ -2630,10 +2963,10 @@ export function registerCommunityRoutes(server: FastifyInstance, pool: Pool): vo
                 if (!manageable.rows[0].challenge_schedule_open) return { status: 'challenge_dates_outside_project' as const };
                 const inserted = await client.query<{ id: string }>(
                     `INSERT INTO impacta.challenges (project_id, created_by_user_id, title, description, status, opens_at, closes_at)
-                     VALUES ($1, $2, $3, $4, 'open',
-                             COALESCE($5::date::timestamp AT TIME ZONE 'Africa/Luanda', now()),
-                             CASE WHEN $6::date IS NULL THEN NULL
-                                  ELSE ($6::date + 1)::timestamp AT TIME ZONE 'Africa/Luanda' END)
+                     SELECT project.id, $2, $3, $4, 'open',
+                            COALESCE($5::date::timestamp AT TIME ZONE 'Africa/Luanda', GREATEST(COALESCE(project.starts_at, now()), now())),
+                            COALESCE(($6::date + 1)::timestamp AT TIME ZONE 'Africa/Luanda', project.ends_at)
+                     FROM impacta.projects AS project WHERE project.id = $1
                      RETURNING id::text AS id`,
                     [projectId, session.userId, title, description, opensAt, closesAt]
                 );
@@ -2773,8 +3106,16 @@ export function registerCommunityRoutes(server: FastifyInstance, pool: Pool): vo
                 `SELECT participation.id::text AS id, participation.user_id::text AS user_id,
                         participation.status, participation.submission,
                         participation.submitted_at, participation.reviewed_at, participation.review_reason,
+                        participation.delivery_submission, participation.delivery_submitted_at, participation.completed_at,
                         challenge.id::text AS challenge_id, challenge.title AS challenge_title,
-                        account.display_name
+                        (project.status = 'active' AND (project.ends_at IS NULL OR project.ends_at >= now())) AS project_accepting_work,
+                        account.display_name,
+                        COALESCE((SELECT json_agg(json_build_object(
+                            'id', media.id::text, 'stage', evidence.stage, 'media_type', media.media_type
+                        ) ORDER BY evidence.created_at)
+                         FROM impacta.challenge_participation_media AS evidence
+                         JOIN impacta.media AS media ON media.id = evidence.media_id AND media.status = 'available'
+                         WHERE evidence.participation_id = participation.id), '[]'::json) AS evidence
                  FROM impacta.challenge_participations AS participation
                  JOIN impacta.challenges AS challenge ON challenge.id = participation.challenge_id
                  JOIN impacta.users AS account ON account.id = participation.user_id AND account.status = 'active'
@@ -2790,22 +3131,29 @@ export function registerCommunityRoutes(server: FastifyInstance, pool: Pool): vo
 
     server.post<{
         Params: { projectId: string; participationId: string };
-        Body: { decision?: unknown };
+        Body: { decision?: unknown; reason?: unknown };
     }>('/api/v1/projects/:projectId/challenge-participations/:participationId', async (request, reply) => {
         const session = await requireSession(request, reply, pool, true);
         if (!session) return;
         const projectId = requestId(request, 'projectId');
         const participationId = requestId(request, 'participationId');
         const decision = request.body?.decision;
-        if (!projectId || !participationId || (decision !== 'approve' && decision !== 'reject')) {
+        const reason = cleanText(request.body?.reason, 500);
+        const validDecision = ['approve', 'reject', 'complete', 'request_changes'].includes(String(decision));
+        if (!projectId || !participationId || !validDecision
+            || ((decision === 'reject' || decision === 'request_changes') && (!reason || reason.length < 5))) {
             return reply.code(400).send({ error: 'invalid_challenge_participation_decision' });
         }
+        if (reason && findFeedPolicyViolation(reason)) return reply.code(422).send({ error: 'feed_content_not_allowed' });
         const outcome = await transaction(pool, async (client) => {
             if (!await beginLimitedWrite(client, session.userId, 'challenge_review', 60)) return 'rate_limit' as const;
-            const participation = await client.query<{ id: string; challenge_id: string; user_id: string; status: string }>(
+            const participation = await client.query<{
+                id: string; challenge_id: string; user_id: string; status: string; project_id: string; registration_open: boolean;
+            }>(
                 `SELECT participation.id::text AS id, challenge.id::text AS challenge_id,
                         participation.user_id::text AS user_id,
-                        participation.status, challenge.title AS challenge_title
+                        participation.status, project.id::text AS project_id,
+                        (project.status = 'active' AND (project.ends_at IS NULL OR project.ends_at >= now())) AS registration_open
                  FROM impacta.challenge_participations AS participation
                  JOIN impacta.challenges AS challenge ON challenge.id = participation.challenge_id
                  JOIN impacta.projects AS project ON project.id = challenge.project_id
@@ -2832,14 +3180,49 @@ export function registerCommunityRoutes(server: FastifyInstance, pool: Pool): vo
             const item = participation.rows[0];
             if (!item) return 'not_found' as const;
             if (item.user_id === session.userId) return 'own_participation' as const;
-            if (item.status !== 'submitted') return 'already_reviewed' as const;
-            const nextStatus = decision === 'approve' ? 'approved' : 'rejected';
+            if (decision === 'approve' && !item.registration_open) return 'project_closed' as const;
+            const reviewIsValid = item.status === 'submitted'
+                ? decision === 'approve' || decision === 'reject'
+                : item.status === 'delivery_submitted'
+                    ? decision === 'complete' || decision === 'request_changes'
+                    : false;
+            if (!reviewIsValid) return 'already_reviewed' as const;
+            const nextStatus = decision === 'approve' ? 'approved'
+                : decision === 'reject' ? 'rejected'
+                    : decision === 'complete' ? 'completed' : 'changes_requested';
             await client.query(
                 `UPDATE impacta.challenge_participations
-                 SET status = $2, reviewed_by_user_id = $3, reviewed_at = now(), review_reason = NULL
+                 SET status = $2, reviewed_by_user_id = $3, reviewed_at = now(),
+                     review_reason = $4, completed_at = CASE WHEN $2 = 'completed' THEN now() ELSE completed_at END
                  WHERE id = $1`,
-                [participationId, nextStatus, session.userId]
+                [participationId, nextStatus, session.userId,
+                    decision === 'reject' || decision === 'request_changes' ? reason : null]
             );
+            if (decision === 'approve') {
+                const joined = await client.query(
+                    `INSERT INTO impacta.project_members (project_id, user_id, membership_role)
+                     VALUES ($1, $2, 'contributor') ON CONFLICT (project_id, user_id) DO NOTHING
+                     RETURNING project_id`,
+                    [item.project_id, item.user_id]
+                );
+                if (joined.rowCount) {
+                    await client.query(
+                        `INSERT INTO impacta.notifications (user_id, notification_type, payload)
+                         SELECT DISTINCT recipient.user_id, 'project_member_joined',
+                                jsonb_build_object('actor_user_id', $2::text, 'project_id', $1::text)
+                         FROM (
+                             SELECT member.user_id FROM impacta.project_members AS member WHERE member.project_id = $1
+                             UNION SELECT project.owner_user_id AS user_id FROM impacta.projects AS project
+                             WHERE project.id = $1 AND project.owner_user_id IS NOT NULL
+                             UNION SELECT community.owner_user_id AS user_id FROM impacta.projects AS project
+                             JOIN impacta.communities AS community ON community.id = project.community_id
+                             WHERE project.id = $1 AND community.owner_user_id IS NOT NULL
+                         ) AS recipient
+                         WHERE recipient.user_id <> $2::bigint`,
+                        [item.project_id, item.user_id]
+                    );
+                }
+            }
             await client.query(
                 `INSERT INTO impacta.notifications (user_id, notification_type, payload)
                  VALUES ($1, 'project_challenge_participation_reviewed',
@@ -2847,11 +3230,12 @@ export function registerCommunityRoutes(server: FastifyInstance, pool: Pool): vo
                                             'challenge_id', $4::text, 'decision', $5::text))`,
                 [item.user_id, session.userId, projectId, item.challenge_id, decision]
             );
-            return nextStatus as 'approved' | 'rejected';
+            return nextStatus as 'approved' | 'rejected' | 'completed' | 'changes_requested';
         });
         if (outcome === 'rate_limit') return reply.code(429).send({ error: 'challenge_review_rate_limit' });
         if (outcome === 'not_found') return reply.code(404).send({ error: 'project_participation_not_found' });
         if (outcome === 'own_participation') return reply.code(403).send({ error: 'cannot_review_own_participation' });
+        if (outcome === 'project_closed') return reply.code(409).send({ error: 'project_not_open' });
         if (outcome === 'already_reviewed') return reply.code(409).send({ error: 'challenge_participation_already_reviewed' });
         return { status: outcome };
     });

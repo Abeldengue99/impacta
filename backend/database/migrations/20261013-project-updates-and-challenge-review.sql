@@ -35,7 +35,7 @@ CREATE INDEX notifications_project_activity_unread_idx
     WHERE read_at IS NULL
       AND notification_type IN (
           'project_member_joined', 'project_challenge_created', 'project_challenge_submission',
-          'project_challenge_participation_reviewed'
+          'project_challenge_participation_reviewed', 'project_challenge_delivery'
       );
 
 COMMIT;

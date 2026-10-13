@@ -15,10 +15,25 @@
         }
     }
 
-    const request = async (path, method = 'GET', body) => {
+    function encodeBase64Url(value) {
+        const bytes = new TextEncoder().encode(value);
+        let binary = '';
+        for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+            binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+        }
+        return window.btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+    }
+
+    const request = async (path, method = 'GET', body, options = {}) => {
         const headers = { Accept: 'application/json' };
         const isBinary = typeof Blob !== 'undefined' && body instanceof Blob;
         if (body !== undefined) headers['Content-Type'] = isBinary ? body.type : 'application/json';
+        if (isBinary && typeof options.caption === 'string' && options.caption.length) {
+            headers['x-direct-message-caption'] = encodeBase64Url(options.caption);
+        }
+        if (isBinary && (options.evidenceStage === 'proposal' || options.evidenceStage === 'delivery')) {
+            headers['x-challenge-evidence-stage'] = options.evidenceStage;
+        }
         if (method !== 'GET') {
             const csrfToken = readCookie('impacta_csrf');
             if (csrfToken) headers['x-csrf-token'] = csrfToken;
@@ -26,7 +41,7 @@
 
         let response;
         const controller = new AbortController();
-        const timeout = window.setTimeout(() => controller.abort(), isBinary ? 180000 : 15000);
+        const timeout = window.setTimeout(() => controller.abort(), isBinary ? 240000 : 15000);
         try {
             response = await fetch(`${apiRoot}${path}`, {
                 method,
@@ -201,7 +216,7 @@
         currentSession: () => request('/auth/session'),
         post: (path, body) => request(path, 'POST', body),
         put: (path, body) => request(path, 'PUT', body),
-        upload: (path, file) => request(path, 'POST', file),
+        upload: (path, file, options) => request(path, 'POST', file, options),
         delete: (path) => request(path, 'DELETE')
     });
 })();

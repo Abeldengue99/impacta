@@ -4,10 +4,15 @@ Options -Indexes
     RewriteEngine On
     RewriteRule ^\.well-known/acme-challenge(?:/|$) - [L]
     RewriteRule (^|/)\. - [F,L,NC]
-    RewriteRule ^(?:backend|\.git)(?:/|$) - [F,L,NC]
+    RewriteRule ^(?:backend|\.git|node_modules|deploy|docs|outputs|local-recovery)(?:/|$) - [F,L,NC]
+    RewriteRule \.(?:sql|ts|map|md|log|env)$ - [F,L,NC]
 </IfModule>
 
 <FilesMatch "^\.env(?:\..*)?$">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "^(?:package(?:-lock)?\.json|tsconfig\.json|SECURITY-RELEASE-CHECKLIST\.md|preserved-local-.*\.html)$">
     Require all denied
 </FilesMatch>
 

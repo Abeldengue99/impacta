@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="pt-AO">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f6f1">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" sizes="any">
+    <title>Mensagens privadas · IMPACTA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/main.css?v=maintenance-mode-20261013-1">
+    <link rel="stylesheet" href="../styles/feed.css?v=project-chat-compact-empty-20261013-4">
+    <link rel="stylesheet" href="../styles/shell.css?v=mobile-message-icons-20261013-2">
+    <link rel="stylesheet" href="../styles/direct-messages.css?v=direct-media-20261013-2">
+    <script src="../scripts/api.js?v=direct-media-20261013-1" defer></script>
+    <script src="../scripts/site-shell.js?v=mobile-message-header-20261013-1" defer></script>
+    <script src="../scripts/direct-messages.js?v=direct-media-20261013-1" defer></script>
+</head>
+<body class="direct-messages-page">
+    <header class="app-shell-header">
+        <a class="brand" href="feed.html" aria-label="IMPACTA, início da comunidade"><span class="brand-mark" aria-hidden="true">i</span><span>impacta<span class="brand-period">.</span></span></a>
+        <a class="app-back-link" href="feed.html" data-smart-back aria-label="Voltar à comunidade"><span>Comunidade</span></a>
+    </header>
+    <main class="dm-main">
+        <header class="dm-page-heading">
+            <div><p class="eyebrow">CONTACTO COM CONSENTIMENTO</p><h1>Mensagens</h1><p>Conversa em privado, com controlo sobre quem pode iniciar contacto.</p></div>
+            <form class="dm-search" id="dm-search-form" role="search">
+                <label for="dm-search-input">Encontrar uma pessoa</label>
+                <input id="dm-search-input" type="search" minlength="2" maxlength="60" autocomplete="off" placeholder="Pesquisar pelo nome">
+                <div class="dm-search-results" id="dm-search-results" role="listbox" hidden></div>
+            </form>
+        </header>
+        <p class="dm-status" id="dm-status" role="status" aria-live="polite"></p>
+        <section class="dm-workspace" aria-label="Mensagens privadas">
+            <aside class="dm-sidebar" id="dm-sidebar">
+                <div class="dm-tabs" role="tablist" aria-label="Caixas de mensagens">
+                    <button class="is-active" type="button" role="tab" aria-selected="true" data-dm-tab="inbox">Conversas</button>
+                    <button type="button" role="tab" aria-selected="false" data-dm-tab="requests">Pedidos <span class="dm-tab-count" id="dm-request-count" hidden>0</span></button>
+                    <button type="button" role="tab" aria-selected="false" data-dm-tab="archived">Arquivadas</button>
+                </div>
+                <div class="dm-request-switch" id="dm-request-switch" hidden>
+                    <button type="button" class="is-active" data-dm-request-box="incoming">Recebidos</button>
+                    <button type="button" data-dm-request-box="outgoing">Enviados</button>
+                </div>
+                <div class="dm-list" id="dm-list" role="list"></div>
+                <section class="dm-privacy-settings" aria-labelledby="dm-policy-title">
+                    <h2 id="dm-policy-title">Quem pode iniciar contacto?</h2>
+                    <label for="dm-policy">Pedidos de mensagem</label>
+                    <select id="dm-policy">
+                        <option value="requests">Aceitar pedidos curtos</option>
+                        <option value="impactas">Apenas pessoas Impacta</option>
+                        <option value="none">Pausar novos contactos</option>
+                    </select>
+                    <p>Conversas já aceites continuam disponíveis. Não mostramos presença, escrita nem confirmações de leitura.</p>
+                    <button class="dm-blocked-toggle" type="button" id="dm-blocked-toggle" aria-expanded="false">Gerir pessoas bloqueadas</button>
+                    <div class="dm-blocked-list" id="dm-blocked-list" hidden></div>
+                </section>
+            </aside>
+            <section class="dm-conversation" id="dm-conversation" aria-label="Conversa" aria-live="off">
+                <div class="dm-empty" id="dm-empty"><span aria-hidden="true">✳</span><h2>Uma conversa de cada vez</h2><p>Escolhe uma conversa ou procura alguém para começar com respeito e intenção.</p></div>
+                <header class="dm-conversation-heading" id="dm-conversation-heading" hidden>
+                    <button class="dm-back-button" type="button" id="dm-back-button" aria-label="Voltar à lista">←</button>
+                    <div class="dm-person-avatar" id="dm-peer-avatar" aria-hidden="true"></div>
+                    <div class="dm-person-copy"><h2 id="dm-peer-name"></h2><p>Conversa privada</p></div>
+                    <div class="dm-conversation-actions">
+                        <button type="button" id="dm-mute-button">Silenciar</button>
+                        <button type="button" id="dm-archive-button">Arquivar</button>
+                        <button type="button" id="dm-block-button" class="is-danger">Bloquear</button>
+                    </div>
+                </header>
+                <button class="dm-load-older" id="dm-load-older" type="button" hidden>Carregar mensagens anteriores</button>
+                <div class="dm-messages" id="dm-messages" role="log" aria-label="Mensagens da conversa" aria-live="off" hidden></div>
+                <form class="dm-composer" id="dm-composer" hidden>
+                    <label class="visually-hidden" for="dm-message-input">Escreve uma mensagem</label>
+                    <textarea id="dm-message-input" maxlength="1200" rows="2" placeholder="Escreve uma mensagem..."></textarea>
+                    <div class="dm-attachment-preview" id="dm-attachment-preview" hidden></div>
+                    <div class="dm-composer-footer">
+                        <div class="dm-composer-tools">
+                            <label class="dm-attachment-trigger" for="dm-media-input">Anexar foto ou vídeo</label>
+                            <input class="dm-file-input" id="dm-media-input" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime" aria-label="Escolher uma foto ou vídeo">
+                            <span>Imagens e vídeos são comprimidos antes do envio.</span>
+                        </div>
+                        <button class="button" type="submit">Enviar</button>
+                    </div>
+                </form>
+            </section>
+        </section>
+    </main>
+    <dialog class="dm-start-dialog" id="dm-start-dialog" aria-labelledby="dm-start-title">
+        <form id="dm-start-form">
+            <button class="dm-dialog-close" type="button" id="dm-start-close" aria-label="Fechar">×</button>
+            <p class="eyebrow">PRIMEIRO CONTACTO</p>
+            <h2 id="dm-start-title">Enviar mensagem</h2>
+            <p class="dm-start-note" id="dm-start-note">Se ainda não existe uma ligação Impacta, esta mensagem será enviada como pedido e a pessoa decide se aceita.</p>
+            <label for="dm-start-input">A tua mensagem</label>
+            <textarea id="dm-start-input" rows="5" maxlength="1200" required placeholder="Explica, com respeito, por que queres conversar."></textarea>
+            <div class="dm-start-footer"><span id="dm-start-limit">Até 1 200 caracteres.</span><button class="button" type="submit">Continuar</button></div>
+        </form>
+    </dialog>
+    <dialog class="dm-start-dialog dm-report-dialog" id="dm-report-dialog" aria-labelledby="dm-report-title">
+        <form id="dm-report-form">
+            <button class="dm-dialog-close" type="button" id="dm-report-close" aria-label="Fechar">×</button>
+            <p class="eyebrow">SEGURANÇA E RESPEITO</p>
+            <h2 id="dm-report-title">Denunciar conteúdo</h2>
+            <p class="dm-start-note">A denúncia é privada e será analisada pela equipa de moderação.</p>
+            <label for="dm-report-reason">Motivo</label>
+            <select id="dm-report-reason" required>
+                <option value="spam">Spam ou contacto insistente</option>
+                <option value="harassment">Assédio ou discriminação</option>
+                <option value="threat">Ameaça ou risco de segurança</option>
+                <option value="other">Outro motivo</option>
+            </select>
+            <label for="dm-report-details">Detalhes (opcional)</label>
+            <textarea id="dm-report-details" maxlength="500" rows="3" placeholder="Acrescenta apenas o contexto necessário."></textarea>
+            <div class="dm-start-footer"><span>Não incluas dados sensíveis.</span><button class="button" type="submit">Enviar denúncia</button></div>
+        </form>
+    </dialog>
+</body>
+</html>

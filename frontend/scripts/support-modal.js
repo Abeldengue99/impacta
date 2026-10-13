@@ -57,6 +57,7 @@
                 }
             }
             const loadedFile = new URL(embeddedWindow.location.href).pathname.split('/').pop()?.toLowerCase() || '';
+            if (loadedFile === 'help.html') embeddedWindow.requestAnimationFrame(() => embeddedWindow.scrollTo(0, 0));
             const loadedRoute = routes.get(loadedFile);
             if (loadedRoute) {
                 dialog.setAttribute('aria-label', loadedRoute.title);

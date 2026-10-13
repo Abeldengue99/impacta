@@ -11,6 +11,7 @@ O código reduz riscos, mas não permite prometer ausência total de falhas. Mar
 - Há limite de processamento simultâneo de vídeos por processo. O limite pode ser configurado de 1 a 4; o valor por omissão é 1.
 - Em produção, a API exige `PGPOOL_MAX`, `PGSSL=true`, MFA configurado e uma pasta `IMPACTA_MEDIA_DIR` absoluta fora da aplicação.
 - A configuração Apache aplica HSTS apenas em pedidos HTTPS. A API já envia uma CSP própria para respostas da API.
+- O `.htaccess` do Apache bloqueia agora backend, dependências, configuração de deploy, documentação e metadados do pacote; no servidor local, as rotas internas verificadas respondem 403 e o feed continua a responder 200.
 
 ## Bloqueios antes do lançamento
 
@@ -44,7 +45,8 @@ O código reduz riscos, mas não permite prometer ausência total de falhas. Mar
 - [ ] Fazer testes autenticados de ponta a ponta para administração, mensagens, desafios, projectos e publicação de actualizações.
 - [ ] Fazer teste de carga com limites de ficheiro e utilizadores previstos; medir erros, latência, CPU, memória e ligações PostgreSQL.
 - [ ] Rever a CSP e todas as páginas no domínio real; verificar imagens/vídeos e autenticação através do proxy.
-- [x] npm audit completo em 13/10/2026: zero vulnerabilidades conhecidas no relatório consultado.
+- [x] Relatório npm audit consultado em 13/10/2026 sem vulnerabilidades conhecidas naquele momento.
+- [ ] A nova tentativa de npm audit nesta revisão não conseguiu contactar registry.npmjs.org; repetir num ambiente com rede antes de publicar.
 - [ ] Revisão independente de segurança antes de convidar utilizadores.
 
 O proxy e os scripts desta revisão são modelos, não uma publicação. A prontidão real

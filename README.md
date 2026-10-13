@@ -40,6 +40,7 @@ As versões exactas das dependências estão registadas em package-lock.json. A 
       test/                 verificações de arranque e smoke HTTP
     deploy/                  exemplos de Apache e Nginx
     docs/                    documentação geral
+    local-recovery/          cópias locais ignoradas pelo Git e bloqueadas no servidor
     frontend/
       assets/                ícones e recursos estáticos
       pages/                 páginas HTML

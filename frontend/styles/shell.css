@@ -212,7 +212,8 @@ body .app-shell-header .feed-header-actions > .user-chip.account-state-placehold
         box-shadow: 0 2px 8px rgba(22, 82, 57, .2);
     }
     .profile-page .app-shell-header .shell-back-link { display: none; }
-    .feed-header-actions #feed-notifications-toggle {
+    .feed-header-actions #feed-notifications-toggle,
+    .feed-header-actions [data-direct-message-link] {
         position: relative;
         display: grid;
         flex: 0 0 36px;
@@ -225,8 +226,20 @@ body .app-shell-header .feed-header-actions > .user-chip.account-state-placehold
         background: #f3f8f4;
         color: #176f50;
     }
-    .feed-header-actions #feed-notifications-toggle svg { width: 21px; height: 21px; }
+    .feed-header-actions #feed-notifications-toggle[hidden],
+    .feed-header-actions [data-direct-message-link][hidden] { display: none !important; }
+    .feed-header-actions #feed-notifications-toggle svg,
+    .feed-header-actions [data-direct-message-link] svg {
+        width: 21px;
+        height: 21px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
     .feed-header-actions #feed-notifications-toggle .notification-badge { top: -2px; right: -3px; }
+    .feed-header-actions [data-direct-message-badge] { top: -2px; right: -3px; }
     .feed-header .feed-mobile-menu:not([hidden]) {
         right: max(10px, env(safe-area-inset-right, 0px));
         max-height: calc(100dvh - 80px - env(safe-area-inset-bottom, 0px));

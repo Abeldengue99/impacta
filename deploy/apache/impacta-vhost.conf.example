@@ -54,6 +54,9 @@
     <Directory "/srv/impacta/deploy">
         Require all denied
     </Directory>
+    <Directory "/srv/impacta/local-recovery">
+        Require all denied
+    </Directory>
     <FilesMatch "^(?:\.|package(?:-lock)?\.json$|preserved-local-.*\.html$)">
         Require all denied
     </FilesMatch>

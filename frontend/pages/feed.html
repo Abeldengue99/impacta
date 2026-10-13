@@ -18,18 +18,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../styles/main.css?v=maintenance-mode-20261013-1">
-    <link rel="stylesheet" href="../styles/feed.css?v=project-chat-compact-empty-20261013-3">
-    <link rel="stylesheet" href="../styles/shell.css?v=header-spacing-balance-20261013-8">
+    <link rel="stylesheet" href="../styles/feed.css?v=challenge-lifecycle-20261013-1">
+    <link rel="stylesheet" href="../styles/shell.css?v=mobile-message-icon-20261013-3">
     <link rel="stylesheet" href="../styles/action-modal.css?v=action-modal-notice-20261011-1">
     <link rel="stylesheet" href="../styles/support-modal.css?v=support-modal-20261009-1">
     <link rel="stylesheet" href="../styles/promotion.css?v=announcement-metrics-20261011-1">
-    <script src="../scripts/support-modal.js?v=support-modal-clean-20261013-1" defer></script>
-    <script src="../scripts/api.js?v=avatar-stability-20261013-2" defer></script>
+    <script src="../scripts/support-modal.js?v=support-modal-scrolltop-20261013-2" defer></script>
+    <script src="../scripts/api.js?v=challenge-evidence-20261013-1" defer></script>
     <script src="../scripts/public-promotions.js?v=flyer-visibility-20261012-1" defer></script>
     <script src="../scripts/action-modal.js?v=action-modal-notice-20261011-1" defer></script>
     <script src="../scripts/carousel-media.js?v=feed-carousel-media-20261013-1" defer></script>
-    <script src="../scripts/feed.js?v=profile-project-actions-20261013-1" defer></script>
-    <script src="../scripts/site-shell.js?v=maintenance-mode-20261013-1" defer></script>
+    <script src="../scripts/feed.js?v=mobile-message-icon-20261013-3" defer></script>
+    <script src="../scripts/site-shell.js?v=mobile-message-icon-20261013-3" defer></script>
 </head>
 <body class="feed-page">
     <header class="feed-header app-shell-header">
@@ -55,6 +55,7 @@
             <a class="top-nav-active icon-nav-link" href="#feed" aria-label="Início" data-tooltip="Início"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m3.5 10 8.5-7 8.5 7"/><path d="M5.5 9v11h13V9M9.5 20v-6h5v6"/></svg><span class="visually-hidden icon-nav-label">Início</span></a>
             <a class="icon-nav-link" href="#desafios" aria-label="Desafios" data-tooltip="Desafios"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2.5v19M3.8 7.2l16.4 9.6M3.8 16.8l16.4-9.6M5 5l14 14M19 5 5 19"/></svg><span class="visually-hidden icon-nav-label">Desafios</span></a>
             <a class="icon-nav-link" href="#projetos" aria-label="Projectos" data-tooltip="Projectos"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 19 19 5M8 5h11v11"/></svg><span class="visually-hidden icon-nav-label">Projectos</span></a>
+            <a class="icon-nav-link" data-direct-message-link href="messages.html" aria-label="Mensagens" data-tooltip="Mensagens" hidden><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20.5 11.5a8.3 8.3 0 0 1-8.5 8.2 9 9 0 0 1-3.8-.8L3 20l1.2-4.1A8 8 0 0 1 3.5 12 8.3 8.3 0 0 1 12 3.8a8.3 8.3 0 0 1 8.5 7.7Z"/><path d="M7.5 11.5h9M7.5 15h6"/></svg><span class="notification-badge" data-direct-message-badge hidden></span><span class="visually-hidden icon-nav-label">Mensagens</span></a>
             <a class="icon-nav-link" id="feed-admin-link" href="admin/index.html#reports" aria-label="Administração" data-tooltip="Administração" hidden><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg><span class="visually-hidden icon-nav-label">Administração</span></a>
             <button class="icon-nav-link icon-nav-button" id="feed-notifications-toggle" type="button" aria-label="Notificações" aria-expanded="false" aria-controls="feed-notification-panel" data-tooltip="Notificações" hidden>
                 <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
@@ -78,6 +79,7 @@
             <a href="#feed"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m3.5 10 8.5-7 8.5 7"/><path d="M5.5 9v11h13V9M9.5 20v-6h5v6"/></svg>Início</a>
             <a href="#desafios"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2.5v19M3.8 7.2l16.4 9.6M3.8 16.8l16.4-9.6"/></svg>Desafios</a>
             <a href="#projetos"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 19 19 5M8 5h11v11"/></svg>Projectos</a>
+            <a data-direct-message-link href="messages.html" hidden><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20.5 11.5a8.3 8.3 0 0 1-8.5 8.2 9 9 0 0 1-3.8-.8L3 20l1.2-4.1A8 8 0 0 1 3.5 12 8.3 8.3 0 0 1 12 3.8a8.3 8.3 0 0 1 8.5 7.7Z"/><path d="M7.5 11.5h9M7.5 15h6"/></svg><span>Mensagens</span></a>
             <a id="feed-mobile-admin-link" href="admin/index.html#reports" hidden><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg>Administração</a>
             <a href="#comunidades"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/></svg>Comunidades</a>
             <span class="feed-menu-divider" aria-hidden="true"></span>
@@ -223,6 +225,7 @@
         <aside class="feed-sidebar sidebar-right">
             <section class="widget panel" id="desafios">
                 <div class="widget-heading"><div><span class="eyebrow">PEQUENAS AÇÕES</span><h2>Desafio da semana</h2></div><span class="widget-symbol">✳</span></div>
+                <p class="challenge-widget-intro">Um desafio aberto é destacado por semana. Envia a tua proposta; se for aceite, podes entregar o resultado e acompanhar a revisão.</p>
                 <label class="resource-area-filter">Área/categoria
                     <select id="challenge-area-filter" data-resource-area-filter="challenges" aria-label="Filtrar desafios por área ou categoria"><option value="">Todas as áreas</option></select>
                 </label>
@@ -332,9 +335,9 @@
     <dialog class="resource-dialog" id="challenge-dialog" aria-labelledby="challenge-dialog-title">
         <form id="challenge-create-form">
             <input type="hidden" name="projectId">
-            <div class="resource-dialog-heading"><p class="eyebrow">PEQUENAS ACÇÕES</p><h2 id="challenge-dialog-title">Criar desafio</h2><p>O desafio ficará ligado ao projecto aprovado e poderá receber participações.</p></div>
+            <div class="resource-dialog-heading"><p class="eyebrow">PEQUENAS ACÇÕES</p><h2 id="challenge-dialog-title">Criar desafio</h2><p>Responsáveis do projecto, gestão/moderação da comunidade e revisores autorizados podem criar tarefas. Define como participar e o prazo: a equipa analisa as propostas, acompanha as entregas e confirma a conclusão dentro do período do projecto.</p></div>
             <label>Nome do desafio<input name="title" maxlength="120" required autocomplete="off" placeholder="Ex.: Recolher 100 livros até sexta-feira"></label>
-            <label>Como participar?<textarea name="description" maxlength="3000" rows="4" required placeholder="Explica a acção e o que a pessoa deve enviar como participação."></textarea></label>
+            <label>O que deve ser feito e como participar?<textarea name="description" maxlength="3000" rows="4" required placeholder="Descreve a tarefa, os critérios de participação e o resultado esperado."></textarea></label>
             <div class="resource-date-row"><label>Abre em (opcional)<input name="opensAt" type="date"></label><label>Encerra em (opcional)<input name="closesAt" type="date"></label></div>
             <p class="resource-form-status" role="status" aria-live="polite" data-resource-status></p>
             <div class="resource-dialog-actions"><button class="button button-quiet" type="button" data-close-resource-dialog>Cancelar</button><button class="button button-small" type="submit">Publicar desafio no projecto</button></div>

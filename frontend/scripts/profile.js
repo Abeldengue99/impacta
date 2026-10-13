@@ -488,7 +488,7 @@ function renderProfilePost(post) {
     renderMentionText(body, post.body, post.mentions);
     const postTextLength = Array.from(String(post.body || '')).length;
     let toggleBody = null;
-    if (postTextLength > 150) {
+    if (postTextLength > 240) {
         body.id = 'profile-post-body-' + (++profilePostTextSequence);
         body.classList.add('is-collapsed');
         toggleBody = document.createElement('button');
@@ -518,15 +518,26 @@ function renderProfilePost(post) {
     const mediaList = Array.isArray(post.media) ? post.media : [];
     const usableMedia = mediaList.filter((media) => media?.url && ['image', 'video'].includes(media.media_type));
     if (usableMedia.length) {
+        const isCarousel = usableMedia.length > 1;
         const gallery = document.createElement('div');
-        gallery.className = 'profile-post-media';
+        gallery.className = 'profile-post-media' + (isCarousel ? ' is-carousel' : ' media-count-1');
         gallery.setAttribute('role', 'group');
-        gallery.setAttribute('aria-label', usableMedia.length + ' itens de multimédia na publicação');
+        gallery.setAttribute('aria-label', isCarousel
+            ? 'Carrossel com ' + usableMedia.length + ' itens da publicação'
+            : 'Multimédia da publicação');
         const modalItems = usableMedia.map((media) => ({
             type: media.media_type,
             url: window.ImpactaAPI.assetUrl(media.url)
         }));
-        usableMedia.slice(0, 4).forEach((media, index) => {
+        const galleryTrack = isCarousel ? document.createElement('div') : gallery;
+        const slides = [];
+        if (isCarousel) {
+            galleryTrack.className = 'profile-post-media-track';
+            galleryTrack.tabIndex = 0;
+            galleryTrack.setAttribute('aria-label', 'Desliza horizontalmente para ver os anexos');
+            gallery.append(galleryTrack);
+        }
+        usableMedia.forEach((media, index) => {
             const tile = document.createElement('button');
             tile.type = 'button';
             tile.className = 'profile-media-tile';
@@ -554,18 +565,64 @@ function renderProfilePost(post) {
                 image.decoding = 'async';
                 tile.append(image);
             }
-            if (index === 3 && usableMedia.length > 4) {
-                const more = document.createElement('span');
-                more.className = 'profile-media-more';
-                more.setAttribute('aria-hidden', 'true');
-                more.textContent = '+' + (usableMedia.length - 4);
-                tile.append(more);
-                tile.setAttribute('aria-label', 'Abrir galeria com ' + usableMedia.length + ' elementos');
-            }
             tile.addEventListener('click', () => openProfileMedia(modalItems, index));
-            gallery.append(tile);
+            galleryTrack.append(tile);
+            if (isCarousel) slides.push(tile);
         });
-        gallery.classList.add('media-count-' + Math.min(usableMedia.length, 4));
+
+        if (isCarousel) {
+            const hint = document.createElement('span');
+            hint.className = 'profile-media-carousel-hint';
+            hint.textContent = 'Desliza para ver';
+            hint.setAttribute('aria-hidden', 'true');
+            const counter = document.createElement('span');
+            counter.className = 'profile-media-carousel-counter';
+            counter.setAttribute('aria-live', 'polite');
+            const controls = document.createElement('div');
+            controls.className = 'profile-media-carousel-controls';
+            const previous = document.createElement('button');
+            previous.type = 'button';
+            previous.className = 'profile-media-carousel-button profile-media-carousel-previous';
+            previous.setAttribute('aria-label', 'Ver anexo anterior');
+            previous.textContent = '‹';
+            const next = document.createElement('button');
+            next.type = 'button';
+            next.className = 'profile-media-carousel-button profile-media-carousel-next';
+            next.setAttribute('aria-label', 'Ver anexo seguinte');
+            next.textContent = '›';
+            controls.append(previous, next);
+            gallery.append(hint, counter, controls);
+
+            let activeIndex = 0;
+            let scrollFrame = 0;
+            const updateCarousel = () => {
+                activeIndex = slides.reduce((nearest, slide, index) => {
+                    const nearestOffset = slides[nearest].offsetLeft;
+                    return Math.abs(slide.offsetLeft - galleryTrack.scrollLeft) < Math.abs(nearestOffset - galleryTrack.scrollLeft)
+                        ? index : nearest;
+                }, 0);
+                counter.textContent = (activeIndex + 1) + ' / ' + slides.length;
+                previous.disabled = activeIndex === 0;
+                next.disabled = activeIndex === slides.length - 1;
+            };
+            const moveCarousel = (direction) => {
+                const target = Math.max(0, Math.min(slides.length - 1, activeIndex + direction));
+                galleryTrack.scrollTo({
+                    left: slides[target].offsetLeft,
+                    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+                });
+            };
+            previous.addEventListener('click', () => moveCarousel(-1));
+            next.addEventListener('click', () => moveCarousel(1));
+            galleryTrack.addEventListener('scroll', () => {
+                if (scrollFrame) return;
+                scrollFrame = window.requestAnimationFrame(() => {
+                    scrollFrame = 0;
+                    updateCarousel();
+                });
+            }, { passive: true });
+            updateCarousel();
+        }
         card.append(gallery);
     }
 

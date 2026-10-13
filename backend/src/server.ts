@@ -8,6 +8,7 @@ import { registerAdminRoutes } from './admin-routes.js';
 import { registerAdminConsoleRoutes } from './admin-console-routes.js';
 import { registerAuthRoutes } from './auth-routes.js';
 import { registerCommunityRoutes, requireMfaSession } from './community-routes.js';
+import { registerDirectMessageRoutes } from './direct-message-routes.js';
 import { registerHelpRoutes } from './help-routes.js';
 import { registerImpactationRoutes } from './impactation-routes.js';
 import { registerProfileRoutes } from './profile-routes.js';
@@ -279,8 +280,16 @@ const requiredRelations = [
     'project_messages',
     'project_message_reads',
     'project_message_preferences',
+    'direct_message_requests',
+    'direct_conversations',
+    'direct_messages',
+    'direct_conversation_members',
+    'direct_message_blocks',
+    'direct_message_preferences',
     'challenges',
     'challenge_participations',
+    'challenge_participation_media',
+    'challenge_weekly_highlights',
     'post_categories',
     'posts',
     'post_media',
@@ -342,7 +351,7 @@ server.addHook('onRequest', async (request, reply) => {
             .header('access-control-allow-origin', origin)
             .header('access-control-allow-credentials', 'true')
             .header('access-control-allow-methods', 'GET, POST, PUT, DELETE, OPTIONS')
-            .header('access-control-allow-headers', 'content-type, x-csrf-token')
+            .header('access-control-allow-headers', 'content-type, x-csrf-token, x-direct-message-caption')
             .header('access-control-max-age', '600')
             .header('vary', 'Origin')
             .code(204)
@@ -355,6 +364,7 @@ server.addHook('onRequest', async (request, reply) => {
         reply
             .header('access-control-allow-origin', origin)
             .header('access-control-allow-credentials', 'true')
+            .header('access-control-expose-headers', 'accept-ranges, content-range, content-length')
             .header('vary', 'Origin');
     }
 
@@ -469,11 +479,20 @@ server.get('/api/v1/health/ready', { schema: readyRouteSchema }, async (request,
             'SELECT post_id, sharer_user_id, shared_at FROM impacta.post_shares LIMIT 0',
             'SELECT id, body, author_user_id, created_at, status, deleted_at, moderation_status FROM impacta.posts LIMIT 0',
             'SELECT id, reporter_user_id, post_id, comment_id, reason_code, details, status, created_at FROM impacta.content_reports LIMIT 0',
-            'SELECT id, challenge_id, user_id, submission, status, submitted_at, reviewed_by_user_id, reviewed_at, review_reason FROM impacta.challenge_participations LIMIT 0',
+            'SELECT id, challenge_id, user_id, submission, status, submitted_at, reviewed_by_user_id, reviewed_at, review_reason, delivery_submission, delivery_submitted_at, completed_at FROM impacta.challenge_participations LIMIT 0',
+            'SELECT participation_id, media_id, stage, uploader_user_id, created_at FROM impacta.challenge_participation_media LIMIT 0',
+            'SELECT week_start, challenge_id, assigned_at FROM impacta.challenge_weekly_highlights LIMIT 0',
             'SELECT user_id, membership_role FROM impacta.project_members LIMIT 0',
             'SELECT id, project_id, author_user_id, body, created_at, edited_at, edited_by_user_id, deleted_at, deleted_by_user_id FROM impacta.project_messages LIMIT 0',
             'SELECT project_id, user_id, last_read_message_id, updated_at FROM impacta.project_message_reads LIMIT 0',
             'SELECT project_id, user_id, muted, updated_at FROM impacta.project_message_preferences LIMIT 0',
+            'SELECT direct_message_id, direct_message_request_id FROM impacta.content_reports LIMIT 0',
+            'SELECT id, requester_user_id, recipient_user_id, body, status, created_at, responded_at FROM impacta.direct_message_requests LIMIT 0',
+            'SELECT id, user_a_id, user_b_id, created_at FROM impacta.direct_conversations LIMIT 0',
+            'SELECT id, conversation_id, author_user_id, body, media_id, created_at, edited_at, deleted_at, deleted_by_user_id FROM impacta.direct_messages LIMIT 0',
+            'SELECT conversation_id, user_id, last_read_message_id, archived_at, muted, updated_at FROM impacta.direct_conversation_members LIMIT 0',
+            'SELECT blocker_user_id, blocked_user_id, created_at FROM impacta.direct_message_blocks LIMIT 0',
+            'SELECT user_id, request_policy, updated_at FROM impacta.direct_message_preferences LIMIT 0',
             'SELECT project_id FROM impacta.posts LIMIT 0',
             'SELECT location_city, location_neighborhood, location_municipality, location_province, location_commune, reviewed_at, reviewed_by_user_id, review_reason FROM impacta.projects LIMIT 0'
         ]) {
@@ -856,6 +875,12 @@ server.get('/api/v1/health/ready', { schema: readyRouteSchema }, async (request,
             "AND has_column_privilege(current_user, 'impacta.project_message_preferences', 'updated_at', 'UPDATE')",
             "AND has_column_privilege(current_user, 'impacta.content_reports', 'project_message_id', 'SELECT')",
             "AND has_column_privilege(current_user, 'impacta.content_reports', 'project_message_id', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.content_reports', 'direct_message_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.content_reports', 'direct_message_id', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.content_reports', 'direct_message_id', 'UPDATE')",
+            "AND has_column_privilege(current_user, 'impacta.content_reports', 'direct_message_request_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.content_reports', 'direct_message_request_id', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.content_reports', 'direct_message_request_id', 'UPDATE')",
             "AS project_messages_ready,",
             "has_column_privilege(current_user, 'impacta.posts', 'project_id', 'SELECT')",
             "AND has_column_privilege(current_user, 'impacta.posts', 'project_id', 'INSERT')",
@@ -868,26 +893,126 @@ server.get('/api/v1/health/ready', { schema: readyRouteSchema }, async (request,
             "AND has_column_privilege(current_user, 'impacta.challenge_participations', 'reviewed_by_user_id', 'SELECT')",
             "AND has_column_privilege(current_user, 'impacta.challenge_participations', 'reviewed_at', 'SELECT')",
             "AND has_column_privilege(current_user, 'impacta.challenge_participations', 'review_reason', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.challenge_participations', 'delivery_submission', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.challenge_participations', 'delivery_submitted_at', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.challenge_participations', 'completed_at', 'SELECT')",
             "AND has_column_privilege(current_user, 'impacta.challenge_participations', 'submission', 'UPDATE')",
             "AND has_column_privilege(current_user, 'impacta.challenge_participations', 'status', 'UPDATE')",
             "AND has_column_privilege(current_user, 'impacta.challenge_participations', 'submitted_at', 'UPDATE')",
             "AND has_column_privilege(current_user, 'impacta.challenge_participations', 'reviewed_by_user_id', 'UPDATE')",
             "AND has_column_privilege(current_user, 'impacta.challenge_participations', 'reviewed_at', 'UPDATE')",
             "AND has_column_privilege(current_user, 'impacta.challenge_participations', 'review_reason', 'UPDATE')",
-            "AS challenge_review_ready"
+            "AND has_column_privilege(current_user, 'impacta.challenge_participations', 'delivery_submission', 'UPDATE')",
+            "AND has_column_privilege(current_user, 'impacta.challenge_participations', 'delivery_submitted_at', 'UPDATE')",
+            "AND has_column_privilege(current_user, 'impacta.challenge_participations', 'completed_at', 'UPDATE')",
+            "AND has_column_privilege(current_user, 'impacta.challenge_participation_media', 'participation_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.challenge_participation_media', 'media_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.challenge_participation_media', 'stage', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.challenge_participation_media', 'uploader_user_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.challenge_participation_media', 'participation_id', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.challenge_participation_media', 'media_id', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.challenge_participation_media', 'stage', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.challenge_participation_media', 'uploader_user_id', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.challenge_weekly_highlights', 'week_start', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.challenge_weekly_highlights', 'challenge_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.challenge_weekly_highlights', 'assigned_at', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.challenge_weekly_highlights', 'week_start', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.challenge_weekly_highlights', 'challenge_id', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.challenge_weekly_highlights', 'challenge_id', 'UPDATE')",
+            "AND has_column_privilege(current_user, 'impacta.challenge_weekly_highlights', 'assigned_at', 'UPDATE')",
+            "AS challenge_review_ready,",
+            "has_column_privilege(current_user, 'impacta.direct_message_requests', 'id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_requests', 'requester_user_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_requests', 'recipient_user_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_requests', 'body', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_requests', 'status', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_requests', 'created_at', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_requests', 'responded_at', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_requests', 'requester_user_id', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_requests', 'recipient_user_id', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_requests', 'body', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_requests', 'body', 'UPDATE')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_requests', 'status', 'UPDATE')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_requests', 'responded_at', 'UPDATE')",
+            "AND has_sequence_privilege(current_user, 'impacta.direct_message_requests_id_seq', 'USAGE')",
+            "AND has_column_privilege(current_user, 'impacta.direct_conversations', 'id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_conversations', 'user_a_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_conversations', 'user_b_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_conversations', 'user_a_id', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_conversations', 'user_b_id', 'INSERT')",
+            "AND has_sequence_privilege(current_user, 'impacta.direct_conversations_id_seq', 'USAGE')",
+            "AND has_column_privilege(current_user, 'impacta.direct_messages', 'id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_messages', 'conversation_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_messages', 'author_user_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_messages', 'body', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_messages', 'media_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_messages', 'created_at', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_messages', 'edited_at', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_messages', 'deleted_at', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_messages', 'deleted_by_user_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_messages', 'conversation_id', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_messages', 'author_user_id', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_messages', 'body', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_messages', 'media_id', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_messages', 'deleted_at', 'UPDATE')",
+            "AND has_column_privilege(current_user, 'impacta.direct_messages', 'deleted_by_user_id', 'UPDATE')",
+            "AND has_sequence_privilege(current_user, 'impacta.direct_messages_id_seq', 'USAGE')",
+            "AND has_column_privilege(current_user, 'impacta.media', 'id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.media', 'owner_user_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.media', 'storage_key', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.media', 'media_type', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.media', 'mime_type', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.media', 'byte_size', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.media', 'status', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.media', 'owner_user_id', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.media', 'storage_key', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.media', 'media_type', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.media', 'mime_type', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.media', 'byte_size', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.media', 'checksum_sha256', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.media', 'status', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_conversation_members', 'conversation_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_conversation_members', 'user_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_conversation_members', 'last_read_message_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_conversation_members', 'archived_at', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_conversation_members', 'muted', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_conversation_members', 'updated_at', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_conversation_members', 'conversation_id', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_conversation_members', 'user_id', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_conversation_members', 'last_read_message_id', 'UPDATE')",
+            "AND has_column_privilege(current_user, 'impacta.direct_conversation_members', 'archived_at', 'UPDATE')",
+            "AND has_column_privilege(current_user, 'impacta.direct_conversation_members', 'muted', 'UPDATE')",
+            "AND has_column_privilege(current_user, 'impacta.direct_conversation_members', 'updated_at', 'UPDATE')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_blocks', 'blocker_user_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_blocks', 'blocked_user_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_blocks', 'created_at', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_blocks', 'blocker_user_id', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_blocks', 'blocked_user_id', 'INSERT')",
+            "AND has_table_privilege(current_user, 'impacta.direct_message_blocks', 'DELETE')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_preferences', 'user_id', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_preferences', 'request_policy', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_preferences', 'updated_at', 'SELECT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_preferences', 'user_id', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_preferences', 'request_policy', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_preferences', 'updated_at', 'INSERT')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_preferences', 'request_policy', 'UPDATE')",
+            "AND has_column_privilege(current_user, 'impacta.direct_message_preferences', 'updated_at', 'UPDATE')",
+            "AS direct_messages_ready"
         ].join(' ');
         const recentFeaturePrivileges = await pool.query<{
             project_messages_ready: boolean;
             project_updates_ready: boolean;
             challenge_review_ready: boolean;
+            direct_messages_ready: boolean;
         }>(recentFeatureSql);
         if (!recentFeaturePrivileges.rows[0]?.project_messages_ready
             || !recentFeaturePrivileges.rows[0]?.project_updates_ready
-            || !recentFeaturePrivileges.rows[0]?.challenge_review_ready) {
+            || !recentFeaturePrivileges.rows[0]?.challenge_review_ready
+            || !recentFeaturePrivileges.rows[0]?.direct_messages_ready) {
             request.log.warn({ event: 'recent_feature_permissions_incomplete' }, 'Recent feature permissions are not ready');
             return reply.code(503).send({
                 status: 'not_ready',
-                message: 'Database is connected; project messaging, project updates or challenge review permissions are incomplete.'
+                message: 'Database is connected; recent feature tables or permissions are incomplete.'
             });
         }
 
@@ -908,6 +1033,7 @@ server.get('/api/v1/health/ready', { schema: readyRouteSchema }, async (request,
 
 registerCommunityRoutes(server, pool);
 registerProjectMessageRoutes(server, pool);
+registerDirectMessageRoutes(server, pool);
 registerAdminRoutes(server, pool);
 registerAdminConsoleRoutes(server, pool);
 registerProfileRoutes(server, pool);

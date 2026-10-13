@@ -57,6 +57,10 @@ server {
         deny all;
     }
 
+    location ^~ /local-recovery/ {
+        deny all;
+    }
+
     location = /package.json {
         deny all;
     }

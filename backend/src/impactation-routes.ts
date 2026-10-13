@@ -96,10 +96,13 @@ export function registerImpactationRoutes(server: FastifyInstance, pool: Pool): 
             return reply.code(400).send({ error: 'invalid_people_query' });
         }
         const result = await pool.query(
-            `SELECT matches.id, matches.display_name, matches.headline
+            `SELECT matches.id, matches.display_name, matches.headline,
+                    CASE WHEN avatar.status = 'available' AND avatar.media_type = 'image'
+                         THEN '/api/v1/media/' || avatar.id::text END AS avatar_url
              FROM (
                  SELECT DISTINCT ON (lower(account.display_name))
-                        account.id::text AS id, account.display_name, profile.headline
+                        account.id::text AS id, account.display_name, profile.headline,
+                        profile.avatar_media_id
                  FROM impacta.users AS account
                  JOIN impacta.user_profiles AS profile ON profile.user_id = account.id
                  WHERE account.status = 'active' AND profile.is_public
@@ -108,6 +111,7 @@ export function registerImpactationRoutes(server: FastifyInstance, pool: Pool): 
                         OR COALESCE(profile.headline, '') ILIKE $1 ESCAPE '\\')
                  ORDER BY lower(account.display_name), account.id
              ) AS matches
+             LEFT JOIN impacta.media AS avatar ON avatar.id = matches.avatar_media_id
              ORDER BY matches.display_name
              LIMIT 8`,
             [`%${query}%`, session.userId]

@@ -21,10 +21,13 @@ Este documento resume a intenção e os percursos observáveis no frontend e bac
 
 - Proposta de projectos comunitários e consulta de projectos activos.
 - Adesão/participação em projectos conforme o estado e as regras do projecto.
-- Responsável/moderador pode criar desafios ligados ao projecto.
-- Participantes submetem respostas; a equipa do projecto pode rever, aceitar ou recusar segundo os estados implementados.
-- Uma resposta recusada pode ser reenviada pelo mesmo participante; a API impede duplicação de participações activas.
-- Actualizações do projecto podem ser partilhadas no feed público por quem tem permissão no projecto.
+- Responsáveis do projecto, responsáveis/moderadores da comunidade e revisores autorizados podem publicar desafios dentro do período do projecto.
+- Um desafio aberto é escolhido de forma determinística como destaque semanal; a selecção renova na segunda-feira segundo o calendário de Luanda.
+- Qualquer conta autenticada pode enviar uma proposta, mesmo sem ser membro do projecto. A equipa aceita ou recusa; recusas exigem motivo e podem ser reenviadas enquanto o desafio estiver aberto.
+- Ao aceitar uma proposta, a pessoa entra como participante no projecto e ganha acesso à conversa privada do grupo.
+- A pessoa participante envia a entrega e pode anexar até quatro imagens ou um vídeo optimizado por etapa. As evidências são privadas para a pessoa e para a equipa autorizada.
+- A equipa pode confirmar a conclusão ou pedir ajustes com motivo. A conclusão não publica automaticamente a entrega nem emite certificados ou pontos.
+- Depois da conclusão, a pessoa pode preparar uma actualização associada ao projecto e revê-la antes de a publicar no feed público.
 
 ## Comunidades e conversas
 

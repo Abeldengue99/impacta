@@ -37,7 +37,7 @@ const requestedProjectId = new URLSearchParams(window.location.search).get('proj
 const resourceListingConfigs = [
     {
         filter: challengeAreaFilter, locationFilter: challengeLocationFilter, container: challengeList, path: '/challenges',
-        emptyMessage: 'Ainda não há desafios publicados ou agendados.',
+        emptyMessage: 'Não há desafios que correspondam aos filtros. Limpa os filtros para ver as tarefas disponíveis e o destaque semanal.',
         errorMessage: 'Não foi possível carregar os desafios.', createCard: createChallenge
     },
     {
@@ -110,6 +110,32 @@ const projectCreateForm = document.querySelector('#project-create-form');
 const challengeCreateForm = document.querySelector('#challenge-create-form');
 
 let currentUser = null;
+const directMessageLinks = [...document.querySelectorAll('[data-direct-message-link]')];
+const cachedAvatarPreview = window.ImpactaAPI?.cachedAvatarPreview?.();
+const setDirectMessageShortcutsVisible = (visible) => {
+    directMessageLinks.forEach((link) => { link.hidden = !visible; });
+};
+setDirectMessageShortcutsVisible(Boolean(cachedAvatarPreview));
+let directMessageBadgeRefreshTimer = null;
+async function refreshDirectMessageBadges() {
+    if (!currentUser || !directMessageLinks.length || !window.ImpactaAPI) return;
+    try {
+        const summary = await window.ImpactaAPI.request('/direct-messages/summary');
+        const unread = Math.max(0, Number(summary?.unread_count) || 0);
+        const requests = Math.max(0, Number(summary?.request_count) || 0);
+        const total = unread + requests;
+        directMessageLinks.forEach((link) => {
+            const badge = link.querySelector('[data-direct-message-badge]');
+            if (badge) {
+                badge.textContent = total > 99 ? '99+' : String(total);
+                badge.hidden = total === 0;
+            }
+            link.setAttribute('aria-label', total
+                ? `Mensagens, ${unread} por ler e ${requests} pedidos`
+                : 'Mensagens');
+        });
+    } catch { /* Keep the shortcut visible if its unread count is unavailable. */ }
+}
 function hydrateFeedAvatarPreview() {
     const cached = window.ImpactaAPI?.cachedAvatarPreview();
     const accountActions = document.querySelector('.feed-header-actions');
@@ -331,6 +357,7 @@ function setMobileMenuOpen(isOpen) {
 const feedHeader = document.querySelector('.feed-header');
 const feedTopNavigation = document.querySelector('.feed-top-nav');
 const feedHeaderActions = document.querySelector('.feed-header-actions');
+const directMessageShortcut = feedTopNavigation?.querySelector('[data-direct-message-link]');
 const feedAdminNavigationSlot = feedTopNavigation?.querySelector('[data-feed-nav-slot="admin"]');
 const feedNotificationsNavigationSlot = feedTopNavigation?.querySelector('[data-feed-nav-slot="notifications"]');
 const feedNavigationViewport = window.matchMedia('(max-width: 760px)');
@@ -395,6 +422,9 @@ function placeFeedNavigation() {
         if (notificationsToggle.parentElement !== feedHeaderActions) {
             feedHeaderActions.insertBefore(notificationsToggle, feedHeaderActions.firstChild);
         }
+        if (directMessageShortcut && directMessageShortcut.parentElement !== feedHeaderActions) {
+            feedHeaderActions.insertBefore(directMessageShortcut, notificationsToggle);
+        }
         return;
     }
     if (feedTopNavigation.parentElement !== feedHeader) {
@@ -404,6 +434,10 @@ function placeFeedNavigation() {
     if (notificationsToggle.parentElement !== feedTopNavigation) {
         const notificationsSlot = feedTopNavigation.querySelector('[data-feed-nav-slot="notifications"]');
         feedTopNavigation.insertBefore(notificationsToggle, notificationsSlot ?? null);
+    }
+    if (directMessageShortcut && directMessageShortcut.parentElement !== feedTopNavigation) {
+        const adminShortcut = feedTopNavigation.querySelector('#feed-admin-link');
+        feedTopNavigation.insertBefore(directMessageShortcut, adminShortcut || notificationsToggle);
     }
 }
 placeFeedNavigation();
@@ -800,6 +834,11 @@ function friendlyError(error, fallback) {
         post_rate_limit: 'Atingiste o limite de publicações por hora. Tenta mais tarde.',
         comment_rate_limit: 'Atingiste o limite de comentários por hora. Tenta mais tarde.',
         challenge_rate_limit: 'Atingiste o limite de participações por hora. Tenta mais tarde.',
+        challenge_delivery_not_allowed: 'A entrega só fica disponível depois de a tua participação ser aceite.',
+        challenge_evidence_not_allowed: 'Já não podes anexar evidências nesta etapa do desafio.',
+        challenge_evidence_limit: 'Anexa até quatro imagens ou um vídeo por etapa.',
+        challenge_evidence_too_large: 'Cada imagem pode ter até 12 MB e cada vídeo até 100 MB antes da otimização.',
+        unsupported_challenge_evidence_type: 'Escolhe uma imagem JPEG, PNG ou WebP, ou um vídeo MP4.',
         report_rate_limit: 'Atingiste o limite de denúncias por hora. Tenta mais tarde.',
         already_participating: 'Já enviaste uma participação neste desafio.',
         resource_rate_limit: 'Atingiste o limite de propostas por hora. Tenta novamente mais tarde.',
@@ -822,7 +861,7 @@ function friendlyError(error, fallback) {
         community_media_rate_limit: 'Atingiste o limite de anexos por hora. Tenta mais tarde.',
         unsupported_community_media_type: 'Escolhe uma imagem JPEG, PNG ou WebP, ou um vídeo MP4.',
         community_media_too_large: 'A imagem pode ter até 12 MB e o vídeo até 100 MB antes da otimização.',
-        project_management_required: 'Só a pessoa responsável por este projecto pode publicar desafios nele.',
+        project_management_required: 'Só a pessoa responsável, a gestão/moderação da comunidade ou uma conta com revisão autorizada pode criar desafios.',
         project_update_access_required: 'Só membros e responsáveis do projecto podem publicar actualizações em seu nome.',
         project_review_required: 'Não tens permissão para consultar as participações deste projecto.',
         invalid_project_id: 'Escolhe um projecto válido para associar à publicação.',
@@ -830,6 +869,7 @@ function friendlyError(error, fallback) {
         cannot_review_own_participation: 'Outra pessoa responsável deve analisar a tua própria participação.',
         challenge_review_rate_limit: 'Atingiste o limite de análises por hora. Tenta mais tarde.',
         invalid_challenge_participation_decision: 'Escolhe uma decisão válida para esta participação.',
+        invalid_challenge_delivery: 'Descreve o resultado que entregaste.',
         challenge_participation_already_reviewed: 'Esta participação já foi analisada. Actualiza a lista.',
         invalid_community: 'Confirma o nome e a descrição da comunidade.',
         invalid_project: 'Confirma o título, a descrição e as datas do projecto.',
@@ -1158,6 +1198,23 @@ mediaPicker?.addEventListener('change', () => {
 function renderFeedHeaderAccount(user) {
     const accountActions = document.querySelector('.feed-header-actions');
     if (!accountActions) return;
+    setDirectMessageShortcutsVisible(Boolean(user));
+    if (user) {
+        void refreshDirectMessageBadges();
+        if (directMessageBadgeRefreshTimer === null) {
+            directMessageBadgeRefreshTimer = window.setInterval(() => { void refreshDirectMessageBadges(); }, 30000);
+        }
+    } else {
+        if (directMessageBadgeRefreshTimer !== null) {
+            window.clearInterval(directMessageBadgeRefreshTimer);
+            directMessageBadgeRefreshTimer = null;
+        }
+        directMessageLinks.forEach((link) => {
+            const badge = link.querySelector('[data-direct-message-badge]');
+            if (badge) { badge.textContent = ''; badge.hidden = true; }
+            link.setAttribute('aria-label', 'Mensagens');
+        });
+    }
     const accountControl = accountActions.querySelector('.user-chip');
 
     if (!user) {
@@ -1214,6 +1271,8 @@ function renderFeedHeaderAccount(user) {
 function setFeedHeaderAccountUnavailable() {
     const accountActions = document.querySelector('.feed-header-actions');
     if (accountActions) accountActions.dataset.accountState = 'unavailable';
+    setDirectMessageShortcutsVisible(Boolean(cachedAvatarPreview));
+
     if (mobileAccountLink) mobileAccountLink.hidden = true;
     if (mobileLogoutButton) mobileLogoutButton.hidden = true;
 }
@@ -1434,9 +1493,14 @@ function projectNotificationMessage(notification) {
         return `${actor} participou num desafio${notification.challenge_title ? `: ${notification.challenge_title}` : ''}.`;
     }
     if (notification.type === 'project_challenge_participation_reviewed') {
-        return notification.decision === 'approve'
-            ? `A tua participação${notification.challenge_title ? ` em ${notification.challenge_title}` : ''} foi aceite.`
-            : `A tua participação${notification.challenge_title ? ` em ${notification.challenge_title}` : ''} não foi aceite.`;
+        const title = notification.challenge_title ? ` em ${notification.challenge_title}` : '';
+        if (notification.decision === 'approve') return `A tua participação${title} foi aceite. Já podes colaborar na conversa do projecto.`;
+        if (notification.decision === 'complete') return `O resultado${title} foi confirmado como concluído.`;
+        if (notification.decision === 'request_changes') return `A equipa pediu ajustes na tua entrega${title}. Consulta o motivo no desafio.`;
+        return `A tua participação${title} não foi aceite. Consulta o motivo no desafio.`;
+    }
+    if (notification.type === 'project_challenge_delivery') {
+        return `${actor} enviou o resultado de um desafio${notification.challenge_title ? `: ${notification.challenge_title}` : ''}.`;
     }
     return 'Há nova actividade neste projecto.';
 }
@@ -2522,43 +2586,219 @@ async function submitPost(event) {
     }
 }
 
+function createChallengeEvidenceGallery(evidence = []) {
+    const items = Array.isArray(evidence) ? evidence : [];
+    const gallery = element('div', 'challenge-evidence-gallery');
+    const proposal = items.filter((item) => item.stage === 'proposal');
+    const delivery = items.filter((item) => item.stage === 'delivery');
+    [[proposal, 'Evidências da proposta'], [delivery, 'Evidências da entrega']].forEach(([group, title]) => {
+        if (!group.length) return;
+        gallery.append(element('strong', 'challenge-evidence-title', title));
+        const row = element('div', 'challenge-evidence-items');
+        group.forEach((item) => {
+            const url = window.ImpactaAPI.assetUrl(`/api/v1/challenge-evidence/${encodeURIComponent(item.id)}`);
+            const link = element('a', 'challenge-evidence-item');
+            link.href = url;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.setAttribute('aria-label', item.media_type === 'video' ? 'Abrir vídeo de evidência' : 'Abrir imagem de evidência');
+            if (item.media_type === 'video') {
+                const video = element('video');
+                video.src = url;
+                video.controls = true;
+                video.preload = 'metadata';
+                video.playsInline = true;
+                link.append(video);
+            } else {
+                const image = element('img');
+                image.src = url;
+                image.alt = 'Evidência privada do desafio';
+                image.loading = 'lazy';
+                link.append(image);
+            }
+            row.append(link);
+        });
+        gallery.append(row);
+    });
+    return gallery;
+}
+
+function appendChallengeEvidenceControl(card, challenge, stage) {
+    if (!currentUser || !challenge.viewer_participation_id) return;
+    const control = element('div', 'challenge-evidence-control');
+    const label = element('label', 'challenge-evidence-label', stage === 'proposal' ? 'Anexar protótipo ou evidência da ideia' : 'Anexar evidência do resultado');
+    const input = element('input', 'challenge-evidence-input');
+    input.type = 'file';
+    input.accept = 'image/jpeg,image/png,image/webp,video/mp4,video/quicktime';
+    input.multiple = true;
+    label.append(input);
+    const note = element('small', '', 'Privado: só tu e a equipa responsável pelo projecto podem consultar. Até quatro imagens ou um vídeo por etapa; os ficheiros são otimizados.');
+    const status = element('p', 'challenge-evidence-status');
+    status.setAttribute('role', 'status');
+    const upload = element('button', 'button button-small challenge-evidence-upload', 'Enviar evidências');
+    upload.type = 'button';
+    upload.disabled = true;
+    let queuedFiles = [];
+    input.addEventListener('change', () => {
+        queuedFiles = [...(input.files || [])];
+        const isVideo = (file) => ['video/mp4', 'video/quicktime'].includes(file.type);
+        if (queuedFiles.length > 4 || (queuedFiles.some(isVideo) && queuedFiles.length !== 1)
+            || queuedFiles.some((file) => !isVideo(file) && !['image/jpeg', 'image/png', 'image/webp'].includes(file.type))) {
+            queuedFiles = [];
+            input.value = '';
+            status.textContent = 'Escolhe até quatro imagens ou um único vídeo.';
+            upload.disabled = true;
+            return;
+        }
+        if (queuedFiles.some((file) => !file.size || file.size > (isVideo(file) ? 100 : 12) * 1024 * 1024)) {
+            queuedFiles = [];
+            input.value = '';
+            status.textContent = 'Cada imagem pode ter até 12 MB e cada vídeo até 100 MB antes da otimização.';
+            upload.disabled = true;
+            return;
+        }
+        status.textContent = queuedFiles.length ? `${queuedFiles.length} ficheiro(s) pronto(s) para enviar.` : '';
+        upload.disabled = queuedFiles.length === 0;
+    });
+    upload.addEventListener('click', async () => {
+        upload.disabled = true;
+        input.disabled = true;
+        try {
+            while (queuedFiles.length) {
+                status.textContent = `A otimizar e enviar evidência ${Number(input.dataset.uploaded || 0) + 1}…`;
+                const file = queuedFiles[0];
+                const result = await window.ImpactaAPI.upload(
+                    `/challenge-participations/${encodeURIComponent(challenge.viewer_participation_id)}/evidence`,
+                    file,
+                    { evidenceStage: stage }
+                );
+                challenge.viewer_evidence = [...(Array.isArray(challenge.viewer_evidence) ? challenge.viewer_evidence : []), {
+                    id: result.id, stage, media_type: result.mediaType
+                }];
+                queuedFiles.shift();
+                const oldGallery = card.querySelector('.challenge-evidence-gallery');
+                const newGallery = createChallengeEvidenceGallery(challenge.viewer_evidence);
+                if (oldGallery) oldGallery.replaceWith(newGallery);
+                else control.before(newGallery);
+                input.dataset.uploaded = String(Number(input.dataset.uploaded || 0) + 1);
+            }
+            status.textContent = 'Evidências enviadas em privado.';
+            input.value = '';
+            input.dataset.uploaded = '0';
+        } catch (error) {
+            status.textContent = friendlyError(error, 'Não foi possível enviar a evidência. Podes tentar novamente.');
+        } finally {
+            input.disabled = false;
+            upload.disabled = queuedFiles.length === 0;
+        }
+    });
+    control.append(label, note, status, upload);
+    card.append(control);
+}
+
+function createChallengeDeliveryForm(challenge) {
+    const form = element('form', 'action-form challenge-form challenge-delivery-form');
+    const label = element('label', '', 'Conta o que entregaste, o que aprendeste e onde está o resultado.');
+    const submission = element('textarea', 'action-input');
+    submission.maxLength = 3000;
+    submission.rows = 4;
+    submission.required = true;
+    submission.value = challenge.viewer_delivery_submission || '';
+    submission.placeholder = 'Resume o resultado e o impacto esperado. Podes anexar imagens ou vídeo abaixo.';
+    label.append(submission);
+    const status = element('p', 'form-status');
+    status.setAttribute('role', 'status');
+    const submit = element('button', 'button button-small', 'Enviar resultado para revisão');
+    submit.type = 'submit';
+    form.append(label, status, submit);
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        submit.disabled = true;
+        try {
+            await window.ImpactaAPI.post(`/challenges/${encodeURIComponent(challenge.id)}/participation/delivery`, {
+                submission: submission.value
+            });
+            challenge.viewer_participation_status = 'delivery_submitted';
+            challenge.viewer_participates = true;
+            challenge.viewer_delivery_submission = submission.value.trim();
+            challenge.viewer_review_reason = null;
+            const card = form.closest('.challenge-entry');
+            if (card) card.replaceWith(createChallenge(challenge));
+            showFeedNotice('Resultado enviado', 'A equipa do projecto vai rever a entrega e poderá confirmar a conclusão ou pedir ajustes.', { durationMs: 2600 });
+        } catch (error) {
+            status.textContent = friendlyError(error, 'Não foi possível enviar o resultado. Tenta novamente.');
+            submit.disabled = false;
+        }
+    });
+    return form;
+}
+
+function shareCompletedChallenge(challenge) {
+    if (!postProjectField || !composerInput || !challenge.project_id) return;
+    ensureProjectPostOption({ id: challenge.project_id, title: challenge.project_title || 'Projecto' });
+    postProjectField.value = String(challenge.project_id);
+    composerInput.value = `Concluí o desafio “${challenge.title}” no projecto “${challenge.project_title || 'da comunidade'}”.\n\n${challenge.viewer_delivery_submission || ''}`.trim();
+    composerInput.dispatchEvent(new Event('input', { bubbles: true }));
+    document.querySelector('#partilhar-ideia')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    composerInput.focus({ preventScroll: true });
+    showFeedNotice('Resultado pronto para partilhar', 'Revê o texto: a publicação será visível no feed público.', { durationMs: 3200 });
+}
+
 function createChallenge(challenge) {
     const card = element('article', 'challenge-entry');
     card.dataset.searchable = '';
+    if (challenge.is_weekly_featured) card.append(element('span', 'challenge-weekly-label', 'Destaque desta semana'));
     card.append(element('span', 'tag tag-green', challenge.impact_area || 'Desafio comunitário'));
     card.append(element('h3', '', challenge.title));
+    if (challenge.project_title) card.append(element('small', 'challenge-project-name', `Projecto: ${challenge.project_title}`));
     if (challenge.description) card.append(expandableDescription(challenge.description, 'challenge-description'));
     const openDate = challenge.opens_at ? new Date(`${String(challenge.opens_at).slice(0, 10)}T12:00:00`) : null;
     const closeDate = challenge.closes_at ? new Date(`${String(challenge.closes_at).slice(0, 10)}T12:00:00`) : null;
     const canParticipate = challenge.can_participate === true;
     const schedule = challenge.status === 'draft' && !canParticipate
-        ? (openDate && !Number.isNaN(openDate.getTime())
-            ? `Agendado para ${openDate.toLocaleDateString('pt-AO')}`
-            : 'A aguardar publicação')
+        ? (openDate && !Number.isNaN(openDate.getTime()) ? `Agendado para ${openDate.toLocaleDateString('pt-AO')}` : 'A aguardar publicação')
         : !canParticipate && openDate && !Number.isNaN(openDate.getTime())
             ? `Abre em ${openDate.toLocaleDateString('pt-AO')}`
-            : closeDate && !Number.isNaN(closeDate.getTime())
-                ? `Participação até ${closeDate.toLocaleDateString('pt-AO')}`
-                : '';
+            : closeDate && !Number.isNaN(closeDate.getTime()) ? `Participação até ${closeDate.toLocaleDateString('pt-AO')}` : '';
     if (schedule) card.append(element('small', 'challenge-dates', schedule));
-    const count = element('small', 'participant-count', `${Number(challenge.participant_count) || 0} participantes`);
-    card.append(count);
+    card.append(element('small', 'participant-count', `${Number(challenge.participant_count) || 0} participantes`));
     const challengeLocation = [challenge.location_neighborhood, challenge.location_commune,
         challenge.location_municipality, challenge.location_city, challenge.location_province]
         .filter(Boolean).filter((value, index, values) => values.indexOf(value) === index);
     if (challengeLocation.length) card.append(element('small', 'project-location', `Local: ${challengeLocation.join(', ')}`));
 
+    const status = challenge.viewer_participation_status;
     if (challenge.viewer_participates) {
-        const done = element('p', 'participation-done', challenge.viewer_participation_status === 'approved'
-            ? 'A tua participação foi aceite pela equipa do projecto.'
-            : 'A tua participação foi recebida e aguarda análise.');
-        card.append(done);
+        const statusText = status === 'approved' ? 'A equipa aceitou a tua proposta. Já és participante do projecto e podes colaborar na conversa privada.'
+            : status === 'delivery_submitted' ? 'Resultado enviado. Aguarda a revisão da equipa do projecto.'
+                : status === 'changes_requested' ? 'A equipa pediu ajustes antes de confirmar a conclusão.'
+                    : status === 'completed' ? 'A equipa confirmou que o desafio foi concluído.'
+                        : 'A tua participação foi recebida e aguarda análise.';
+        card.append(element('p', 'participation-done', statusText));
+        if (challenge.viewer_review_reason) card.append(element('p', 'challenge-review-reason', `Nota da equipa: ${challenge.viewer_review_reason}`));
+        const evidence = createChallengeEvidenceGallery(challenge.viewer_evidence);
+        if (evidence.childElementCount) card.append(evidence);
+        if (status === 'submitted') appendChallengeEvidenceControl(card, challenge, 'proposal');
+        if (status === 'approved' || status === 'changes_requested') card.append(createChallengeDeliveryForm(challenge));
+        if (status === 'approved' || status === 'changes_requested' || status === 'delivery_submitted') {
+            appendChallengeEvidenceControl(card, challenge, 'delivery');
+        }
+        if (status === 'completed' && challenge.project_id) {
+            const share = element('button', 'button button-small challenge-share-result', 'Partilhar resultado no feed');
+            share.type = 'button';
+            share.addEventListener('click', () => shareCompletedChallenge(challenge));
+            card.append(share);
+        }
         return card;
     }
+    if (status === 'rejected') {
+        card.append(element('p', 'challenge-scheduled-state', 'A equipa não aceitou a proposta. Podes ajustar a resposta e tentar novamente enquanto o desafio estiver aberto.'));
+        if (challenge.viewer_review_reason) card.append(element('p', 'challenge-review-reason', `Motivo: ${challenge.viewer_review_reason}`));
+        const rejectedEvidence = createChallengeEvidenceGallery(challenge.viewer_evidence);
+        if (rejectedEvidence.childElementCount) card.append(rejectedEvidence);
+    }
     if (!canParticipate) {
-        const state = challenge.status === 'draft'
-            ? 'Este desafio está agendado e ainda não aceita participações.'
-            : 'As participações ainda não começaram.';
+        const state = challenge.status === 'draft' ? 'Este desafio está agendado e ainda não aceita participações.' : 'As participações ainda não começaram.';
         card.append(element('p', 'challenge-scheduled-state', state));
         return card;
     }
@@ -2568,12 +2808,7 @@ function createChallenge(challenge) {
         card.append(login);
         return card;
     }
-
-    if (challenge.viewer_participation_status === 'rejected') {
-        card.append(element('p', 'challenge-scheduled-state', 'A resposta anterior não foi aceite. Podes enviar uma nova participação enquanto o desafio estiver aberto.'));
-    }
-
-    const toggle = element('button', 'button button-full challenge-button', 'Participar neste desafio');
+    const toggle = element('button', 'button button-full challenge-button', status === 'rejected' ? 'Enviar nova proposta' : 'Participar neste desafio');
     toggle.type = 'button';
     const form = element('form', 'action-form challenge-form');
     form.hidden = true;
@@ -2581,12 +2816,14 @@ function createChallenge(challenge) {
     submission.maxLength = 2000;
     submission.rows = 3;
     submission.required = true;
-    submission.placeholder = 'Conta como gostarias de contribuir com este desafio.';
-    const status = element('p', 'form-status');
-    status.setAttribute('role', 'status');
-    const submit = element('button', 'button button-small', 'Enviar a minha participação');
+    submission.value = status === 'rejected' ? (challenge.viewer_submission || '') : '';
+    submission.placeholder = 'Explica como pretendes contribuir e que resultado gostarias de alcançar.';
+    const note = element('small', 'challenge-participation-note', 'A resposta é uma proposta. Se for aceite, passarás a integrar a equipa do projecto e poderás enviar a entrega e evidências em privado.');
+    const formStatus = element('p', 'form-status');
+    formStatus.setAttribute('role', 'status');
+    const submit = element('button', 'button button-small', status === 'rejected' ? 'Enviar nova proposta' : 'Enviar a minha proposta');
     submit.type = 'submit';
-    form.append(submission, status, submit);
+    form.append(submission, note, formStatus, submit);
     toggle.addEventListener('click', () => {
         form.hidden = !form.hidden;
         if (!form.hidden) submission.focus();
@@ -2595,16 +2832,17 @@ function createChallenge(challenge) {
         event.preventDefault();
         submit.disabled = true;
         try {
-            await window.ImpactaAPI.post(`/challenges/${challenge.id}/participations`, { submission: submission.value });
+            const response = await window.ImpactaAPI.post(`/challenges/${encodeURIComponent(challenge.id)}/participations`, { submission: submission.value });
+            challenge.viewer_participation_id = response.id;
             challenge.viewer_participates = true;
+            challenge.viewer_participation_status = 'submitted';
+            challenge.viewer_submission = submission.value.trim();
+            challenge.viewer_review_reason = null;
             challenge.participant_count = Number(challenge.participant_count) + 1;
-            count.textContent = `${challenge.participant_count} participantes`;
-            form.replaceChildren(element('p', 'participation-done', 'A tua participação neste desafio foi recebida.'));
-            toggle.remove();
-            showFeedNotice('Participação enviada', 'A tua participação no desafio foi recebida.', { durationMs: 1900 });
+            card.replaceWith(createChallenge(challenge));
+            showFeedNotice('Proposta enviada', 'A equipa do projecto foi notificada e vai analisar a tua participação.', { durationMs: 2200 });
         } catch (error) {
-            status.textContent = '';
-            showFeedNotice('Não foi possível participar', friendlyError(error, 'Tenta novamente.'), { danger: true, durationMs: 3000 });
+            formStatus.textContent = friendlyError(error, 'Não foi possível participar. Tenta novamente.');
             submit.disabled = false;
         }
     });
@@ -2760,46 +2998,7 @@ async function loadProjectChallengeParticipations(projectId, panel, before = nul
             panel.append(element('p', 'project-review-status', 'Ainda não há participações nos desafios deste projecto.'));
             return;
         }
-        items.forEach((participation) => {
-            const entry = element('article', 'project-review-item');
-            entry.append(element('strong', '', `${participation.display_name} · ${participation.challenge_title}`));
-            entry.append(element('p', '', participation.submission));
-            const submittedAt = participation.submitted_at ? new Date(participation.submitted_at).toLocaleString('pt-AO') : '';
-            entry.append(element('small', '', submittedAt));
-            if (participation.status === 'submitted' && String(participation.user_id) !== String(currentUser?.id)) {
-                const actions = element('div', 'project-review-actions');
-                const act = (decision, label) => {
-                    const button = element('button', `button button-small${decision === 'reject' ? ' button-quiet' : ''}`, label);
-                    button.type = 'button';
-                    button.addEventListener('click', async () => {
-                        actions.querySelectorAll('button').forEach((item) => { item.disabled = true; });
-                        try {
-                            const response = await window.ImpactaAPI.post(
-                                `/projects/${encodeURIComponent(projectId)}/challenge-participations/${encodeURIComponent(participation.id)}`,
-                                { decision }
-                            );
-                            participation.status = response.status;
-                            entry.replaceWith(createProjectParticipationEntry(participation));
-                            showFeedNotice('Participação analisada', decision === 'approve'
-                                ? 'A pessoa receberá a decisão na actividade do projecto.'
-                                : 'A decisão foi registada e a pessoa será notificada.', { durationMs: 2200 });
-                        } catch (error) {
-                            actions.querySelectorAll('button').forEach((item) => { item.disabled = false; });
-                            showFeedNotice('Não foi possível analisar', friendlyError(error, 'Actualiza a lista e tenta novamente.'), { danger: true, durationMs: 3000 });
-                        }
-                    });
-                    return button;
-                };
-                actions.append(act('approve', 'Aceitar participação'), act('reject', 'Recusar'));
-                entry.append(actions);
-            } else {
-                const status = participation.status === 'approved' ? 'Participação aceite'
-                    : participation.status === 'rejected' ? 'Participação recusada'
-                        : participation.status === 'withdrawn' ? 'Participação retirada' : 'A aguardar análise';
-                entry.append(element('small', 'project-review-decision', status));
-            }
-            panel.append(entry);
-        });
+        items.forEach((participation) => panel.append(createProjectParticipationEntry(participation, projectId)));
         if (result.hasMore && result.nextBefore) {
             const older = element('button', 'project-review-more', 'Carregar participações anteriores');
             older.type = 'button';
@@ -2816,13 +3015,95 @@ async function loadProjectChallengeParticipations(projectId, panel, before = nul
     }
 }
 
-function createProjectParticipationEntry(participation) {
+function createProjectReviewButton(projectId, participation, decision, label, needsReason) {
+    const actions = element('div', 'project-review-actions');
+    const button = element('button', `button button-small${needsReason ? ' button-quiet' : ''}`, label);
+    button.type = 'button';
+    button.addEventListener('click', () => {
+        if (needsReason) {
+            const form = element('form', 'project-review-reason-form');
+            const reason = element('textarea', 'action-input');
+            reason.maxLength = 500;
+            reason.minLength = 5;
+            reason.rows = 2;
+            reason.required = true;
+            reason.placeholder = decision === 'reject'
+                ? 'Explica brevemente por que a proposta não foi aceite.'
+                : 'Indica o que precisa de ser ajustado na entrega.';
+            const submit = element('button', 'button button-small button-quiet', decision === 'reject' ? 'Confirmar recusa' : 'Enviar pedido de ajustes');
+            submit.type = 'submit';
+            const status = element('small', 'project-review-status');
+            form.append(reason, submit, status);
+            button.replaceWith(form);
+            reason.focus();
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                void sendProjectParticipationDecision(projectId, participation, decision, reason.value, actions, status);
+            });
+            return;
+        }
+        void sendProjectParticipationDecision(projectId, participation, decision, '', actions, null);
+    });
+    actions.append(button);
+    return actions;
+}
+
+async function sendProjectParticipationDecision(projectId, participation, decision, reason, actions, statusNode) {
+    actions.querySelectorAll('button, textarea').forEach((item) => { item.disabled = true; });
+    try {
+        const response = await window.ImpactaAPI.post(
+            `/projects/${encodeURIComponent(projectId)}/challenge-participations/${encodeURIComponent(participation.id)}`,
+            { decision, reason: reason || undefined }
+        );
+        participation.status = response.status;
+        participation.review_reason = reason || null;
+        const entry = actions.closest('.project-review-item');
+        entry?.replaceWith(createProjectParticipationEntry(participation, projectId));
+        const notices = {
+            approve: 'A pessoa foi aceite como participante e já pode colaborar na conversa privada do projecto.',
+            reject: 'A recusa e o motivo foram registados; a pessoa poderá ajustar a proposta e tentar novamente.',
+            complete: 'A conclusão foi registada. O resultado só será público se alguém o partilhar no feed.',
+            request_changes: 'A pessoa recebeu o pedido de ajustes e poderá enviar uma nova versão.'
+        };
+        showFeedNotice('Etapa actualizada', notices[decision] || 'A actividade do projecto foi actualizada.', { durationMs: 2700 });
+    } catch (error) {
+        actions.querySelectorAll('button, textarea').forEach((item) => { item.disabled = false; });
+        if (statusNode) statusNode.textContent = friendlyError(error, 'Actualiza a lista e tenta novamente.');
+        else showFeedNotice('Não foi possível analisar', friendlyError(error, 'Actualiza a lista e tenta novamente.'), { danger: true, durationMs: 3000 });
+    }
+}
+
+function createProjectParticipationEntry(participation, projectId) {
     const entry = element('article', 'project-review-item');
     entry.append(element('strong', '', `${participation.display_name} · ${participation.challenge_title}`));
     entry.append(element('p', '', participation.submission));
     const submittedAt = participation.submitted_at ? new Date(participation.submitted_at).toLocaleString('pt-AO') : '';
     entry.append(element('small', '', submittedAt));
-    entry.append(element('small', 'project-review-decision', participation.status === 'approved' ? 'Participação aceite' : 'Participação recusada'));
+    const labels = {
+        submitted: 'Proposta aguarda análise', approved: 'Aceite · trabalho em curso', delivery_submitted: 'Entrega aguarda revisão',
+        changes_requested: 'Ajustes solicitados', completed: 'Desafio concluído', rejected: 'Proposta recusada', withdrawn: 'Participação retirada'
+    };
+    entry.append(element('small', 'project-review-decision', labels[participation.status] || 'Estado actualizado'));
+    if (participation.review_reason) entry.append(element('p', 'challenge-review-reason', `Nota enviada à pessoa: ${participation.review_reason}`));
+    if (participation.delivery_submission) {
+        entry.append(element('strong', 'project-review-delivery-title', 'Resultado apresentado'));
+        entry.append(element('p', '', participation.delivery_submission));
+    }
+    const evidence = createChallengeEvidenceGallery(participation.evidence);
+    if (evidence.childElementCount) entry.append(evidence);
+    if (String(participation.user_id) !== String(currentUser?.id)) {
+        if (participation.status === 'submitted') {
+            if (participation.project_accepting_work) {
+                entry.append(createProjectReviewButton(projectId, participation, 'approve', 'Aceitar e integrar no projecto', false));
+            } else {
+                entry.append(element('small', 'project-review-status', 'O período do projecto terminou; já não é possível aceitar novas pessoas.'));
+            }
+            entry.append(createProjectReviewButton(projectId, participation, 'reject', 'Recusar com motivo', true));
+        } else if (participation.status === 'delivery_submitted') {
+            entry.append(createProjectReviewButton(projectId, participation, 'complete', 'Confirmar conclusão', false));
+            entry.append(createProjectReviewButton(projectId, participation, 'request_changes', 'Pedir ajustes', true));
+        }
+    }
     return entry;
 }
 

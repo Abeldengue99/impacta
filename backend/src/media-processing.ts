@@ -7,12 +7,19 @@ import sharp from 'sharp';
 export const MEDIA_DIRECTORY = resolve(process.env.IMPACTA_MEDIA_DIR ?? resolve(__dirname, '../storage/media'));
 export const POST_MEDIA_DIRECTORY = resolve(MEDIA_DIRECTORY, 'posts');
 export const COMMUNITY_CHAT_MEDIA_DIRECTORY = resolve(MEDIA_DIRECTORY, 'community-chat');
+export const DIRECT_MESSAGE_MEDIA_DIRECTORY = resolve(MEDIA_DIRECTORY, 'direct-messages');
+export const CHALLENGE_EVIDENCE_DIRECTORY = resolve(MEDIA_DIRECTORY, 'challenge-evidence');
 export const PROMOTION_MEDIA_DIRECTORY = resolve(MEDIA_DIRECTORY, 'promotions');
 export const MAX_POST_IMAGE_BYTES = 12 * 1024 * 1024;
 export const MAX_POST_IMAGE_OUTPUT_BYTES = 8 * 1024 * 1024;
 export const MAX_POST_VIDEO_BYTES = 100 * 1024 * 1024;
 export const MAX_POST_VIDEO_OUTPUT_BYTES = 50 * 1024 * 1024;
 export const MAX_POST_VIDEO_SECONDS = 90;
+export const MAX_DIRECT_MESSAGE_IMAGE_BYTES = 12 * 1024 * 1024;
+export const MAX_DIRECT_MESSAGE_IMAGE_OUTPUT_BYTES = 4 * 1024 * 1024;
+export const MAX_DIRECT_MESSAGE_VIDEO_BYTES = 100 * 1024 * 1024;
+export const MAX_DIRECT_MESSAGE_VIDEO_OUTPUT_BYTES = 20 * 1024 * 1024;
+export const MAX_DIRECT_MESSAGE_VIDEO_SECONDS = 60;
 const MAX_IMAGE_PIXELS = 40_000_000;
 // Accept both UHD (3840×2160) and DCI 4K (4096×2160) source video.
 const MAX_VIDEO_WIDTH = 4096;
@@ -125,6 +132,30 @@ export async function optimizePostImage(input: Buffer): Promise<ProcessedPostMed
     }
 }
 
+export async function optimizeDirectMessageImage(input: Buffer): Promise<ProcessedPostMedia> {
+    try {
+        const metadata = await sharp(input, { limitInputPixels: MAX_IMAGE_PIXELS, failOn: 'error' }).metadata();
+        if (!['jpeg', 'png', 'webp'].includes(metadata.format ?? '') || !metadata.width || !metadata.height
+            || metadata.width > 8192 || metadata.height > 8192 || metadata.width * metadata.height > MAX_IMAGE_PIXELS
+            || (metadata.pages ?? 1) > 1) {
+            throw new MediaProcessingError('invalid_direct_message_image', 400);
+        }
+
+        const bytes = await sharp(input, { limitInputPixels: MAX_IMAGE_PIXELS, failOn: 'error' })
+            .rotate()
+            .resize({ width: 1920, height: 1920, fit: 'inside', withoutEnlargement: true })
+            .webp({ quality: 78, effort: 5, smartSubsample: true })
+            .toBuffer();
+        if (!bytes.length || bytes.length > MAX_DIRECT_MESSAGE_IMAGE_OUTPUT_BYTES) {
+            throw new MediaProcessingError('processed_media_too_large', 413);
+        }
+        return { bytes, mediaType: 'image', mimeType: 'image/webp', extension: 'webp' };
+    } catch (error) {
+        if (error instanceof MediaProcessingError) throw error;
+        throw new MediaProcessingError('invalid_direct_message_image', 400);
+    }
+}
+
 interface ProbeResult {
     format?: { duration?: string };
     streams?: Array<{ codec_type?: string; width?: number; height?: number; duration?: string }>;
@@ -215,7 +246,15 @@ async function runVideoTool(
     }
 }
 
-export async function optimizePostVideo(input: Buffer): Promise<ProcessedPostMedia> {
+interface VideoOptimizationOptions {
+    maxDurationSeconds: number;
+    maxOutputBytes: number;
+    outputDimension: number;
+    crf: number;
+    audioBitrate: string;
+}
+
+async function optimizeVideo(input: Buffer, options: VideoOptimizationOptions): Promise<ProcessedPostMedia> {
     const temporaryDirectory = resolve(MEDIA_DIRECTORY, '.processing');
     const id = randomUUID();
     const inputPath = resolve(temporaryDirectory, `${id}.input.mp4`);
@@ -243,8 +282,9 @@ export async function optimizePostVideo(input: Buffer): Promise<ProcessedPostMed
             || width <= 0 || height <= 0) {
             throw new MediaProcessingError('invalid_post_video', 400);
         }
-        if (duration > MAX_POST_VIDEO_SECONDS) {
-            throw new MediaProcessingError('post_video_too_long', 400);
+        if (duration > options.maxDurationSeconds) {
+            throw new MediaProcessingError(options.maxDurationSeconds === MAX_DIRECT_MESSAGE_VIDEO_SECONDS
+                ? 'direct_message_video_too_long' : 'post_video_too_long', 400);
         }
         if (width > MAX_VIDEO_WIDTH || height > MAX_VIDEO_HEIGHT || width * height > MAX_VIDEO_PIXELS) {
             throw new MediaProcessingError('post_video_resolution_too_large', 400);
@@ -254,20 +294,40 @@ export async function optimizePostVideo(input: Buffer): Promise<ProcessedPostMed
             '-hide_banner', '-loglevel', 'error', '-nostdin', '-y',
             '-protocol_whitelist', 'file,crypto,data', '-f', 'mov', '-i', inputPath,
             '-map', '0:v:0', '-map', '0:a:0?',
-            '-vf', "scale=w='min(1920,iw)':h='min(1920,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2",
-            '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '23', '-pix_fmt', 'yuv420p',
-            '-c:a', 'aac', '-b:a', '128k', '-map_metadata', '-1', '-movflags', '+faststart',
-            '-t', String(MAX_POST_VIDEO_SECONDS), '-f', 'mp4', outputPath
+            '-vf', `scale=w='min(${options.outputDimension},iw)':h='min(${options.outputDimension},ih)':force_original_aspect_ratio=decrease:force_divisible_by=2`,
+            '-c:v', 'libx264', '-preset', 'veryfast', '-crf', String(options.crf), '-pix_fmt', 'yuv420p',
+            '-c:a', 'aac', '-b:a', options.audioBitrate, '-map_metadata', '-1', '-movflags', '+faststart',
+            '-t', String(options.maxDurationSeconds), '-f', 'mp4', outputPath
         ], VIDEO_PROCESS_TIMEOUT_MS);
 
         const bytes = await readFile(outputPath);
-        if (!bytes.length || bytes.length > MAX_POST_VIDEO_OUTPUT_BYTES) {
+        if (!bytes.length || bytes.length > options.maxOutputBytes) {
             throw new MediaProcessingError('processed_media_too_large', 413);
         }
         return { bytes, mediaType: 'video', mimeType: 'video/mp4', extension: 'mp4' };
     } finally {
         await Promise.all([unlink(inputPath).catch(() => undefined), unlink(outputPath).catch(() => undefined)]);
     }
+}
+
+export function optimizePostVideo(input: Buffer): Promise<ProcessedPostMedia> {
+    return optimizeVideo(input, {
+        maxDurationSeconds: MAX_POST_VIDEO_SECONDS,
+        maxOutputBytes: MAX_POST_VIDEO_OUTPUT_BYTES,
+        outputDimension: 1920,
+        crf: 23,
+        audioBitrate: '128k'
+    });
+}
+
+export function optimizeDirectMessageVideo(input: Buffer): Promise<ProcessedPostMedia> {
+    return optimizeVideo(input, {
+        maxDurationSeconds: MAX_DIRECT_MESSAGE_VIDEO_SECONDS,
+        maxOutputBytes: MAX_DIRECT_MESSAGE_VIDEO_OUTPUT_BYTES,
+        outputDimension: 1280,
+        crf: 28,
+        audioBitrate: '96k'
+    });
 }
 
 export function postMediaStoragePath(storageKey: string): string | null {
@@ -277,6 +337,16 @@ export function postMediaStoragePath(storageKey: string): string | null {
 
 export function communityChatMediaStoragePath(storageKey: string): string | null {
     if (!/^community-chat\/[a-f0-9-]{36}\.(?:webp|mp4)$/i.test(storageKey)) return null;
+    return resolve(MEDIA_DIRECTORY, storageKey);
+}
+
+export function directMessageMediaStoragePath(storageKey: string): string | null {
+    if (!/^direct-messages\/[a-f0-9-]{36}\.(?:webp|mp4)$/i.test(storageKey)) return null;
+    return resolve(MEDIA_DIRECTORY, storageKey);
+}
+
+export function challengeEvidenceStoragePath(storageKey: string): string | null {
+    if (!/^challenge-evidence\/[a-f0-9-]{36}\.(?:webp|mp4)$/i.test(storageKey)) return null;
     return resolve(MEDIA_DIRECTORY, storageKey);
 }
 

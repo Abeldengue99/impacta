@@ -349,10 +349,25 @@
                 const card = makeElement('article', 'admin-report-card');
                 const targetLabel = item.target_type === 'project_message'
                     ? 'Mensagem de projecto denunciada'
+                    : item.target_type === 'direct_message' ? 'Mensagem privada denunciada'
+                    : item.target_type === 'direct_message_request' ? 'Pedido de mensagem denunciado'
                     : item.target_type === 'comment' ? 'Comentário denunciado' : 'Publicação denunciada';
                 card.append(makeElement('h3', '', `${targetLabel} · ${item.reporter_count} perfil(is)`));
                 card.append(makeElement('p', 'admin-report-meta', `Autor: ${item.author_name || 'Conta encerrada'} · ${new Date(item.latest_report_at).toLocaleString('pt-AO')}`));
                 card.append(makeElement('blockquote', 'admin-reported-post', item.content || 'Conteúdo indisponível'));
+                if (canDecide && item.media_url && ['image', 'video'].includes(item.media_type)) {
+                    const preview = makeElement(item.media_type === 'video' ? 'video' : 'img', 'admin-review-media');
+                    preview.crossOrigin = 'use-credentials';
+                    preview.src = window.ImpactaAPI.assetUrl(item.media_url);
+                    if (item.media_type === 'video') {
+                        preview.controls = true;
+                        preview.playsInline = true;
+                        preview.preload = 'metadata';
+                    } else {
+                        preview.alt = 'Anexo da mensagem privada denunciada';
+                    }
+                    card.append(preview);
+                }
                 const reportReasons = makeElement('ul', 'admin-report-reasons');
                 (Array.isArray(item.reports) ? item.reports : []).forEach((report) => {
                     const entry = makeElement('li');
@@ -379,7 +394,14 @@
                         try {
                             await window.ImpactaAPI.request(`/admin/content-reports/${item.target_type}/${encodeURIComponent(item.target_id)}/decision`, 'POST', { action, reason: reason.value.trim() });
                             await loadContentReports();
-                        } catch (error) { status.textContent = friendlyApiError(error, 'Não foi possível registar a decisão.'); }
+                        } catch (error) {
+                            if (error?.code === 'content_report_moved') {
+                                status.textContent = 'O pedido foi aceite entretanto. A denúncia passou para a mensagem privada.';
+                                await loadContentReports();
+                            } else {
+                                status.textContent = friendlyApiError(error, 'Não foi possível registar a decisão.');
+                            }
+                        }
                         finally { button.disabled = false; }
                     });
                     if (canDecide) actions.append(button);

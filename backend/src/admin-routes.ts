@@ -1,8 +1,9 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { Pool, PoolClient } from 'pg';
 import { createReadStream } from 'node:fs';
+import { stat } from 'node:fs/promises';
 import { requireMfaSession, type AuthenticatedSession } from './community-routes.js';
-import { postMediaStoragePath } from './media-processing.js';
+import { directMessageMediaStoragePath, postMediaStoragePath } from './media-processing.js';
 
 interface UrgentReportRow {
     post_id: string;
@@ -844,8 +845,9 @@ export function registerAdminRoutes(server: FastifyInstance, pool: Pool): void {
         const [result, canModerate] = await Promise.all([
             pool.query(
                 `SELECT * FROM (
-                    SELECT 'post'::text AS target_type, post.id::text AS target_id,
-                           post.body AS content, author.display_name AS author_name,
+                     SELECT 'post'::text AS target_type, post.id::text AS target_id,
+                            post.body AS content, author.display_name AS author_name,
+                            NULL::text AS media_type, NULL::text AS media_url,
                            count(DISTINCT report.reporter_user_id)::int AS reporter_count,
                            max(report.created_at) AS latest_report_at,
                            jsonb_agg(jsonb_build_object('id', report.id::text,
@@ -860,8 +862,9 @@ export function registerAdminRoutes(server: FastifyInstance, pool: Pool): void {
                     GROUP BY post.id, author.display_name
                     HAVING count(DISTINCT report.reporter_user_id) <= 5
                     UNION ALL
-                    SELECT 'comment'::text AS target_type, comment.id::text AS target_id,
-                           comment.body AS content, author.display_name AS author_name,
+                     SELECT 'comment'::text AS target_type, comment.id::text AS target_id,
+                            comment.body AS content, author.display_name AS author_name,
+                            NULL::text AS media_type, NULL::text AS media_url,
                            count(DISTINCT report.reporter_user_id)::int AS reporter_count,
                            max(report.created_at) AS latest_report_at,
                            jsonb_agg(jsonb_build_object('id', report.id::text,
@@ -875,8 +878,9 @@ export function registerAdminRoutes(server: FastifyInstance, pool: Pool): void {
                     WHERE report.status IN ('open', 'reviewing') AND comment.deleted_at IS NULL
                     GROUP BY comment.id, author.display_name
                     UNION ALL
-                    SELECT 'project_message'::text AS target_type, message.id::text AS target_id,
-                           message.body AS content, author.display_name AS author_name,
+                     SELECT 'project_message'::text AS target_type, message.id::text AS target_id,
+                            message.body AS content, author.display_name AS author_name,
+                            NULL::text AS media_type, NULL::text AS media_url,
                            count(DISTINCT report.reporter_user_id)::int AS reporter_count,
                            max(report.created_at) AS latest_report_at,
                            jsonb_agg(jsonb_build_object('id', report.id::text,
@@ -889,6 +893,42 @@ export function registerAdminRoutes(server: FastifyInstance, pool: Pool): void {
                     LEFT JOIN impacta.users AS reporter ON reporter.id = report.reporter_user_id
                     WHERE report.status IN ('open', 'reviewing') AND message.deleted_at IS NULL
                     GROUP BY message.id, author.display_name
+                    UNION ALL
+                      SELECT 'direct_message'::text AS target_type, message.id::text AS target_id,
+                             COALESCE(message.body, '[Anexo de media]') AS content, author.display_name AS author_name,
+                            media.media_type,
+                            CASE WHEN media.id IS NOT NULL
+                                 THEN '/api/v1/admin/content-reports/direct-messages/' || message.id::text
+                                      || '/media/' || media.id::text END AS media_url,
+                           count(DISTINCT report.reporter_user_id)::int AS reporter_count,
+                           max(report.created_at) AS latest_report_at,
+                           jsonb_agg(jsonb_build_object('id', report.id::text,
+                               'reporter', COALESCE(reporter.display_name, 'Conta encerrada'),
+                               'reason_code', report.reason_code, 'details', report.details,
+                               'created_at', report.created_at) ORDER BY report.created_at DESC) AS reports
+                    FROM impacta.content_reports AS report
+                    JOIN impacta.direct_messages AS message ON message.id = report.direct_message_id
+                    LEFT JOIN impacta.users AS author ON author.id = message.author_user_id
+                     LEFT JOIN impacta.media AS media ON media.id = message.media_id AND media.status = 'available'
+                    LEFT JOIN impacta.users AS reporter ON reporter.id = report.reporter_user_id
+                    WHERE report.status IN ('open', 'reviewing') AND message.deleted_at IS NULL
+                     GROUP BY message.id, author.display_name, media.id, media.media_type
+                    UNION ALL
+                     SELECT 'direct_message_request'::text AS target_type, request.id::text AS target_id,
+                            request.body AS content, author.display_name AS author_name,
+                            NULL::text AS media_type, NULL::text AS media_url,
+                           count(DISTINCT report.reporter_user_id)::int AS reporter_count,
+                           max(report.created_at) AS latest_report_at,
+                           jsonb_agg(jsonb_build_object('id', report.id::text,
+                               'reporter', COALESCE(reporter.display_name, 'Conta encerrada'),
+                               'reason_code', report.reason_code, 'details', report.details,
+                               'created_at', report.created_at) ORDER BY report.created_at DESC) AS reports
+                    FROM impacta.content_reports AS report
+                    JOIN impacta.direct_message_requests AS request ON request.id = report.direct_message_request_id
+                    LEFT JOIN impacta.users AS author ON author.id = request.requester_user_id
+                    LEFT JOIN impacta.users AS reporter ON reporter.id = report.reporter_user_id
+                    WHERE report.status IN ('open', 'reviewing') AND request.status IN ('pending', 'declined')
+                    GROUP BY request.id, author.display_name
                 ) AS queued
                 ORDER BY latest_report_at DESC LIMIT 100`
             ),
@@ -897,6 +937,58 @@ export function registerAdminRoutes(server: FastifyInstance, pool: Pool): void {
         return { items: result.rows, canModerate };
     });
 
+    server.get<{ Params: { messageId: string; mediaId: string } }>(
+        '/api/v1/admin/content-reports/direct-messages/:messageId/media/:mediaId', async (request, reply) => {
+            const session = await requirePermission(request, reply, pool, 'content.moderate', false);
+            if (!session) return;
+            const { messageId, mediaId } = request.params;
+            if (!validId(messageId) || !validId(mediaId)) return reply.code(404).send({ error: 'media_not_found' });
+            const result = await pool.query<{ storage_key: string; mime_type: string; media_type: string }>(
+                `SELECT media.storage_key, media.mime_type, media.media_type
+                 FROM impacta.content_reports AS report
+                 JOIN impacta.direct_messages AS message ON message.id = report.direct_message_id
+                 JOIN impacta.media AS media ON media.id = message.media_id
+                 WHERE message.id = $1 AND media.id = $2 AND message.deleted_at IS NULL
+                   AND media.status = 'available' AND report.status IN ('open', 'reviewing')
+                 LIMIT 1`, [messageId, mediaId]
+            );
+            const media = result.rows[0];
+            const path = media ? directMessageMediaStoragePath(media.storage_key) : null;
+            if (!media || !path) return reply.code(404).send({ error: 'media_not_found' });
+            try {
+                const file = await stat(path);
+                if (media.media_type === 'video' && request.headers.range) {
+                    const match = /^bytes=(\d*)-(\d*)$/.exec(request.headers.range);
+                    if (!match || (!match[1] && !match[2])) {
+                        return reply.code(416).header('content-range', `bytes */${file.size}`).send();
+                    }
+                    const start = match[1] ? Number(match[1]) : Math.max(0, file.size - Number(match[2]));
+                    let end = match[2] && match[1] ? Number(match[2]) : file.size - 1;
+                    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end)
+                        || start < 0 || start >= file.size || end < start) {
+                        return reply.code(416).header('content-range', `bytes */${file.size}`).send();
+                    }
+                    end = Math.min(end, file.size - 1);
+                    return reply.code(206).type(media.mime_type)
+                        .header('accept-ranges', 'bytes')
+                        .header('content-range', `bytes ${start}-${end}/${file.size}`)
+                        .header('content-length', String(end - start + 1))
+                        .header('cache-control', 'private, no-store')
+                        .header('x-content-type-options', 'nosniff')
+                        .send(createReadStream(path, { start, end }));
+                }
+                return reply.type(media.mime_type)
+                    .header('accept-ranges', media.media_type === 'video' ? 'bytes' : 'none')
+                    .header('content-length', String(file.size))
+                    .header('cache-control', 'private, no-store')
+                    .header('x-content-type-options', 'nosniff')
+                    .send(createReadStream(path));
+            } catch {
+                return reply.code(404).send({ error: 'media_not_found' });
+            }
+        }
+    );
+
     server.post<{ Params: { targetType: string; targetId: string }; Body: { action?: unknown; reason?: unknown } }>(
         '/api/v1/admin/content-reports/:targetType/:targetId/decision', async (request, reply) => {
             const session = await requirePermission(request, reply, pool, 'content.moderate', true);
@@ -904,29 +996,43 @@ export function registerAdminRoutes(server: FastifyInstance, pool: Pool): void {
             const { targetType, targetId } = request.params;
             const action = request.body?.action;
             const reason = cleanReason(request.body?.reason);
-            if (!['post', 'comment', 'project_message'].includes(targetType) || !validId(targetId)
+            if (!['post', 'comment', 'project_message', 'direct_message', 'direct_message_request'].includes(targetType) || !validId(targetId)
                 || !['dismiss', 'hide', 'remove'].includes(String(action)) || !reason) {
                 return reply.code(400).send({ error: 'invalid_content_report_decision' });
             }
             const outcome = await transaction(pool, async (client) => {
                 const table = targetType === 'project_message' ? 'project_messages'
+                    : targetType === 'direct_message' ? 'direct_messages'
+                    : targetType === 'direct_message_request' ? 'direct_message_requests'
                     : targetType === 'post' ? 'posts' : 'comments';
                 const targetColumn = targetType === 'project_message' ? 'project_message_id'
+                    : targetType === 'direct_message' ? 'direct_message_id'
+                    : targetType === 'direct_message_request' ? 'direct_message_request_id'
                     : targetType === 'post' ? 'post_id' : 'comment_id';
-                const locked = targetType === 'project_message'
+                const locked = targetType === 'project_message' || targetType === 'direct_message'
                     ? await client.query<{ id: string; status: string }>(
-                        `SELECT id::text AS id, 'active'::text AS status FROM impacta.project_messages
+                        `SELECT id::text AS id, 'active'::text AS status FROM impacta.${table}
                          WHERE id = $1 FOR UPDATE`, [targetId]
                     )
                     : await client.query<{ id: string; status: string }>(
                         `SELECT id::text AS id, status FROM impacta.${table} WHERE id = $1 FOR UPDATE`, [targetId]
                     );
                 if (!locked.rows[0]) return 'content_not_found' as const;
+                if (targetType === 'direct_message_request' && locked.rows[0].status === 'accepted') {
+                    return 'content_report_moved' as const;
+                }
                 if (action !== 'dismiss') {
                     const nextStatus = action === 'hide' ? 'hidden' : 'removed';
-                    if (targetType === 'project_message') {
+                    if (targetType === 'direct_message_request') {
                         await client.query(
-                            `UPDATE impacta.project_messages
+                            `UPDATE impacta.direct_message_requests
+                             SET body = CASE WHEN $2 = 'remove' THEN 'Mensagem removida pela moderação.' ELSE body END,
+                                 status = 'declined', responded_at = now()
+                             WHERE id = $1`, [targetId, action]
+                        );
+                    } else if (targetType === 'project_message' || targetType === 'direct_message') {
+                        await client.query(
+                            `UPDATE impacta.${table}
                              SET deleted_at = COALESCE(deleted_at, now()), deleted_by_user_id = $2
                              WHERE id = $1`, [targetId, session.userId]
                         );
@@ -938,11 +1044,13 @@ export function registerAdminRoutes(server: FastifyInstance, pool: Pool): void {
                                  updated_at = now()
                              WHERE id = $1`, [targetId, nextStatus]
                         );
-                        await client.query(
-                            `INSERT INTO impacta.moderation_actions (actor_user_id, ${targetColumn}, action_type, reason)
-                             VALUES ($1, $2, $3, $4)`,
-                            [session.userId, targetId, action === 'hide' ? 'hide_content' : 'remove_content', reason]
-                        );
+                        if (targetType !== 'direct_message_request') {
+                            await client.query(
+                                `INSERT INTO impacta.moderation_actions (actor_user_id, ${targetColumn}, action_type, reason)
+                                 VALUES ($1, $2, $3, $4)`,
+                                [session.userId, targetId, action === 'hide' ? 'hide_content' : 'remove_content', reason]
+                            );
+                        }
                     }
                 }
                 const resolved = await client.query(
@@ -958,6 +1066,7 @@ export function registerAdminRoutes(server: FastifyInstance, pool: Pool): void {
                 return { resolvedReports: resolved.rowCount ?? 0 };
             });
             if (outcome === 'content_not_found') return reply.code(404).send({ error: outcome });
+            if (outcome === 'content_report_moved') return reply.code(409).send({ error: outcome });
             return { status: 'decided', ...outcome };
         }
     );

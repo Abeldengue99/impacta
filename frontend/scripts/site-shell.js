@@ -27,7 +27,29 @@ document.addEventListener('click', (event) => {
 
 (() => {
     const oldHeader = document.querySelector('header.app-shell-header');
-    if (!oldHeader || document.body.classList.contains('feed-page')) return;
+    if (!oldHeader) return;
+    const getMessageLinks = () => [...document.querySelectorAll('[data-direct-message-link]')];
+    const updateMessageBadges = async () => {
+        const messageLinks = getMessageLinks();
+        if (!window.ImpactaAPI || !messageLinks.length) return;
+        try {
+            const summary = await window.ImpactaAPI.request('/direct-messages/summary');
+            const unread = Math.max(0, Number(summary?.unread_count) || 0);
+            const requests = Math.max(0, Number(summary?.request_count) || 0);
+            const total = unread + requests;
+            messageLinks.forEach((link) => {
+                const badge = link.querySelector('[data-direct-message-badge]');
+                if (badge) {
+                    badge.textContent = total > 99 ? '99+' : String(total);
+                    badge.hidden = total === 0;
+                }
+                link.setAttribute('aria-label', total
+                    ? `Mensagens, ${unread} por ler e ${requests} pedidos`
+                    : 'Mensagens');
+            });
+        } catch { /* Keep the messages shortcut available when the count cannot load. */ }
+    };
+    if (document.body.classList.contains('feed-page')) return;
     if (document.body.classList.contains('support-page')) {
         const callout = document.querySelector('.about-callout[data-hide-for-authenticated]');
         const communityLinks = [...document.querySelectorAll('[data-support-community-link]')];
@@ -142,6 +164,7 @@ document.addEventListener('click', (event) => {
         <a class="icon-nav-link" href="${feedUrl}#feed" aria-label="In\u00edcio" data-tooltip="In\u00edcio"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m3.5 10 8.5-7 8.5 7"/><path d="M5.5 9v11h13V9M9.5 20v-6h5v6"/></svg><span class="visually-hidden icon-nav-label">In\u00edcio</span></a>
         <a class="icon-nav-link" href="${feedUrl}#desafios" aria-label="Desafios" data-tooltip="Desafios"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2.5v19M3.8 7.2l16.4 9.6M3.8 16.8l16.4-9.6M5 5l14 14M19 5 5 19"/></svg><span class="visually-hidden icon-nav-label">Desafios</span></a>
         <a class="icon-nav-link" href="${feedUrl}#projetos" aria-label="Projectos" data-tooltip="Projectos"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 19 19 5M8 5h11v11"/></svg><span class="visually-hidden icon-nav-label">Projectos</span></a>
+        <a class="icon-nav-link" data-direct-message-link href="${relative('messages.html')}" aria-label="Mensagens" data-tooltip="Mensagens" hidden><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20.5 11.5a8.3 8.3 0 0 1-8.5 8.2 9 9 0 0 1-3.8-.8L3 20l1.2-4.1A8 8 0 0 1 3.5 12 8.3 8.3 0 0 1 12 3.8a8.3 8.3 0 0 1 8.5 7.7Z"/><path d="M7.5 11.5h9M7.5 15h6"/></svg><span class="notification-badge" data-direct-message-badge hidden></span><span class="visually-hidden icon-nav-label">Mensagens</span></a>
         <a class="icon-nav-link" id="feed-admin-link" href="${adminUrl}" aria-label="Administra\u00e7\u00e3o" data-tooltip="Administra\u00e7\u00e3o" hidden><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg><span class="visually-hidden icon-nav-label">Administra\u00e7\u00e3o</span></a>
         <a class="icon-nav-link" id="feed-notifications-toggle" href="${feedUrl}#notifications" aria-label="Notifica\u00e7\u00f5es" data-tooltip="Notifica\u00e7\u00f5es" hidden><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span class="notification-badge" id="feed-notifications-badge" hidden></span><span class="visually-hidden icon-nav-label">Notifica\u00e7\u00f5es</span></a>`;
     gateFeedLinksForVisitors(topNav);
@@ -195,6 +218,7 @@ document.addEventListener('click', (event) => {
             <a href="${feedUrl}#feed"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m3.5 10 8.5-7 8.5 7"/><path d="M5.5 9v11h13V9M9.5 20v-6h5v6"/></svg>In\u00edcio</a>
             <a href="${feedUrl}#desafios"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2.5v19M3.8 7.2l16.4 9.6M3.8 16.8l16.4-9.6M5 5l14 14M19 5 5 19"/></svg>Desafios</a>
             <a href="${feedUrl}#projetos"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 19 19 5M8 5h11v11"/></svg>Projectos</a>
+            <a data-direct-message-link href="${relative('messages.html')}" hidden><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20.5 11.5a8.3 8.3 0 0 1-8.5 8.2 9 9 0 0 1-3.8-.8L3 20l1.2-4.1A8 8 0 0 1 3.5 12 8.3 8.3 0 0 1 12 3.8a8.3 8.3 0 0 1 8.5 7.7Z"/><path d="M7.5 11.5h9M7.5 15h6"/></svg><span>Mensagens</span></a>
             <a id="feed-mobile-admin-link" href="${adminUrl}" hidden><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg>Administra\u00e7\u00e3o</a>
             <a href="${feedUrl}#comunidades"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/></svg>Comunidades</a>
             <span class="feed-menu-divider" aria-hidden="true"></span>
@@ -218,6 +242,25 @@ document.addEventListener('click', (event) => {
     header.append(brand, searchShell, topNav, headerActions);
     if (!isAdminPage) header.append(menuToggle, mobileMenu);
     oldHeader.replaceWith(header);
+
+    const directMessageShortcut = topNav.querySelector('[data-direct-message-link]');
+    const messageShortcutViewport = window.matchMedia('(max-width: 760px)');
+    const placeDirectMessageShortcut = () => {
+        if (!directMessageShortcut) return;
+        if (messageShortcutViewport.matches) {
+            const notificationShortcut = headerActions.querySelector('#feed-notifications-toggle');
+            const accountShortcut = headerActions.querySelector('.profile-chip, .account-state-placeholder, .user-chip');
+            headerActions.insertBefore(directMessageShortcut, notificationShortcut || accountShortcut || headerActions.firstChild);
+            return;
+        }
+        if (directMessageShortcut.parentElement !== topNav) {
+            const adminShortcut = topNav.querySelector('#feed-admin-link');
+            const notificationShortcut = topNav.querySelector('#feed-notifications-toggle');
+            topNav.insertBefore(directMessageShortcut, adminShortcut || notificationShortcut || null);
+        }
+    };
+    placeDirectMessageShortcut();
+    messageShortcutViewport.addEventListener('change', placeDirectMessageShortcut);
 
     const cachedAvatar = window.ImpactaAPI?.cachedAvatarPreview();
     if (cachedAvatar) {
@@ -338,6 +381,9 @@ document.addEventListener('click', (event) => {
                 link.removeAttribute('data-authenticated-feed-href');
             });
             const user = session.user;
+            header.querySelectorAll('[data-direct-message-link]').forEach((link) => { link.hidden = false; });
+            void updateMessageBadges();
+            window.setInterval(() => { void updateMessageBadges(); }, 30000);
             const avatar = headerActions.querySelector('.profile-chip') || document.createElement('a');
             avatar.className = 'user-chip profile-chip';
             avatar.href = relative('profile.html');
