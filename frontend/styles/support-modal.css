@@ -1,0 +1,39 @@
+.support-modal {
+    display: none;
+    width: min(820px, calc(100vw - 32px));
+    height: min(820px, calc(100dvh - 40px));
+    max-width: none;
+    max-height: none;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid rgba(220, 228, 220, .95);
+    border-radius: 20px;
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: 0 28px 90px rgba(13, 31, 24, .24);
+}
+.support-modal[open] { display: flex; }
+.support-modal::backdrop { background: rgba(12, 32, 25, .48); backdrop-filter: blur(7px); }
+.support-modal-header { display: grid; min-height: 68px; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; padding: 0 20px; border-bottom: 1px solid var(--line); background: #fff; }
+.support-modal-brand { font-size: 1.02rem; }
+.support-modal-brand .brand-mark { width: 29px; height: 29px; border-radius: 10px 10px 10px 3px; font-size: 1rem; }
+.support-modal-nav { display: flex; justify-content: center; gap: 7px; }
+.support-modal-nav a { padding: 9px 13px; border-radius: 9px; color: var(--ink-soft); font-size: .82rem; font-weight: 700; transition: color .18s ease, background .18s ease; }
+.support-modal-nav a:hover, .support-modal-nav a[aria-current="page"] { background: #edf5ef; color: var(--green); }
+.support-modal-close { display: grid; width: 38px; height: 38px; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: #fff; color: var(--ink-soft); cursor: pointer; font-size: 1.4rem; line-height: 1; }
+.support-modal-close:hover { border-color: #b7d4c3; background: #f1f8f3; color: var(--green); }
+.support-modal-frame { display: block; width: 100%; min-height: 0; flex: 1; border: 0; background: var(--paper); }
+body.support-modal-open { overflow: hidden; }
+
+@media (max-width: 620px) {
+    .support-modal { width: calc(100vw - 18px); height: calc(100dvh - 20px); border-radius: 16px; }
+    .support-modal-header { min-height: 60px; grid-template-columns: 27px minmax(0, 1fr) 34px; gap: 6px; padding: 0 8px; }
+    .support-modal-brand { gap: 6px; font-size: .87rem; }
+    .support-modal-brand > span:not(.brand-mark) { display: none; }
+    .support-modal-brand .brand-mark { width: 25px; height: 25px; font-size: .86rem; }
+    .support-modal-nav { min-width: 0; gap: 0; overflow-x: auto; scrollbar-width: none; }
+    .support-modal-nav::-webkit-scrollbar { display: none; }
+    .support-modal-nav a { flex: 0 0 auto; padding: 8px 5px; font-size: .68rem; white-space: nowrap; }
+    .support-modal-close { width: 34px; height: 34px; }
+}

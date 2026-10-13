@@ -1,31 +1,50 @@
 <!doctype html>
-<html lang="pt">
+<html lang="pt-AO">
 <head>
     <meta charset="utf-8">
+    <script src="../../scripts/avatar-preview-bootstrap.js?v=avatar-preview-bootstrap-20261013-1"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../styles/scrollbar.css?v=scrollbar-brand-green-20261010-1">
+    <script src="../../scripts/scroll-navigation.js?v=scroll-navigation-single-20261010-1" defer></script>
     <meta name="theme-color" content="#10231d">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg" sizes="any">
     <meta name="robots" content="noindex, nofollow">
-    <title>Administração | IMPACTA</title>
-    <link rel="stylesheet" href="../../styles/main.css">
-    <link rel="stylesheet" href="../../styles/admin.css">
-    <script src="../../scripts/admin.js" defer></script>
+    <title>Administração</title>
+    <link rel="stylesheet" href="../../styles/main.css?v=security-release-20261011-1">
+    <link rel="stylesheet" href="../../styles/feed.css?v=feed-header-carousel-spacing-20261012-2">
+    <link rel="stylesheet" href="../../styles/admin.css?v=admin-backup-maintenance-20261013-1">
+    <link rel="stylesheet" href="../../styles/shell.css?v=header-spacing-balance-20261013-5">
+    <link rel="stylesheet" href="../../styles/action-modal.css?v=action-modal-system-20261011-1">
+    <script src="../../scripts/api.js?v=admin-backup-20261013-1" defer></script>
+    <script src="../../scripts/admin-console.js?v=admin-backup-maintenance-20261013-1" defer></script>
+    <script src="../../scripts/action-modal.js?v=action-modal-system-20261011-1" defer></script>
+    <script src="../../scripts/admin.js?v=admin-automation-20261012-1" defer></script>
+    <script src="../../scripts/site-shell.js?v=maintenance-mode-20261013-1" defer></script>
 </head>
 <body class="admin-page">
     <a class="admin-skip-link" href="#admin-content">Saltar para o conteúdo</a>
+    <header class="admin-topbar app-shell-header">
+        <button class="admin-menu-toggle" type="button" aria-expanded="false" aria-controls="admin-sidebar" aria-label="Abrir navegação">☰</button>
+        <a class="brand admin-shell-brand" href="../index.html" aria-label="IMPACTA, página inicial">
+            <span class="brand-mark" aria-hidden="true">i</span><span>impacta<span class="brand-period">.</span></span>
+        </a>
+        <span class="visually-hidden" id="admin-current-title" aria-live="polite">Visão geral</span>
+        <div class="admin-top-actions">
+            <a class="admin-profile-link app-back-link" data-admin-profile-link href="../profile.html" aria-label="Voltar ao meu perfil" hidden><span aria-hidden="true">←</span><span class="admin-profile-link-label">O meu perfil</span></a>
+        </div>
+    </header>
     <div class="admin-shell">
         <aside class="admin-sidebar" id="admin-sidebar">
-            <a class="brand admin-brand" href="../index.html" aria-label="IMPACTA, página inicial">
-                <span class="brand-mark" aria-hidden="true">i</span><span>impacta<span class="brand-period">.</span></span>
-            </a>
             <p class="admin-sidebar-label">PLATAFORMA</p>
             <nav class="admin-nav" aria-label="Secções de administração">
                 <a href="#overview" data-admin-nav="overview" aria-current="page"><span aria-hidden="true">⌂</span> Visão geral</a>
                 <a href="#users" data-admin-nav="users"><span aria-hidden="true">♙</span> Utilizadores</a>
+                <a href="#verifications" data-admin-nav="verifications"><span aria-hidden="true">✓</span> Verificação de contas</a>
                 <a href="#roles" data-admin-nav="roles"><span aria-hidden="true">◇</span> Funções e permissões</a>
                 <a href="#communities" data-admin-nav="communities"><span aria-hidden="true">◎</span> Comunidades</a>
-                <a href="#projects" data-admin-nav="projects"><span aria-hidden="true">↗</span> Projetos e desafios</a>
+                <a href="#projects" data-admin-nav="projects"><span aria-hidden="true">↗</span> Projectos e desafios</a>
                 <a href="#moderation" data-admin-nav="moderation"><span aria-hidden="true">✳</span> Moderação</a>
-                <a href="#reports" data-admin-nav="reports"><span aria-hidden="true">⚑</span> Denúncias e recursos</a>
+                <a href="#reports" data-admin-nav="reports"><span aria-hidden="true">⚑</span> Denúncias e recursos <b class="admin-report-badge" data-urgent-report-badge hidden>0</b></a>
                 <a href="#announcements" data-admin-nav="announcements"><span aria-hidden="true">▣</span> Anúncios</a>
                 <a href="#recognition" data-admin-nav="recognition"><span aria-hidden="true">✦</span> Distintivos e pontos</a>
                 <a href="#privacy" data-admin-nav="privacy"><span aria-hidden="true">◈</span> Privacidade</a>
@@ -35,39 +54,30 @@
             </nav>
             <div class="admin-sidebar-foot">
                 <span class="admin-lock-mark" aria-hidden="true">⌑</span>
-                <span><strong>Acesso condicionado</strong><small>Autenticação e MFA pendentes</small></span>
+                <span><strong>Acesso protegido</strong><small>Permissões verificadas no servidor</small></span>
             </div>
         </aside>
 
         <main class="admin-main" id="admin-content">
-            <header class="admin-topbar">
-                <button class="admin-menu-toggle" type="button" aria-expanded="false" aria-controls="admin-sidebar" aria-label="Abrir navegação">☰</button>
-                <div class="admin-breadcrumb"><span>IMPACTA</span><span aria-hidden="true">/</span><strong id="admin-current-title">Visão geral</strong></div>
-                <div class="admin-top-actions">
-                    <span class="admin-env-badge"><i aria-hidden="true"></i> Pré-visualização</span>
-                    <a class="admin-home-link" href="../index.html">Voltar ao site <span aria-hidden="true">↗</span></a>
-                </div>
-            </header>
-
             <div class="admin-content-wrap">
                 <section class="admin-page-heading" aria-labelledby="admin-heading">
                     <div>
                         <p class="admin-eyebrow"><span></span> CENTRO DE ADMINISTRAÇÃO</p>
                         <h1 id="admin-heading">Uma plataforma, <span>bem cuidada.</span></h1>
-                        <p id="admin-description">Acompanhe a atividade e as decisões que mantêm a comunidade segura.</p>
+                        <p id="admin-description">Acompanha a actividade e as decisões que mantêm a comunidade IMPACTA segura.</p>
                     </div>
                     <div class="admin-operator-card">
                         <span class="admin-operator-avatar" aria-hidden="true">A</span>
-                        <span><strong>Acesso protegido</strong><small>Sem sessão administrativa</small></span>
+                        <span><strong>Acesso protegido</strong><small>Sessão e permissões verificadas pela API</small></span>
                     </div>
                 </section>
 
-                <section class="admin-security-notice" role="status" aria-live="polite">
+                <section class="admin-security-notice" role="status" aria-live="polite" data-admin-access-notice>
                     <span class="admin-notice-icon" aria-hidden="true">⌑</span>
-                    <div><strong>Área administrativa bloqueada até a ligação segura</strong>
-                        <p>Esta pré-visualização não lê nem altera dados. O acesso real só será ativado depois da API com autenticação, MFA e permissões estar ligada à base de dados aprovada.</p>
+                    <div><strong data-admin-access-title>A validar sessão e permissões</strong>
+                        <p data-admin-access-copy>A fila urgente requer sessão ativa e a permissão administrativa correspondente.</p>
                     </div>
-                    <span class="admin-notice-state">SEM ACESSO A DADOS</span>
+                    <span class="admin-notice-state" data-admin-access-state>A AGUARDAR</span>
                 </section>
 
                 <section class="admin-view" data-admin-view="overview" aria-labelledby="overview-title">
@@ -77,18 +87,29 @@
                     </div>
                     <div class="admin-stat-grid" aria-label="Indicadores não carregados">
                         <article class="admin-stat-card"><span>Utilizadores ativos</span><strong>—</strong><small>Disponível após ligação</small><i class="stat-mark stat-mark-green" aria-hidden="true">♙</i></article>
-                        <article class="admin-stat-card"><span>Projetos em curso</span><strong>—</strong><small>Disponível após ligação</small><i class="stat-mark stat-mark-mint" aria-hidden="true">↗</i></article>
-                        <article class="admin-stat-card"><span>Denúncias por rever</span><strong>—</strong><small>Disponível após ligação</small><i class="stat-mark stat-mark-amber" aria-hidden="true">⚑</i></article>
+                        <article class="admin-stat-card"><span>Projectos em curso</span><strong>—</strong><small>Disponível após ligação</small><i class="stat-mark stat-mark-mint" aria-hidden="true">↗</i></article>
+                        <article class="admin-stat-card"><span>Publicações urgentes</span><strong data-urgent-report-count>—</strong><small data-urgent-report-caption>Mais de 5 perfis distintos</small><i class="stat-mark stat-mark-amber" aria-hidden="true">⚑</i></article>
                         <article class="admin-stat-card"><span>Pedidos de privacidade</span><strong>—</strong><small>Disponível após ligação</small><i class="stat-mark stat-mark-blue" aria-hidden="true">◈</i></article>
+                        <article class="admin-stat-card" data-admin-verification-stat hidden><span>Canais oficiais confirmados</span><strong>—</strong><small>Disponível após ligação</small><i class="stat-mark stat-mark-blue" aria-hidden="true">✓</i></article>
+                    </div>
+                    <div class="admin-analytics-grid" aria-label="Gráficos da plataforma">
+                        <article class="admin-panel admin-chart-panel">
+                            <div class="admin-panel-heading"><div><p class="admin-eyebrow">ÚLTIMOS 7 DIAS</p><h3>Ritmo da comunidade</h3></div><span class="admin-chart-badge">ACTIVIDADE</span></div>
+                            <div class="admin-chart-host" data-admin-trend-chart><p class="admin-chart-empty">A carregar actividade diária…</p></div>
+                        </article>
+                        <article class="admin-panel admin-chart-panel">
+                            <div class="admin-panel-heading"><div><p class="admin-eyebrow">ESTADO ACTUAL</p><h3>Panorama dos estados</h3></div><span class="admin-panel-icon" aria-hidden="true">◫</span></div>
+                            <div class="admin-status-chart" data-admin-status-chart><p class="admin-chart-empty">A carregar estados…</p></div>
+                        </article>
                     </div>
                     <div class="admin-overview-grid">
                         <article class="admin-panel admin-queue-panel">
                             <div class="admin-panel-heading"><div><p class="admin-eyebrow">ATENÇÃO DA EQUIPA</p><h3>Filas de trabalho</h3></div><span class="admin-panel-icon">≡</span></div>
-                            <div class="admin-empty-state"><span aria-hidden="true">⌑</span><strong>Fila ainda não ligada</strong><p>Denúncias, recursos e pedidos de privacidade aparecerão aqui quando a API estiver ativa.</p></div>
+                            <div class="admin-empty-state" data-report-overview><span aria-hidden="true">⚑</span><strong data-report-overview-title>A verificar a fila urgente…</strong><p data-report-overview-copy>A API verifica denúncias de perfis diferentes e mantém a decisão com a administração.</p><a href="#reports" data-report-overview-link>Abrir denúncias e recursos →</a></div>
                         </article>
                         <article class="admin-panel admin-activity-panel">
                             <div class="admin-panel-heading"><div><p class="admin-eyebrow">REGISTO RECENTE</p><h3>Atividade administrativa</h3></div><span class="admin-panel-icon">◷</span></div>
-                            <div class="admin-empty-state"><span aria-hidden="true">⌑</span><strong>Sem dados carregados</strong><p>As ações administrativas serão registadas e apresentadas aqui, com acesso limitado por permissão.</p></div>
+                            <div class="admin-empty-state"><span aria-hidden="true">⌑</span><strong>Sem dados carregados</strong><p>As acções administrativas serão registadas e apresentadas aqui, com acesso limitado por permissão.</p></div>
                         </article>
                     </div>
                 </section>
@@ -97,6 +118,12 @@
                     <div class="admin-section-heading"><div><p class="admin-eyebrow">CONTAS DA COMUNIDADE</p><h2 id="users-title">Utilizadores</h2></div></div>
                     <div class="admin-module-grid"><article><b>01</b><h3>Pesquisa e consulta</h3><p>Localizar contas e consultar apenas os dados necessários ao trabalho autorizado.</p></article><article><b>02</b><h3>Estado da conta</h3><p>Suspender ou restaurar o acesso com motivo e histórico da decisão.</p></article><article><b>03</b><h3>Privacidade</h3><p>Iniciar o fluxo de exportação, correção ou encerramento de uma conta.</p></article></div>
                     <div class="admin-locked-state"><span aria-hidden="true">⌑</span><div><strong>Consulta desativada</strong><p>Os dados de utilizadores só serão apresentados depois da autenticação e das permissões estarem ativas.</p></div></div>
+                </section>
+
+                <section class="admin-view" data-admin-view="verifications" aria-labelledby="verifications-title" hidden>
+                    <div class="admin-section-heading"><div><p class="admin-eyebrow">IDENTIDADE E CONFIANÇA</p><h2 id="verifications-title">Verificação de contas</h2></div><button class="admin-refresh-button" type="button" data-verification-refresh>Actualizar pedidos</button></div>
+                    <p class="admin-live-status" data-verification-status role="status" aria-live="polite">A verificar a sessão e a permissão de revisão…</p>
+                    <div class="admin-live-module" data-account-verification-list aria-live="polite"></div>
                 </section>
 
                 <section class="admin-view" data-admin-view="roles" aria-labelledby="roles-title" hidden>
@@ -108,25 +135,37 @@
                 <section class="admin-view" data-admin-view="communities" aria-labelledby="communities-title" hidden>
                     <div class="admin-section-heading"><div><p class="admin-eyebrow">ESPAÇOS COLABORATIVOS</p><h2 id="communities-title">Comunidades</h2></div></div>
                     <div class="admin-module-grid"><article><b>01</b><h3>Revisão</h3><p>Analisar comunidades pendentes e respetiva área de impacto.</p></article><article><b>02</b><h3>Membros</h3><p>Consultar e gerir adesões dentro do âmbito atribuído.</p></article><article><b>03</b><h3>Estado e visibilidade</h3><p>Gerir a publicação, suspensão e arquivo com histórico.</p></article></div>
-                    <div class="admin-locked-state"><span aria-hidden="true">⌑</span><div><strong>Gestão desativada</strong><p>A lista e as ações de comunidade aguardam a API autenticada.</p></div></div>
+                    <div class="admin-proposal-toolbar"><p data-proposal-status="community" role="status" aria-live="polite">À espera de propostas de comunidade.</p><button class="admin-refresh-button" type="button" data-proposal-refresh>Actualizar propostas de comunidade</button></div>
+                    <div class="admin-space-proposals" data-proposal-list="community" aria-live="polite"></div>
                 </section>
 
                 <section class="admin-view" data-admin-view="projects" aria-labelledby="projects-title" hidden>
-                    <div class="admin-section-heading"><div><p class="admin-eyebrow">IDEIAS EM AÇÃO</p><h2 id="projects-title">Projetos e desafios</h2></div></div>
-                    <div class="admin-module-grid"><article><b>01</b><h3>Projetos</h3><p>Rever propostas, estados e participação.</p></article><article><b>02</b><h3>Desafios</h3><p>Gerir períodos de participação e submissões.</p></article><article><b>03</b><h3>Decisões</h3><p>Registar aprovação ou rejeição com motivo.</p></article></div>
-                    <div class="admin-locked-state"><span aria-hidden="true">⌑</span><div><strong>Revisão desativada</strong><p>O conteúdo real só será consultado com autenticação e autorização por recurso.</p></div></div>
+                    <div class="admin-section-heading"><div><p class="admin-eyebrow">IDEIAS EM ACÇÃO</p><h2 id="projects-title">Projectos e desafios</h2></div></div>
+                    <div class="admin-module-grid"><article><b>01</b><h3>Projectos</h3><p>Revê propostas, estados e participação.</p></article><article><b>02</b><h3>Desafios</h3><p>Gere períodos de participação e respostas.</p></article><article><b>03</b><h3>Decisões</h3><p>Regista aprovações ou rejeições com o respectivo motivo.</p></article></div>
+                    <div class="admin-proposal-toolbar"><p data-proposal-status="project" role="status" aria-live="polite">À espera de propostas de projecto.</p><button class="admin-refresh-button" type="button" data-proposal-refresh>Actualizar propostas de projectos</button></div>
+                    <div class="admin-space-proposals" data-proposal-list="project" aria-live="polite"></div>
                 </section>
 
                 <section class="admin-view" data-admin-view="moderation" aria-labelledby="moderation-title" hidden>
                     <div class="admin-section-heading"><div><p class="admin-eyebrow">SEGURANÇA DA COMUNIDADE</p><h2 id="moderation-title">Moderação</h2></div></div>
                     <div class="admin-module-grid"><article><b>01</b><h3>Publicações</h3><p>Ocultar, restaurar ou remover conteúdo com uma razão registada.</p></article><article><b>02</b><h3>Comentários</h3><p>Tratar conteúdo sinalizado sem expor dados desnecessários.</p></article><article><b>03</b><h3>Contas</h3><p>Aplicar avisos ou suspensões proporcionais, com prazo quando aplicável.</p></article></div>
-                    <div class="admin-locked-state"><span aria-hidden="true">⌑</span><div><strong>Ações de moderação desativadas</strong><p>Cada ação exigirá permissão, motivo e registo de auditoria no servidor.</p></div></div>
+                    <div class="admin-locked-state"><span aria-hidden="true">⌑</span><div><strong>Revisão por sinalização</strong><p>As regras automáticas encaminham conteúdo suspeito para análise. A decisão exige permissão, MFA, motivo e registo de auditoria.</p></div></div>
+                    <div class="admin-report-toolbar"><p>Publicações que não forem sinalizadas entram no feed automaticamente. Só conteúdo marcado pelas regras de segurança aguarda revisão.</p><button class="admin-refresh-button" type="button" data-feed-review-refresh>Atualizar fila sinalizada</button></div>
+                    <p class="admin-report-status" data-feed-review-status role="status" aria-live="polite">A verificar publicações sinalizadas…</p>
+                    <div class="admin-urgent-reports" data-feed-review-list aria-live="polite"></div>
                 </section>
 
                 <section class="admin-view" data-admin-view="reports" aria-labelledby="reports-title" hidden>
                     <div class="admin-section-heading"><div><p class="admin-eyebrow">TRIAGEM E RECURSOS</p><h2 id="reports-title">Denúncias e recursos</h2></div></div>
-                    <div class="admin-module-grid"><article><b>01</b><h3>Triagem</h3><p>Classificar e atribuir denúncias à equipa autorizada.</p></article><article><b>02</b><h3>Decisão</h3><p>Registar o resultado e a respetiva fundamentação.</p></article><article><b>03</b><h3>Recurso</h3><p>Rever decisões anteriores com histórico separado.</p></article></div>
-                    <div class="admin-locked-state"><span aria-hidden="true">⌑</span><div><strong>Fila desativada</strong><p>Não existem contagens fictícias nem denúncias de demonstração nesta página.</p></div></div>
+                    <div class="admin-report-toolbar">
+                        <p>As publicações com denúncias abertas de <strong>6 ou mais perfis diferentes</strong> exigem revisão imediata. A administração decide se oculta ou remove o conteúdo.</p>
+                        <button class="admin-refresh-button" type="button" data-report-refresh>Actualizar fila de denúncias</button>
+                    </div>
+                    <p class="admin-report-status" data-report-status role="status" aria-live="polite">A verificar a sessão e as permissões…</p>
+                    <div class="admin-urgent-reports" data-report-list aria-live="polite"></div>
+                    <h3>Outras denúncias abertas</h3>
+                    <p class="admin-report-status" data-content-report-status role="status" aria-live="polite">A carregar denúncias de comentários e publicações…</p>
+                    <div class="admin-urgent-reports" data-content-report-list aria-live="polite"></div>
                 </section>
 
                 <section class="admin-view" data-admin-view="announcements" aria-labelledby="announcements-title" hidden>
@@ -165,9 +204,9 @@
                     <div class="admin-locked-state"><span aria-hidden="true">⌑</span><div><strong>Edição desativada</strong><p>Credenciais e definições só serão acessíveis através dos controlos seguros do backend.</p></div></div>
                 </section>
 
-                <footer class="admin-footer"><span>IMPACTA · Administração da plataforma</span><span>Pré-visualização sem dados reais</span></footer>
             </div>
         </main>
     </div>
+    <footer class="authenticated-footer admin-footer"><a class="feed-help-button" href="../help.html">Ajuda</a></footer>
 </body>
 </html>

@@ -1,0 +1,73 @@
+.impacta-action-dialog {
+    position: fixed;
+    inset: 0;
+    width: min(460px, calc(100vw - 28px));
+    margin: auto;
+    z-index: 10000;
+    max-width: none;
+    max-height: min(740px, calc(100dvh - 32px));
+    padding: 0;
+    overflow: auto;
+    border: 0;
+    border-radius: 20px;
+    background: transparent;
+    color: var(--ink, #18332a);
+    box-shadow: 0 28px 90px rgba(9, 28, 20, .28);
+}
+.impacta-action-dialog[open] { animation: impacta-action-enter .2s ease-out both; }
+.impacta-action-dialog::backdrop { background: rgba(12, 32, 25, .56); backdrop-filter: blur(7px); }
+.impacta-action-card { overflow: hidden; border: 1px solid rgba(220, 228, 220, .95); border-radius: inherit; background: #fff; }
+.impacta-action-header { display: flex; align-items: center; justify-content: space-between; padding: 22px 24px 0; }
+.impacta-action-mark { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 14px 14px 14px 4px; background: var(--green, #167353); color: #fff; font: 800 1.25rem/1 var(--font-display, sans-serif); }
+.impacta-action-dialog.is-danger .impacta-action-mark { background: #a94738; }
+.impacta-action-close { display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid #dce4dc; border-radius: 50%; background: #fff; color: #61766a; cursor: pointer; font-size: 1.35rem; line-height: 1; transition: background .16s ease, color .16s ease; }
+.impacta-action-close:hover { background: #f1f6f2; color: var(--green, #167353); }
+.impacta-action-content { display: grid; gap: 0; padding: 19px 26px 25px; }
+.impacta-action-eyebrow { margin: 0 0 8px; color: #498266; font-size: .62rem; font-weight: 800; letter-spacing: .13em; }
+.impacta-action-title { margin: 0; color: var(--ink, #18332a); font: 800 clamp(1.35rem, 4vw, 1.7rem)/1.16 var(--font-display, sans-serif); letter-spacing: -.045em; }
+.impacta-action-message { margin: 10px 0 0; color: #657a6e; font-size: .9rem; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.impacta-action-field-wrap { display: grid; gap: 8px; margin-top: 18px; }
+.impacta-action-field-wrap[hidden] { display: none; }
+.impacta-action-field-label { color: #284637; font-size: .75rem; font-weight: 750; }
+.impacta-action-field { width: 100%; min-height: 48px; padding: 11px 13px; border: 1px solid #d8e2d9; border-radius: 10px; outline: none; background: #f7faf7; color: #264234; font-size: .84rem; }
+.impacta-action-field:focus { border-color: #4c9875; box-shadow: 0 0 0 3px rgba(22, 115, 83, .12); }
+.impacta-action-status { margin: 12px 0 0; color: #287151; font-size: .75rem; line-height: 1.5; }
+.impacta-action-status[hidden] { display: none; }
+.impacta-action-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 24px; }
+.impacta-action-button { min-height: 43px; padding: 0 17px; border: 1px solid transparent; border-radius: 9px; cursor: pointer; font-size: .77rem; font-weight: 750; transition: transform .16s ease, background .16s ease, border-color .16s ease; }
+.impacta-action-button:hover { transform: translateY(-1px); }
+.impacta-action-button:focus-visible, .impacta-action-close:focus-visible { outline: 3px solid rgba(22, 115, 83, .25); outline-offset: 2px; }
+.impacta-action-cancel { border-color: #dce5dd; background: #fff; color: #51685b; }
+.impacta-action-cancel:hover { background: #f4f8f4; }
+.impacta-action-confirm { background: var(--green, #167353); color: #fff; box-shadow: 0 6px 16px rgba(22, 115, 83, .17); }
+.impacta-action-confirm:hover { background: #105f44; }
+.impacta-action-confirm.is-danger { background: #a94738; box-shadow: 0 6px 16px rgba(169, 71, 56, .16); }
+.impacta-action-confirm.is-danger:hover { background: #8d392e; }
+.impacta-action-confirm:disabled { cursor: wait; opacity: .75; transform: none; }
+.impacta-action-dialog.is-danger .impacta-action-eyebrow { color: #a94738; }
+.impacta-action-dialog.is-notice { width: min(430px, calc(100vw - 28px)); }
+.impacta-action-dialog.is-notice .impacta-action-header { padding-top: 18px; }
+.impacta-action-dialog.is-notice .impacta-action-content { padding-top: 14px; }
+.impacta-action-dialog.is-notice .impacta-action-actions { display: none; }
+.impacta-action-dialog.is-notice .impacta-action-message { margin-top: 8px; }
+body.impacta-action-modal-open { overflow: hidden; }
+body.impacta-action-modal-open::before { position: fixed; z-index: 9999; inset: 0; background: rgba(12, 32, 25, .56); content: ''; backdrop-filter: blur(7px); }
+
+@keyframes impacta-action-enter {
+    from { opacity: 0; transform: translateY(9px) scale(.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 520px) {
+    .impacta-action-dialog { width: calc(100vw - 20px); max-height: calc(100dvh - 20px); border-radius: 16px; }
+    .impacta-action-header { padding: 16px 17px 0; }
+    .impacta-action-mark { width: 38px; height: 38px; }
+    .impacta-action-content { padding: 16px 18px 19px; }
+    .impacta-action-actions { display: grid; grid-template-columns: 1fr 1fr; }
+    .impacta-action-button { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .impacta-action-dialog[open] { animation: none; }
+    .impacta-action-button { transition: none; }
+}

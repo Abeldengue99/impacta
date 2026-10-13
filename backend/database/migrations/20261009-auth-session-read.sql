@@ -5,5 +5,6 @@ BEGIN;
 
 GRANT SELECT (user_id, token_hash, revoked_at, idle_expires_at, absolute_expires_at)
     ON impacta.auth_sessions TO impacta_app;
+GRANT SELECT (last_seen_at) ON impacta.auth_sessions TO impacta_app;
 
 COMMIT;

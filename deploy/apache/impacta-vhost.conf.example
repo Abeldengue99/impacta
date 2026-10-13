@@ -1,0 +1,70 @@
+# Example only. Replace the domain, certificate paths, and application root.
+# Enable Apache modules: ssl, headers, proxy, proxy_http, rewrite.
+<VirtualHost *:80>
+    ServerName impacta.example.org
+    DocumentRoot "/srv/impacta"
+
+    Alias /.well-known/acme-challenge/ "/var/www/letsencrypt/.well-known/acme-challenge/"
+    <Directory "/var/www/letsencrypt/.well-known/acme-challenge">
+        Options None
+        AllowOverride None
+        Require all granted
+    </Directory>
+
+    RewriteEngine On
+    RewriteRule ^/.well-known/acme-challenge/ - [L]
+    RewriteRule ^ https://impacta.example.org%{REQUEST_URI} [R=301,L]
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName impacta.example.org
+    DocumentRoot "/srv/impacta"
+    DirectoryIndex index.html
+
+    SSLEngine on
+    SSLCertificateFile /etc/letsencrypt/live/impacta.example.org/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/impacta.example.org/privkey.pem
+    SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1
+    ServerTokens Prod
+    ServerSignature Off
+
+    ProxyRequests Off
+    ProxyPreserveHost On
+    ProxyAddHeaders Off
+    RequestHeader set X-Real-IP expr=%{REMOTE_ADDR}
+    RequestHeader set X-Forwarded-For expr=%{REMOTE_ADDR}
+    RequestHeader set X-Forwarded-Proto "https"
+    ProxyPass /api/v1/ http://127.0.0.1:3001/api/v1/ connectiontimeout=10 timeout=180
+    ProxyPassReverse /api/v1/ http://127.0.0.1:3001/api/v1/
+
+    <Directory "/srv/impacta">
+        Options -Indexes -Includes
+        AllowOverride None
+        Require all granted
+    </Directory>
+    <DirectoryMatch "^/srv/impacta/\.[^/]+">
+        Require all denied
+    </DirectoryMatch>
+    <Directory "/srv/impacta/backend">
+        Require all denied
+    </Directory>
+    <Directory "/srv/impacta/node_modules">
+        Require all denied
+    </Directory>
+    <Directory "/srv/impacta/deploy">
+        Require all denied
+    </Directory>
+    <FilesMatch "^(?:\.|package(?:-lock)?\.json$|preserved-local-.*\.html$)">
+        Require all denied
+    </FilesMatch>
+    <FilesMatch "\.(?:sql|ts|map|md|log|env)$">
+        Require all denied
+    </FilesMatch>
+
+    Header always set Strict-Transport-Security "max-age=31536000"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    Header always set Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests"
+</VirtualHost>

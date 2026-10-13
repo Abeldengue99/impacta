@@ -1,30 +1,74 @@
 <!doctype html>
-<html lang="pt">
+<html lang="pt-AO">
 <head>
     <meta charset="utf-8">
+    <script src="../scripts/avatar-preview-bootstrap.js?v=avatar-preview-bootstrap-20261013-1"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../styles/scrollbar.css?v=scrollbar-brand-green-20261010-1">
+    <script src="../scripts/scroll-navigation.js?v=scroll-navigation-single-20261010-1" defer></script>
     <meta name="theme-color" content="#f4f6f1">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" sizes="any">
+    <meta name="robots" content="noindex, follow">
     <title>Perfil · IMPACTA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../styles/main.css">
-    <link rel="stylesheet" href="../styles/profile.css?v=profile-20261009-1">
-    <script src="../scripts/api.js?v=profile-20261009-1" defer></script>
-    <script src="../scripts/profile.js?v=profile-20261009-1" defer></script>
+    <link rel="stylesheet" href="../styles/main.css?v=maintenance-mode-20261013-1">
+    <link rel="stylesheet" href="../styles/feed.css?v=feed-header-carousel-spacing-20261012-2">
+    <link rel="stylesheet" href="../styles/action-modal.css?v=action-modal-notice-20261011-1">
+    <link rel="stylesheet" href="../styles/profile.css?v=profile-actions-layout-20261013-1">
+    <link rel="stylesheet" href="../styles/promotion.css?v=profile-promotion-style-20261013-1">
+    <link rel="stylesheet" href="../styles/shell.css?v=header-spacing-balance-20261013-5">
+    <script src="../scripts/api.js?v=avatar-stability-20261013-2" defer></script>
+    <script src="../scripts/public-promotions.js?v=flyer-visibility-20261012-1" defer></script>
+    <script src="../scripts/action-modal.js?v=action-modal-notice-20261011-1" defer></script>
+    <script src="../scripts/profile.js?v=profile-actions-layout-20261013-1" defer></script>
+    <script src="../scripts/site-shell.js?v=maintenance-mode-20261013-1" defer></script>
 </head>
 <body class="profile-page">
-    <header class="profile-header">
-        <a class="brand" href="index.html" aria-label="IMPACTA, página inicial"><span class="brand-mark" aria-hidden="true">i</span><span>impacta<span class="brand-period">.</span></span></a>
-        <a class="profile-back" href="feed.html" data-tooltip="Voltar à comunidade" aria-label="Voltar à comunidade">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m14.5 5-7 7 7 7M8 12h12"/></svg>
-            <span>Comunidade</span>
-        </a>
+    <header class="profile-header app-shell-header">
+        <a class="brand" href="feed.html" aria-label="IMPACTA, início da comunidade"><span class="brand-mark" aria-hidden="true">i</span><span>impacta<span class="brand-period">.</span></span></a>
+        <div class="profile-header-actions">
+            <a class="profile-back app-back-link" href="feed.html" data-smart-back data-tooltip="Voltar à comunidade" aria-label="Voltar à comunidade">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m14.5 5-7 7 7 7M8 12h12"/></svg>
+                <span>Comunidade</span>
+            </a>
+            <a class="profile-admin-shortcut" id="profile-admin-shortcut" href="admin/index.html#overview" aria-label="Abrir área administrativa" hidden>
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg>
+                <span>Admin</span>
+            </a>
+        </div>
     </header>
+    <section class="public-promotions" data-public-promotions aria-label="Avisos e publicidade" hidden></section>
     <main class="profile-main">
-        <p class="eyebrow">A TUA IDENTIDADE NA COMUNIDADE</p>
-        <h1 id="profile-heading">O teu perfil</h1>
+        <section class="profile-cover" id="profile-cover" aria-label="Imagem de capa do perfil" hidden>
+            <div class="profile-cover-art" aria-hidden="true">
+                <img class="profile-cover-image" id="profile-cover-image" alt="" hidden>
+                <div class="profile-cover-empty" id="profile-cover-empty"><span>Personaliza o teu perfil com uma imagem de capa</span></div>
+            </div>
+            <div class="profile-cover-identity" id="profile-cover-identity" hidden>
+                <div class="profile-cover-avatar avatar" id="profile-cover-avatar" aria-hidden="true"></div>
+                <div class="profile-cover-copy">
+                    <h1 id="profile-cover-name"></h1>
+                    <p id="profile-cover-headline"></p>
+                    <p id="profile-cover-location" hidden></p>
+                </div>
+            </div>
+            <div class="profile-cover-controls" id="profile-cover-controls" hidden>
+                <button class="button button-small profile-cover-choose" id="choose-cover" type="button" aria-controls="cover-file">Adicionar imagem de capa</button>
+                <button class="profile-cover-remove" id="remove-cover" type="button" hidden>Remover capa</button>
+                <input id="cover-file" type="file" accept="image/png,image/jpeg" hidden>
+            </div>
+            <p class="profile-cover-feedback" id="cover-feedback" role="status" aria-live="polite"></p>
+        </section>
+        <p class="eyebrow visually-hidden">A TUA IDENTIDADE NA COMUNIDADE</p>
+        <h1 class="visually-hidden" id="profile-heading">O teu perfil</h1>
         <p class="profile-intro" id="profile-intro">Partilha um pouco sobre ti e sobre a forma como queres contribuir.</p>
+        <nav class="profile-tabs" id="profile-tabs" role="tablist" aria-label="Navegação do perfil" hidden>
+            <a href="#public-profile">Sobre</a>
+            <a href="#profile-posts-section">Publicações</a>
+            <a href="#profile-impactation">Impactantes</a>
+        </nav>
         <p class="profile-status panel" id="profile-status" role="status" aria-live="polite">A carregar perfil…</p>
 
         <section class="profile-editor panel" id="profile-editor" hidden>
@@ -32,20 +76,106 @@
                 <div class="profile-avatar avatar" id="profile-avatar" aria-label="Fotografia de perfil">I</div>
                 <div class="profile-photo-actions">
                     <strong>Fotografia de perfil</strong>
-                    <span>PNG ou JPEG · até 2 MB · máximo 4096 × 4096 px</span>
+                    <span>PNG ou JPEG · até 2 MB · guardada como WebP otimizado</span>
                     <div class="profile-photo-buttons">
-                        <button class="button button-small" id="choose-avatar" type="button">Escolher fotografia</button>
+                        <button class="button button-small" id="choose-avatar" type="button" aria-controls="avatar-file" aria-describedby="avatar-feedback">Escolher fotografia</button>
                         <button class="profile-text-button" id="remove-avatar" type="button" hidden>Remover fotografia</button>
                     </div>
+                    <p class="profile-photo-feedback" id="avatar-feedback" role="status" aria-live="polite"></p>
                     <input id="avatar-file" type="file" accept="image/png,image/jpeg" hidden>
                 </div>
             </div>
+            <section class="profile-verification-manager" aria-labelledby="account-verification-heading">
+                <div class="profile-documents-heading">
+                    <div><p class="eyebrow">IDENTIDADE PÚBLICA</p><h2 id="account-verification-heading">Verificação de conta</h2></div>
+                    <p>Confirma que controlas um canal oficial. Não pedimos documentos.</p>
+                </div>
+                <p class="profile-verification-status" id="account-verification-status" role="status" aria-live="polite">A consultar o estado da verificação…</p>
+                <section class="profile-verification-proof" id="account-verification-proof" hidden aria-label="Código para confirmar o canal oficial">
+                    <p><strong>Não publiques este código.</strong> Envia-o por e-mail usando um endereço listado no canal oficial indicado ou, se o canal permitir, por mensagem privada enviada a partir do próprio perfil. A equipa confirma o remetente e o canal; não pedimos documentos nem palavras-passe.</p>
+                    <div class="profile-verification-code-row"><code id="account-verification-code"></code><button class="button button-small" id="account-verification-copy" type="button">Copiar código</button></div>
+                    <a class="button button-small" id="account-verification-email-link" hidden>Enviar código por e-mail ao IMPACTA</a>
+                    <small id="account-verification-expiry"></small>
+                    <button class="profile-text-button" id="account-verification-renew" type="button" hidden>Gerar novo código</button>
+                </section>
+                <form id="account-verification-form" class="profile-verification-form" hidden>
+                    <label class="profile-field">Tipo de perfil
+                        <select name="category" required>
+                            <option value="public_figure">Figura pública</option>
+                            <option value="organization">Representante de organização</option>
+                        </select>
+                    </label>
+                    <label class="profile-field">Ligação do canal oficial
+                        <input name="evidenceUrl" type="url" inputmode="url" maxlength="2048" placeholder="https://" required>
+                        <small>Usa um site ou perfil social que controlas.</small>
+                    </label>
+                    <label class="profile-field">Contexto adicional (opcional)
+                        <textarea name="note" rows="2" maxlength="1500" placeholder="Se necessário, explica a ligação ao perfil ou à organização."></textarea>
+                    </label>
+                    <button class="button button-small" id="account-verification-submit" type="submit">Pedir verificação</button>
+                </form>
+            </section>
+            <section class="profile-mfa-manager" aria-labelledby="profile-mfa-heading">
+                <div class="profile-documents-heading">
+                    <div><p class="eyebrow">SEGURANÇA DA CONTA</p><h2 id="profile-mfa-heading">Verificação em dois passos</h2></div>
+                    <p>Usa uma app autenticadora para confirmar a tua identidade quando iniciares sessão.</p>
+                </div>
+                <p class="profile-mfa-status" id="profile-mfa-status" role="status" aria-live="polite">A consultar a proteção da conta…</p>
+                <form class="profile-mfa-start-form" id="profile-mfa-start-form" hidden>
+                    <label class="profile-field">Confirma a tua palavra-passe
+                        <input name="password" type="password" autocomplete="current-password" minlength="12" maxlength="128" required>
+                    </label>
+                    <button class="button button-small" type="submit">Preparar verificação em dois passos</button>
+                </form>
+                <form class="profile-mfa-confirm-form" id="profile-mfa-confirm-form" hidden>
+                    <p>Na app autenticadora, adiciona uma conta IMPACTA com esta chave. Ela só é mostrada durante esta configuração.</p>
+                    <label class="profile-field">Chave de configuração
+                        <input id="profile-mfa-secret" type="text" readonly autocomplete="off" spellcheck="false">
+                    </label>
+                    <label class="profile-field">Código de 6 dígitos da app
+                        <input name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="000000" required>
+                    </label>
+                    <button class="button button-small" type="submit">Confirmar e proteger a conta</button>
+                </form>
+                <section class="profile-mfa-recovery" id="profile-mfa-recovery" hidden aria-labelledby="profile-mfa-recovery-heading">
+                    <h3 id="profile-mfa-recovery-heading">Guarda os códigos de recuperação</h3>
+                    <p>Cada código só pode ser usado uma vez. Guarda-os num lugar privado; não os partilhes. Se perderes a app e estes códigos, poderás ficar sem acesso.</p>
+                    <pre id="profile-mfa-recovery-codes"></pre>
+                    <button class="profile-text-button" id="profile-mfa-recovery-saved" type="button">Guardei os códigos</button>
+                </section>
+            </section>
+            <section class="profile-documents-manager" aria-labelledby="profile-documents-heading">
+                <div class="profile-documents-heading">
+                    <div><p class="eyebrow">DOCUMENTOS PROFISSIONAIS</p><h2 id="profile-documents-heading">CV e portefólio</h2></div>
+                    <p>Adiciona ficheiros PDF até 10 MB. Os documentos ficam disponíveis no teu perfil público.</p>
+                </div>
+                <div class="profile-document-list">
+                    <article class="profile-document-slot" data-profile-document="cv">
+                        <div class="profile-document-copy"><strong>Currículo (CV)</strong><small data-document-status role="status" aria-live="polite">Nenhum ficheiro anexado.</small></div>
+                        <div class="profile-document-actions">
+                            <a class="profile-document-open" data-document-open target="_blank" rel="noopener noreferrer" hidden>Ver CV</a>
+                            <button class="button button-small" data-document-upload type="button">Anexar o meu CV</button>
+                            <button class="profile-text-button" data-document-remove type="button" hidden>Remover CV</button>
+                        </div>
+                        <input data-document-file type="file" accept="application/pdf,.pdf" hidden>
+                    </article>
+                    <article class="profile-document-slot" data-profile-document="portfolio">
+                        <div class="profile-document-copy"><strong>Portefólio</strong><small data-document-status role="status" aria-live="polite">Nenhum ficheiro anexado.</small></div>
+                        <div class="profile-document-actions">
+                            <a class="profile-document-open" data-document-open target="_blank" rel="noopener noreferrer" hidden>Ver portefólio</a>
+                            <button class="button button-small" data-document-upload type="button">Anexar o meu portefólio</button>
+                            <button class="profile-text-button" data-document-remove type="button" hidden>Remover portefólio</button>
+                        </div>
+                        <input data-document-file type="file" accept="application/pdf,.pdf" hidden>
+                    </article>
+                </div>
+            </section>
             <form id="profile-form" class="profile-form">
                 <div class="profile-field-grid">
-                    <label class="profile-field profile-field-wide">Nome apresentado
+                    <label class="profile-field">Nome apresentado
                         <input name="displayName" type="text" maxlength="80" autocomplete="name" required>
                     </label>
-                    <label class="profile-field profile-field-wide">Frase curta sobre ti
+                    <label class="profile-field">Frase curta sobre ti
                         <input name="headline" type="text" maxlength="120" placeholder="Ex.: Educadora e mobilizadora comunitária">
                     </label>
                     <label class="profile-field profile-field-wide">Sobre ti
@@ -58,6 +188,11 @@
                     <label class="profile-field">Área de impacto
                         <select name="impactAreaId"><option value="">Escolhe uma área</option></select>
                     </label>
+                    <div class="profile-field profile-field-wide" id="custom-impact-area" hidden>
+                        <label for="custom-impact-area-input">N&atilde;o encontraste? Escreve a tua &aacute;rea</label>
+                        <input id="custom-impact-area-input" name="customImpactArea" type="text" maxlength="120" placeholder="Ex.: Desenvolvimento rural">
+                        <small>Esta &aacute;rea fica guardada no teu perfil.</small>
+                    </div>
                     <label class="profile-field">Profissão ou função
                         <input name="occupation" type="text" maxlength="120" autocomplete="organization-title">
                     </label>
@@ -77,21 +212,102 @@
                 <p class="profile-account-email" id="profile-email"></p>
                 <div class="profile-form-footer">
                     <p class="profile-feedback" id="profile-feedback" role="status" aria-live="polite"></p>
-                    <button class="button" id="save-profile" type="submit">Guardar perfil</button>
+                    <button class="button" id="save-profile" type="submit">Guardar alterações do perfil</button>
                 </div>
             </form>
         </section>
 
-        <section class="public-profile panel" id="public-profile" hidden>
-            <div class="public-profile-heading">
-                <div class="profile-avatar avatar" id="public-avatar" aria-label="Fotografia de perfil"></div>
-                <div><h2 id="public-name"></h2><p id="public-headline"></p></div>
-            </div>
-            <p class="public-profile-bio" id="public-bio"></p>
-            <dl class="public-profile-details" id="public-details"></dl>
-            <div class="public-profile-skills" id="public-skills"></div>
-            <a class="public-profile-website" id="public-website" hidden target="_blank" rel="noopener noreferrer">Visitar site <span aria-hidden="true">↗</span></a>
+        <section class="profile-projects-section" id="profile-projects-section" hidden aria-labelledby="profile-projects-heading">
+            <div class="profile-posts-heading"><div><p class="eyebrow">PARTICIPAÇÃO</p><h2 id="profile-projects-heading">Projectos</h2></div></div>
+            <p class="profile-posts-status panel" id="profile-projects-status" role="status" aria-live="polite">A carregar projectos…</p>
+            <div class="profile-projects-list" id="profile-projects-list"></div>
+        </section>
+
+        <div class="profile-content-grid is-tabbed-view">
+            <aside class="profile-side-column" aria-label="Informações do perfil">
+                <section class="public-profile panel" id="public-profile" hidden>
+                    <div class="public-profile-heading">
+                        <div class="profile-avatar avatar" id="public-avatar" aria-label="Fotografia de perfil"></div>
+                        <div><h2 id="public-name"></h2><p id="public-headline"></p><p class="public-impactation-count" id="public-impactation-count">0 pessoas ligadas a este perfil</p></div>
+                    </div>
+                    <div class="profile-impactation" id="profile-impactation" hidden>
+                        <div class="profile-impactation-actions" id="profile-impactation-actions"></div>
+                        <p class="profile-impactation-status" id="profile-impactation-status" role="status" aria-live="polite"></p>
+                    </div>
+                    <p class="public-profile-bio" id="public-bio"></p>
+                    <dl class="public-profile-details" id="public-details"></dl>
+                    <div class="public-profile-skills" id="public-skills"></div>
+                    <a class="public-profile-website" id="public-website" hidden target="_blank" rel="noopener noreferrer">Visitar site <span aria-hidden="true">↗</span></a>
+                    <div class="public-profile-documents" id="public-profile-documents" aria-label="CV e portefólio" hidden></div>
+                </section>
+
+            </aside>
+
+            <section class="profile-posts-section" id="profile-posts-section" hidden aria-labelledby="profile-posts-heading">
+                <div class="profile-posts-heading"><div><p class="eyebrow">PARTILHAS</p><h2 id="profile-posts-heading">Publicações</h2></div></div>
+                <p class="profile-posts-status panel" id="profile-posts-status" role="status" aria-live="polite">A carregar publicações…</p>
+                <div class="profile-posts-list" id="profile-posts-list"></div>
+                <button class="button profile-posts-more" id="profile-posts-more" type="button" hidden>Ver mais publicações deste perfil</button>
+            </section>
+        </div>
+        <section class="profile-collection-section" id="profile-connections-section" hidden aria-labelledby="profile-connections-heading">
+            <div class="profile-posts-heading"><div><p class="eyebrow">REDE DE IMPACTAÇÃO</p><h2 id="profile-connections-heading">Impactantes</h2></div></div>
+            <p class="profile-collection-summary" id="profile-connections-summary">Pessoas ligadas a este perfil.</p>
+            <p class="profile-collection-count" id="profile-connections-count"></p>
+            <p class="profile-connections-status" id="my-impactations-status" role="status" aria-live="polite" hidden></p>
+            <div class="profile-connections-list" id="my-impactations-items"></div>
+        </section>
+        <section class="profile-collection-section" id="profile-communities-section" hidden aria-labelledby="profile-communities-heading">
+            <div class="profile-posts-heading"><div><p class="eyebrow">PESSOAS EM CONJUNTO</p><h2 id="profile-communities-heading">Comunidades</h2></div></div>
+            <p class="profile-posts-status panel" id="profile-communities-status" role="status" aria-live="polite">A carregar comunidades…</p>
+            <div class="profile-communities-list" id="profile-communities-list"></div>
         </section>
     </main>
+    <footer class="authenticated-footer"><a class="feed-help-button" href="help.html">Ajuda</a></footer>
+    <dialog class="profile-project-edit-dialog" id="profile-project-edit-dialog" aria-labelledby="profile-project-edit-title">
+        <form class="profile-project-edit-form" id="profile-project-edit-form">
+            <header class="profile-project-edit-header">
+                <div><p class="eyebrow">AS TUAS PROPOSTAS</p><h2 id="profile-project-edit-title">Editar projecto</h2></div>
+                <button class="profile-project-edit-close" id="profile-project-edit-close" type="button" aria-label="Fechar">×</button>
+            </header>
+            <p class="profile-project-edit-notice">Ao guardar, o projecto volta para análise. Se já estiver aprovado, ficará temporariamente indisponível até uma nova decisão.</p>
+            <input name="projectId" type="hidden">
+            <div class="profile-project-edit-fields">
+                <label class="profile-project-edit-wide">Título do projecto
+                    <input name="title" type="text" maxlength="120" required>
+                </label>
+                <label class="profile-project-edit-wide">Descrição
+                    <textarea name="description" rows="4" maxlength="5000" required></textarea>
+                </label>
+                <label class="profile-project-edit-wide">Área de impacto
+                    <select name="impactAreaId"><option value="">Sem área específica</option></select>
+                </label>
+                <label>Província<input name="locationProvince" maxlength="100"></label>
+                <label>Município<input name="locationMunicipality" maxlength="100"></label>
+                <label>Comuna<input name="locationCommune" maxlength="100"></label>
+                <label>Bairro<input name="locationNeighborhood" maxlength="100"></label>
+                <label>Cidade / localidade<input name="locationCity" maxlength="100"></label>
+                <label>Início (opcional)<input name="startsAt" type="date"></label>
+                <label>Fim (opcional)<input name="endsAt" type="date"></label>
+            </div>
+            <p class="profile-project-edit-feedback" id="profile-project-edit-feedback" role="status" aria-live="polite"></p>
+            <footer class="profile-project-edit-actions">
+                <button class="button button-quiet button-small" id="profile-project-edit-cancel" type="button">Cancelar</button>
+                <button class="button button-small" id="profile-project-edit-save" type="submit">Guardar e enviar para análise</button>
+            </footer>
+        </form>
+    </dialog>
+    <dialog class="profile-media-dialog" id="profile-media-dialog" aria-label="Galeria da publicação">
+        <div class="profile-media-dialog-top">
+            <span id="profile-media-counter">1 / 1</span>
+            <button class="profile-media-close" id="profile-media-close" type="button" aria-label="Fechar galeria">×</button>
+        </div>
+        <div class="profile-media-stage" id="profile-media-stage"></div>
+        <div class="profile-media-dialog-bottom">
+            <button class="profile-media-nav" id="profile-media-previous" type="button" aria-label="Imagem anterior">‹</button>
+            <span>Galeria da publicação</span>
+            <button class="profile-media-nav" id="profile-media-next" type="button" aria-label="Imagem seguinte">›</button>
+        </div>
+    </dialog>
 </body>
 </html>

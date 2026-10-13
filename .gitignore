@@ -36,3 +36,10 @@ backend/storage/media/
 
 # Keep original source videos local; commit optimized web copies.
 frontend/videos/*.mp4
+
+# Local environment files; keep only the documented template.
+.env.*
+!.env.example
+
+# Local recovery snapshots are not deployable source.
+preserved-local-*.html

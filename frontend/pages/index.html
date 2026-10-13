@@ -1,23 +1,35 @@
 <!doctype html>
-<html lang="pt">
+<html lang="pt-AO">
 <head>
     <meta charset="utf-8">
+    <script src="../scripts/avatar-preview-bootstrap.js?v=avatar-preview-bootstrap-20261013-1"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../styles/scrollbar.css?v=scrollbar-brand-green-20261010-1">
+    <script src="../scripts/scroll-navigation.js?v=scroll-navigation-single-20261010-1" defer></script>
     <meta name="theme-color" content="#10231d">
-    <meta name="description" content="O IMPACTA liga pessoas que querem aprender, colaborar e criar mudanças positivas nas suas comunidades.">
-    <title>IMPACTA — Aprende. Colabora. Impacta.</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" sizes="any">
+    <meta name="description" content="Descobre projectos, participa em desafios, partilha ideias e colabora com pessoas que querem melhorar as comunidades em Angola.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="IMPACTA">
+    <meta property="og:title" content="IMPACTA | Ideias, projectos e comunidades em Angola">
+    <meta property="og:description" content="Descobre projectos, participa em desafios, partilha ideias e colabora com pessoas que querem melhorar as comunidades em Angola.">
+    <title>IMPACTA | Ideias, projectos e comunidades em Angola</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../styles/main.css?v=icons-profile-1">
+    <link rel="stylesheet" href="../styles/main.css?v=visitor-header-full-width-20261013-1">
+    <link rel="stylesheet" href="../styles/feed.css?v=feed-carousel-first-paint-20261012-4">
+    <link rel="stylesheet" href="../styles/auth.css?v=admin-totp-20261011-1">
+    <link rel="stylesheet" href="../styles/support-modal.css?v=support-modal-20261012-2">
+    <link rel="stylesheet" href="../styles/promotion.css?v=flyer-desktop-20261012-2">
 </head>
 <body>
-    <header class="site-header">
+    <header class="site-header visitor-site-header">
         <a class="brand" href="index.html" aria-label="IMPACTA, página inicial">
             <span class="brand-mark" aria-hidden="true">i</span>
             <span>impacta<span class="brand-period">.</span></span>
         </a>
-        <nav class="site-nav" aria-label="Navegação principal">
+        <nav class="site-nav" id="mobile-nav" aria-label="Navegação principal">
             <a class="icon-nav-link" href="#como-funciona" aria-label="Como funciona" data-tooltip="Como funciona">
                 <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3 3.5 7.4v9.2L12 21l8.5-4.4V7.4L12 3Z"/><path d="M8.5 12h7M12 8.5v7"/></svg>
                 <span class="visually-hidden icon-nav-label">Como funciona</span>
@@ -26,59 +38,65 @@
                 <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg>
                 <span class="visually-hidden icon-nav-label">Áreas de impacto</span>
             </a>
-            <a class="icon-nav-link" href="feed.html" aria-label="Comunidade" data-tooltip="Comunidade">
+            <a class="icon-nav-link" href="login.html" data-open-auth="welcome" data-visitor-auth-gate data-authenticated-href="feed.html" aria-label="Comunidade" data-tooltip="Comunidade">
                 <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20"/><circle cx="9.5" cy="7.5" r="4"/><path d="M17 11a4 4 0 0 0 0-7.8M21 20v-1.5a4 4 0 0 0-3-3.9"/></svg>
                 <span class="visually-hidden icon-nav-label">Comunidade</span>
             </a>
+        <div class="site-nav-auth" aria-label="Acesso à conta">
+            <a class="text-link" href="login.html" data-open-auth="login">Entrar</a>
+            <a class="button button-small" href="register.html" data-open-auth="register">Criar conta <span aria-hidden="true">↗</span></a>
+        </div>
         </nav>
         <div class="header-actions">
-            <a class="text-link" href="login.html">Entrar</a>
-            <a class="button button-small" href="register.html">Criar conta <span aria-hidden="true">↗</span></a>
+            <a class="text-link" href="login.html" data-open-auth="login">Entrar</a>
+            <a class="button button-small" href="register.html" data-open-auth="register">Criar conta <span aria-hidden="true">↗</span></a>
         </div>
         <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-nav">☰</button>
     </header>
 
+    <section class="public-promotions" data-public-promotions aria-label="Avisos e publicidade" hidden></section>
+
     <main>
-        <section class="hero" id="inicio" data-hero-carousel aria-label="Histórias de impacto do IMPACTA">
+        <section class="hero" id="inicio" data-hero-carousel aria-label="Problemas locais, projectos e acções comunitárias">
             <div class="hero-video-backdrop" aria-hidden="true">
-                <div class="hero-video-slide is-active" data-eyebrow="COMUNIDADE EM MOVIMENTO" data-title="A tua voz" data-highlight="faz a diferença." data-description="Liga-te a pessoas que querem agir e melhorar a vida na sua comunidade.">
+                <div class="hero-video-slide is-active" data-eyebrow="VOZES DO BAIRRO" data-title="O teu bairro" data-highlight="merece ser ouvido." data-description="Partilha o que precisa de melhorar e aproxima pessoas dispostas a agir.">
                     <video class="hero-video" muted loop playsinline preload="none" poster="../videos/posters/4771342-uhd_3840_2160_24fps.jpg" tabindex="-1">
-                        <source data-src="../videos/optimized/4771342-uhd_3840_2160_24fps.mp4" type="video/mp4">
+                        <source data-src="../videos/optimized/4771342-uhd_3840_2160_24fps.mp4" data-mobile-src="../videos/optimized/mobile/4771342-uhd_3840_2160_24fps.mp4" type="video/mp4">
                     </video>
                 </div>
-                <div class="hero-video-slide" data-eyebrow="CONHECIMENTO PARTILHADO" data-title="O que sabes" data-highlight="pode abrir caminhos." data-description="Partilha experiência e ajuda outras pessoas a transformar ideias em soluções.">
+                <div class="hero-video-slide" data-eyebrow="IDEIAS LOCAIS" data-title="Uma ideia" data-highlight="pode virar projecto." data-description="Propõe uma iniciativa para a tua zona e convida outras pessoas a participar.">
                     <video class="hero-video" muted loop playsinline preload="none" poster="../videos/posters/7692919-hd_1920_1080_25fps.jpg" tabindex="-1">
-                        <source data-src="../videos/optimized/7692919-hd_1920_1080_25fps.mp4" type="video/mp4">
+                        <source data-src="../videos/optimized/7692919-hd_1920_1080_25fps.mp4" data-mobile-src="../videos/optimized/mobile/7692919-hd_1920_1080_25fps.mp4" type="video/mp4">
                     </video>
                 </div>
-                <div class="hero-video-slide" data-eyebrow="INOVAÇÃO COM PROPÓSITO" data-title="Ideias novas" data-highlight="criam novas soluções." data-description="Liga criatividade e tecnologia aos desafios reais da tua comunidade.">
+                <div class="hero-video-slide" data-eyebrow="MORADORES EM CONJUNTO" data-title="Juntos, damos" data-highlight="o primeiro passo." data-description="Propõe uma comunidade para moradores trocarem ideias e organizarem respostas.">
                     <video class="hero-video" muted loop playsinline preload="none" poster="../videos/posters/8328040-uhd_3840_2160_25fps.jpg" tabindex="-1">
-                        <source data-src="../videos/optimized/8328040-uhd_3840_2160_25fps.mp4" type="video/mp4">
+                        <source data-src="../videos/optimized/8328040-uhd_3840_2160_25fps.mp4" data-mobile-src="../videos/optimized/mobile/8328040-uhd_3840_2160_25fps.mp4" type="video/mp4">
                     </video>
                 </div>
-                <div class="hero-video-slide" data-eyebrow="IDEIAS QUE AVANÇAM" data-title="Planeia uma ideia." data-highlight="Transforma-a em impacto." data-description="Organiza recursos, define prioridades e acompanha o progresso de cada projeto.">
+                <div class="hero-video-slide" data-eyebrow="PARTICIPAÇÃO ABERTA" data-title="Há muitas formas" data-highlight="de contribuir." data-description="Encontra projectos e desafios onde as tuas competências fazem diferença.">
                     <video class="hero-video" muted loop playsinline preload="none" poster="../videos/posters/8348714-uhd_3840_2160_25fps.jpg" tabindex="-1">
-                        <source data-src="../videos/optimized/8348714-uhd_3840_2160_25fps.mp4" type="video/mp4">
+                        <source data-src="../videos/optimized/8348714-uhd_3840_2160_25fps.mp4" data-mobile-src="../videos/optimized/mobile/8348714-uhd_3840_2160_25fps.mp4" type="video/mp4">
                     </video>
                 </div>
-                <div class="hero-video-slide hero-video-slide-portrait" data-eyebrow="LIDERANÇA PARTILHADA" data-title="Cada voz" data-highlight="pode inspirar." data-description="Quando alguém partilha conhecimento, abre espaço para novas oportunidades.">
+                <div class="hero-video-slide hero-video-slide-portrait" data-eyebrow="PROGRESSO PARTILHADO" data-title="Cada passo" data-highlight="também conta." data-description="Partilha o que está a ser feito e acompanha o avanço das iniciativas.">
                     <video class="hero-video" muted loop playsinline preload="none" poster="../videos/posters/8348717-uhd_2160_3840_25fps.jpg" tabindex="-1">
-                        <source data-src="../videos/optimized/8348717-uhd_2160_3840_25fps.mp4" type="video/mp4">
+                        <source data-src="../videos/optimized/8348717-uhd_2160_3840_25fps.mp4" data-mobile-src="../videos/optimized/mobile/8348717-uhd_2160_3840_25fps.mp4" type="video/mp4">
                     </video>
                 </div>
-                <div class="hero-video-slide" data-eyebrow="COLABORAÇÃO EM AÇÃO" data-title="Juntos, fazemos" data-highlight="mais acontecer." data-description="Reúne competências diferentes e transforma objetivos em soluções.">
+                <div class="hero-video-slide" data-eyebrow="RESULTADOS LOCAIS" data-title="Mostra o que" data-highlight="conseguimos juntos." data-description="Conta o que mudou e inspira outras pessoas a agir na sua comunidade.">
                     <video class="hero-video" muted loop playsinline preload="none" poster="../videos/posters/8348720-uhd_3840_2160_25fps.jpg" tabindex="-1">
-                        <source data-src="../videos/optimized/8348720-uhd_3840_2160_25fps.mp4" type="video/mp4">
+                        <source data-src="../videos/optimized/8348720-uhd_3840_2160_25fps.mp4" data-mobile-src="../videos/optimized/mobile/8348720-uhd_3840_2160_25fps.mp4" type="video/mp4">
                     </video>
                 </div>
             </div>
             <div class="hero-copy" data-hero-copy>
-                <p class="eyebrow" data-hero-eyebrow>COMUNIDADE EM MOVIMENTO</p>
-                <h1><span data-hero-title>A tua voz</span><br><span data-hero-highlight>faz a diferença.</span></h1>
-                <p class="hero-description" data-hero-description>Encontra pessoas que querem melhorar a comunidade e participa em ações concretas.</p>
+                <p class="eyebrow" data-hero-eyebrow>VOZES DO BAIRRO</p>
+                <h1><span data-hero-title>O teu bairro</span><br><span data-hero-highlight>merece ser ouvido.</span></h1>
+                <p class="hero-description" data-hero-description>Partilha o que precisa de melhorar e aproxima pessoas dispostas a agir.</p>
                 <div class="hero-actions">
-                    <a class="button" href="register.html">Fazer parte <span aria-hidden="true">↗</span></a>
-                    <a class="button button-quiet" href="feed.html">Explorar a comunidade <span aria-hidden="true">→</span></a>
+                    <a class="button" href="register.html" data-open-auth="register">Criar conta <span aria-hidden="true">↗</span></a>
+                    <a class="button button-quiet" href="login.html" data-open-auth="welcome" data-visitor-auth-gate data-authenticated-href="feed.html">Explorar a comunidade <span aria-hidden="true">→</span></a>
                 </div>
             </div>
             <div class="carousel-controls hero-carousel-controls" role="group" aria-label="Controlos do carrossel de vídeos">
@@ -106,22 +124,69 @@
                 <article class="feature-card feature-card-dark">
                     <span class="feature-number">01</span><span class="feature-symbol" aria-hidden="true">↗</span>
                     <h3>Descobre desafios</h3><p>Encontra causas e necessidades concretas onde as tuas capacidades podem fazer diferença.</p>
-                    <a href="feed.html#desafios">Explorar desafios <span aria-hidden="true">→</span></a>
+                    <a href="login.html" data-open-auth="welcome" data-visitor-auth-gate data-authenticated-href="feed.html#desafios">Ver desafios e participar <span aria-hidden="true">→</span></a>
                 </article>
                 <article class="feature-card feature-card-mint">
                     <span class="feature-number">02</span><span class="feature-symbol" aria-hidden="true">◎</span>
-                    <h3>Constrói em conjunto</h3><p>Junta-te a pessoas com diferentes talentos e transforma boas ideias em projetos colaborativos.</p>
-                    <a href="feed.html#projetos">Ver projetos <span aria-hidden="true">→</span></a>
+                    <h3>Constrói em conjunto</h3><p>Junta-te a pessoas com diferentes talentos e transforma boas ideias em projectos colaborativos.</p>
+                    <a href="login.html" data-open-auth="welcome" data-visitor-auth-gate data-authenticated-href="feed.html#projetos">Explorar projectos <span aria-hidden="true">→</span></a>
                 </article>
                 <article class="feature-card feature-card-cream">
                     <span class="feature-number">03</span><span class="feature-symbol" aria-hidden="true">✳</span>
                     <h3>Partilha o que aprendeste</h3><p>Regista o teu percurso, inspira outras pessoas e ajuda a comunidade a continuar a crescer.</p>
-                    <a href="feed.html">Conhecer a comunidade <span aria-hidden="true">→</span></a>
+                    <a href="login.html" data-open-auth="welcome" data-visitor-auth-gate data-authenticated-href="feed.html#comunidades">Ver comunidades <span aria-hidden="true">→</span></a>
                 </article>
             </div>
         </section>
 
-        <section class="closing-banner" data-carousel aria-label="Histórias de impacto do IMPACTA">
+        <section class="impact-journey" id="ciclo-de-impacto" data-impact-journey aria-label="Percurso de impacto no IMPACTA">
+            <div class="impact-journey-stage" data-journey-stage>
+                <div class="impact-journey-intro">
+                    <p class="eyebrow">IDEIAS QUE GANHAM VIDA</p>
+                    <h2>Do problema local a uma mudan&ccedil;a concreta.</h2>
+                    <p>O IMPACTA aproxima pessoas para transformar necessidades reais em ac&ccedil;&otilde;es acompanhadas e resultados partilhados.</p>
+                    <div class="impact-journey-status" aria-live="polite">
+                        <span class="impact-journey-status-dot" aria-hidden="true"></span>
+                        <span data-journey-current>01 / 04 - Ouvir o problema</span>
+                    </div>
+                </div>
+                <div class="impact-journey-visual" data-journey-visual data-active-step="0" aria-hidden="true">
+                    <span class="impact-journey-node" data-journey-node="0">01</span>
+                    <span class="impact-journey-node" data-journey-node="1">02</span>
+                    <span class="impact-journey-node" data-journey-node="2">03</span>
+                    <span class="impact-journey-node" data-journey-node="3">04</span>
+                    <div class="impact-journey-core">
+
+
+                        <span class="impact-journey-core-caption" data-journey-core-caption>Escuta</span>
+                    </div>
+                </div>
+                <div class="impact-journey-steps" role="list" aria-label="Etapas de uma ideia com impacto">
+                    <article class="impact-journey-step is-active" data-journey-step="0" data-journey-short="Escuta" role="listitem" aria-current="step">
+                        <span class="impact-journey-index">01</span>
+                        <div><h3>Ouvir o problema</h3><p>Dar visibilidade a uma necessidade real do bairro, da cidade ou da comunidade.</p></div>
+                        <span class="impact-journey-arrow" aria-hidden="true">&rarr;</span>
+                    </article>
+                    <article class="impact-journey-step" data-journey-step="1" data-journey-short="Comunidade" role="listitem">
+                        <span class="impact-journey-index">02</span>
+                        <div><h3>Juntar a comunidade</h3><p>Aproximar pessoas, experi&ecirc;ncias e capacidades em torno de uma causa comum.</p></div>
+                        <span class="impact-journey-arrow" aria-hidden="true">&rarr;</span>
+                    </article>
+                    <article class="impact-journey-step" data-journey-step="2" data-journey-short="Projecto" role="listitem">
+                        <span class="impact-journey-index">03</span>
+                        <div><h3>Fazer acontecer</h3><p>Organizar a ideia num projecto com participantes, etapas e actualiza&ccedil;&otilde;es.</p></div>
+                        <span class="impact-journey-arrow" aria-hidden="true">&rarr;</span>
+                    </article>
+                    <article class="impact-journey-step" data-journey-step="3" data-journey-short="Resultado" role="listitem">
+                        <span class="impact-journey-index">04</span>
+                        <div><h3>Partilhar o resultado</h3><p>Registar o que mudou, o que se aprendeu e o pr&oacute;ximo passo da comunidade.</p></div>
+                        <span class="impact-journey-arrow" aria-hidden="true">&rarr;</span>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="closing-banner" data-carousel aria-label="Problemas locais, projectos e acções comunitárias">
             <div class="closing-carousel" aria-hidden="true">
                 <div class="carousel-slide is-active"><img src="../videos/posters/4771342-uhd_3840_2160_24fps.jpg" alt="" loading="lazy" decoding="async"></div>
                 <div class="carousel-slide"><img src="../videos/posters/7692919-hd_1920_1080_25fps.jpg" alt="" loading="lazy" decoding="async"></div>
@@ -134,7 +199,7 @@
                 <p class="eyebrow">O próximo passo é teu</p>
                 <h2>Há muito para fazer.<br><span>Vamos começar?</span></h2>
             </div>
-            <a class="button button-light" href="register.html">Juntar-me ao IMPACTA <span aria-hidden="true">↗</span></a>
+            <a class="button button-light" href="register.html" data-open-auth="register">Criar conta e começar a contribuir <span aria-hidden="true">↗</span></a>
             <div class="carousel-controls" role="group" aria-label="Controlos das imagens de fundo">
                 <button class="carousel-arrow" type="button" data-carousel-previous aria-label="Imagem anterior">←</button>
                 <div class="carousel-indicators" role="group" aria-label="Escolher imagem">
@@ -154,8 +219,42 @@
     <footer class="site-footer">
         <a class="brand brand-footer" href="index.html"><span class="brand-mark" aria-hidden="true">i</span><span>impacta<span class="brand-period">.</span></span></a>
         <p>Aprende. Colabora. Impacta.</p>
+        <nav class="site-footer-links" aria-label="Informações">
+            <a href="about.html">Sobre o IMPACTA</a>
+            <span aria-hidden="true">·</span>
+            <a href="help.html">Ajuda</a>
+            <span aria-hidden="true">·</span>
+            <a href="contact.html">Contacto</a>
+            <span aria-hidden="true">·</span>
+            <a href="https://www.linkedin.com/company/impacta-angola/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+            <span aria-hidden="true">·</span>
+            <a href="mailto:impactaa2025@gmail.com" aria-label="Enviar e-mail para impactaa2025@gmail.com">E-mail</a>
+        </nav>
         <span>© <span id="year">2026</span> IMPACTA</span>
     </footer>
-    <script src="../scripts/site.js?v=hero-carousel-1" defer></script>
+    <dialog class="auth-modal auth-welcome-modal" id="auth-welcome-modal" aria-modal="true" aria-labelledby="auth-welcome-title">
+        <section class="auth-welcome-top">
+            <a class="brand auth-welcome-brand" href="index.html" aria-label="IMPACTA, página inicial">
+                <span class="brand-mark" aria-hidden="true">i</span>
+                <span>impacta<span class="brand-period">.</span></span>
+            </a>
+            <a class="auth-modal-close auth-welcome-close" href="index.html" aria-label="Fechar">×</a>
+        </section>
+        <section class="auth-welcome-panel">
+            <p class="auth-welcome-eyebrow">A comunidade faz acontecer</p>
+            <h1 id="auth-welcome-title">Bem-vindo ao IMPACTA.</h1>
+            <p>Partilha ideias, aprende com outras pessoas e transforma vontade em impacto.</p>
+            <div class="auth-welcome-actions" aria-label="Escolhe como continuar">
+                <button type="button" class="auth-welcome-login" data-auth-choice="login">Entrar</button>
+                <button type="button" class="auth-welcome-register" data-auth-choice="register">Criar conta</button>
+            </div>
+        </section>
+    </dialog>
+    <script src="../scripts/api.js?v=avatar-stability-20261013-2" defer></script>
+    <script src="../scripts/public-promotions.js?v=flyer-visibility-20261012-1" defer></script>
+    <script src="../scripts/carousel-media.js?v=carousel-poster-overlay-20261012-4" defer></script>
+    <script src="../scripts/site.js?v=header-session-layout-20261012-1" defer></script>
+    <script src="../scripts/support-modal.js?v=support-modal-clean-20261013-1" defer></script>
+    <script src="../scripts/site-shell.js?v=maintenance-mode-20261013-1" defer></script>
 </body>
 </html>

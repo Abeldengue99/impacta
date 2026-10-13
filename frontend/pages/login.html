@@ -1,45 +1,101 @@
 <!doctype html>
-<html lang="pt">
+<html lang="pt-AO">
 <head>
     <meta charset="utf-8">
+    <script src="../scripts/avatar-preview-bootstrap.js?v=avatar-preview-bootstrap-20261013-1"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#10231d">
-    <title>Entrar — IMPACTA</title>
+    <link rel="stylesheet" href="../styles/scrollbar.css?v=scrollbar-brand-green-20261010-1">
+    <script src="../scripts/scroll-navigation.js?v=scroll-navigation-single-20261010-1" defer></script>
+    <meta name="theme-color" content="#f4f6f1">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" sizes="any">
+    <meta name="description" content="Entra na tua conta IMPACTA para continuares a participar na comunidade.">
+    <meta name="robots" content="noindex, follow">
+    <title>Entrar · IMPACTA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../styles/main.css?v=auth-carousel-1">
-    <script src="../scripts/api.js?v=auth-flow-2" defer></script>
-    <script src="../scripts/auth.js?v=auth-carousel-1" defer></script>
+    <link rel="stylesheet" href="../styles/auth.css?v=admin-totp-20261011-1">
+    <script src="../scripts/api.js?v=avatar-stability-20261013-2" defer></script>
+    <script src="../scripts/auth.js?v=security-release-20261011-1" defer></script>
 </head>
-<body class="auth-page">
-    <aside class="auth-visual">
-        <div class="auth-image-carousel" aria-hidden="true">
-            <img class="auth-image-slide is-active" src="../videos/posters/4771342-uhd_3840_2160_24fps.jpg" alt="" fetchpriority="high" decoding="async">
-            <img class="auth-image-slide" src="../videos/posters/7692919-hd_1920_1080_25fps.jpg" alt="" loading="lazy" decoding="async">
-            <img class="auth-image-slide" src="../videos/posters/8328040-uhd_3840_2160_25fps.jpg" alt="" loading="lazy" decoding="async">
-            <img class="auth-image-slide" src="../videos/posters/8348714-uhd_3840_2160_25fps.jpg" alt="" loading="lazy" decoding="async">
-            <img class="auth-image-slide" src="../videos/posters/8348717-uhd_2160_3840_25fps.jpg" alt="" loading="lazy" decoding="async">
-            <img class="auth-image-slide" src="../videos/posters/8348720-uhd_3840_2160_25fps.jpg" alt="" loading="lazy" decoding="async">
+<body class="auth-modal-page">
+    <dialog class="auth-modal" aria-modal="true" aria-labelledby="auth-title">
+        <div class="auth-modal-top">
+            <button class="auth-modal-back" type="button" data-auth-back aria-label="Voltar à apresentação">←</button>
+            <a class="auth-modal-close" href="index.html" aria-label="Fechar e voltar à página inicial">×</a>
         </div>
-        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">i</span><span>impacta<span class="brand-period">.</span></span></a>
-        <div class="auth-visual-copy"><p class="eyebrow">A comunidade faz acontecer</p><h1>O teu próximo passo pode <span>começar aqui.</span></h1><p>Volta às conversas, aos projetos e às ideias que estás a ajudar a fazer crescer.</p></div>
-        <p class="auth-quote">“Pequenas ações, feitas em conjunto, podem abrir novos caminhos.”<strong>Comunidade IMPACTA</strong></p>
-    </aside>
-    <main class="auth-panel">
-        <section class="auth-card" aria-labelledby="auth-title">
-            <a class="auth-back" href="index.html">← Página inicial</a>
-            <h2 id="auth-title">Que bom ter-te de volta.</h2>
-            <p class="auth-subtitle">Entra para continuares a participar na comunidade.</p>
-            <form class="auth-form" id="login-form" method="post">
-                <label for="email">E-mail<input id="email" name="email" type="email" autocomplete="email" placeholder="nome@exemplo.com" required></label>
-                <label for="password">Palavra-passe<input id="password" name="password" type="password" autocomplete="current-password" placeholder="A tua palavra-passe" required></label>
-                <button class="button" type="submit">Entrar <span aria-hidden="true">↗</span></button>
-            </form>
-            <p class="auth-feedback" id="login-status" role="status" aria-live="polite" hidden></p>
-            <p class="auth-switch"><a href="password-reset.html">Esqueceste a palavra-passe?</a></p>
-            <p class="auth-switch">Ainda não tens conta? <a href="register.html">Criar conta</a></p>
+
+        <header class="auth-modal-heading">
+            <p class="auth-eyebrow">A comunidade faz acontecer</p>
+            <h1 id="auth-title">Entrar</h1>
+            <p class="auth-subtitle">Acede à tua conta para continuares a partilhar ideias e criar impacto.</p>
+        </header>
+
+        <form class="auth-form" id="login-form" method="post">
+            <label for="email">E-mail
+                <input id="email" name="email" type="email" autocomplete="email" placeholder="nome@exemplo.com" required>
+            </label>
+            <label for="password">Palavra-passe
+                    <span class="auth-password-control">
+                        <input id="password" name="password" type="password" autocomplete="current-password" placeholder="A tua palavra-passe" required>
+                        <button class="auth-password-toggle" type="button" data-password-toggle aria-controls="password" aria-label="Mostrar palavra-passe" aria-pressed="false">Mostrar</button>
+                    </span>
+            </label>
+            <button class="auth-submit" type="submit">Entrar <span aria-hidden="true">↗</span></button>
+        </form>
+        <p class="auth-feedback" id="login-status" role="status" aria-live="polite" hidden></p>
+
+        <form class="auth-form mfa-auth-form" id="mfa-login-form" method="post" hidden>
+            <p class="mfa-auth-copy">Confirma a tua identidade com o código de 6 dígitos da app autenticadora. Também podes usar um código de recuperação.</p>
+            <label for="mfa-login-code">Código de segurança
+                <input id="mfa-login-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" maxlength="19" placeholder="000000" required>
+            </label>
+            <button class="auth-submit" type="submit">Confirmar e entrar <span aria-hidden="true">↗</span></button>
+            <button class="mfa-back-button" type="button" data-mfa-back>Usar outra conta</button>
+        </form>
+
+        <form class="auth-form mfa-auth-form" id="mfa-setup-form" method="post" hidden>
+            <p class="mfa-auth-copy">Esta conta tem acesso administrativo. Liga uma app autenticadora para proteger a área de gestão. A chave é mostrada apenas agora.</p>
+            <label for="mfa-setup-secret">Chave para adicionar na app autenticadora
+                <input id="mfa-setup-secret" name="secret" type="text" readonly autocomplete="off" spellcheck="false">
+            </label>
+            <p class="mfa-auth-help">Na app, escolhe adicionar uma conta com chave de configuração. Usa o nome IMPACTA e uma chave baseada em tempo, com 6 dígitos e intervalo de 30 segundos.</p>
+            <label for="mfa-setup-code">Código gerado pela app
+                <input id="mfa-setup-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="000000" required>
+            </label>
+            <button class="auth-submit" type="submit">Activar protecção e entrar <span aria-hidden="true">↗</span></button>
+            <button class="mfa-back-button" type="button" data-mfa-back>Usar outra conta</button>
+        </form>
+
+        <section class="mfa-recovery-panel" id="mfa-recovery-panel" aria-labelledby="mfa-recovery-title" hidden>
+            <h2 id="mfa-recovery-title">Guarda os teus códigos de recuperação</h2>
+            <p>Guarda estes códigos num local seguro. Cada um só pode ser usado uma vez; não voltarão a aparecer.</p>
+            <pre id="mfa-recovery-codes"></pre>
+            <button class="auth-submit" id="mfa-recovery-continue" type="button">Guardei os códigos e continuar</button>
         </section>
-    </main>
+
+        <a class="auth-forgot" href="password-reset.html">Esqueceste a palavra-passe?</a>
+        <p class="auth-switch">Ainda não tens conta? <a href="register.html">Criar conta</a></p>
+        <p class="auth-footnote">Um espaço para aprender, colaborar e transformar ideias em ação.</p>
+    </dialog>
+    <dialog class="account-destination-modal" id="account-destination-modal" aria-modal="true" aria-labelledby="account-destination-title">
+        <div class="account-destination-mark" aria-hidden="true">i</div>
+        <p class="account-destination-eyebrow">ACESSO IMPACTA</p>
+        <h2 id="account-destination-title">Onde queres continuar?</h2>
+        <p class="account-destination-copy" id="account-destination-copy">A tua conta tem acesso ao perfil pessoal e à área administrativa.</p>
+        <div class="account-destination-options">
+            <button class="account-destination-option" type="button" data-account-destination="profile">
+                <span class="account-destination-icon" aria-hidden="true">◎</span>
+                <span><strong>Perfil pessoal</strong><small>Ver o teu perfil e as tuas publicações</small></span>
+                <span class="account-destination-arrow" aria-hidden="true">→</span>
+            </button>
+            <button class="account-destination-option account-destination-admin" type="button" data-account-destination="admin">
+                <span class="account-destination-icon" aria-hidden="true">✳</span>
+                <span><strong>Área administrativa</strong><small>Gerir e acompanhar a plataforma</small></span>
+                <span class="account-destination-arrow" aria-hidden="true">→</span>
+            </button>
+        </div>
+        <button class="account-destination-feed" type="button" data-account-destination="feed">Continuar para o feed</button>
+    </dialog>
 </body>
 </html>

@@ -1,61 +1,90 @@
 <!doctype html>
-<html lang="pt">
+<html lang="pt-AO">
 <head>
     <meta charset="utf-8">
+    <script src="../scripts/avatar-preview-bootstrap.js?v=avatar-preview-bootstrap-20261013-1"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#10231d">
-    <title>Criar conta — IMPACTA</title>
+    <link rel="stylesheet" href="../styles/scrollbar.css?v=scrollbar-brand-green-20261010-1">
+    <script src="../scripts/scroll-navigation.js?v=scroll-navigation-single-20261010-1" defer></script>
+    <meta name="theme-color" content="#f4f6f1">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" sizes="any">
+    <meta name="description" content="Cria a tua conta IMPACTA e junta-te à comunidade.">
+    <meta name="robots" content="noindex, follow">
+    <title>Criar conta · IMPACTA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../styles/main.css?v=auth-carousel-1">
-    <script src="../scripts/api.js?v=auth-flow-2" defer></script>
-    <script src="../scripts/auth.js?v=auth-carousel-1" defer></script>
+    <link rel="stylesheet" href="../styles/auth.css?v=registration-guard-20261011-1">
+    <script src="../scripts/api.js?v=avatar-stability-20261013-2" defer></script>
+    <script src="../scripts/auth.js?v=registration-guard-20261011-1" defer></script>
 </head>
-<body class="auth-page">
-    <aside class="auth-visual">
-        <div class="auth-image-carousel" aria-hidden="true">
-            <img class="auth-image-slide is-active" src="../videos/posters/4771342-uhd_3840_2160_24fps.jpg" alt="" fetchpriority="high" decoding="async">
-            <img class="auth-image-slide" src="../videos/posters/7692919-hd_1920_1080_25fps.jpg" alt="" loading="lazy" decoding="async">
-            <img class="auth-image-slide" src="../videos/posters/8328040-uhd_3840_2160_25fps.jpg" alt="" loading="lazy" decoding="async">
-            <img class="auth-image-slide" src="../videos/posters/8348714-uhd_3840_2160_25fps.jpg" alt="" loading="lazy" decoding="async">
-            <img class="auth-image-slide" src="../videos/posters/8348717-uhd_2160_3840_25fps.jpg" alt="" loading="lazy" decoding="async">
-            <img class="auth-image-slide" src="../videos/posters/8348720-uhd_3840_2160_25fps.jpg" alt="" loading="lazy" decoding="async">
+<body class="auth-modal-page">
+    <dialog class="auth-modal auth-card auth-modal-register" aria-modal="true" aria-labelledby="register-auth-title">
+        <div class="auth-modal-top">
+            <button class="auth-modal-back" type="button" data-auth-back aria-label="Voltar à apresentação">←</button>
+            <a class="auth-modal-close" href="index.html" aria-label="Fechar e voltar à página inicial">×</a>
         </div>
-        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">i</span><span>impacta<span class="brand-period">.</span></span></a>
-        <div class="auth-visual-copy"><p class="eyebrow">Aprende. Colabora. Impacta.</p><h1>Fazer a diferença começa com <span>uma ligação.</span></h1><p>Conhece pessoas, troca experiências e encontra formas de contribuir com o que sabes.</p></div>
-        <p class="auth-quote">“Uma ideia cresce quando encontra outras pessoas.”<strong>Comunidade IMPACTA</strong></p>
-    </aside>
-    <main class="auth-panel">
-        <section class="auth-card" aria-labelledby="auth-title">
-            <a class="auth-back" href="index.html">← Página inicial</a>
-            <h2 id="auth-title">Cria a tua conta.</h2>
-            <p class="auth-subtitle">Junta-te a pessoas que transformam vontade em ação.</p>
-            <form class="auth-form" id="register-form" method="post">
-                <label for="full-name">Nome<input id="full-name" name="displayName" type="text" autocomplete="name" placeholder="O teu nome" minlength="2" maxlength="120" required></label>
-                <label for="register-email">E-mail<input id="register-email" name="email" type="email" autocomplete="email" placeholder="nome@exemplo.com" maxlength="320" required></label>
-                <button class="button" type="submit">Criar a minha conta <span aria-hidden="true">↗</span></button>
-                <p class="auth-terms">Ao criar uma conta, concordas em participar com respeito e responsabilidade na comunidade IMPACTA.</p>
-            </form>
-            <p class="auth-feedback" id="register-status" role="status" aria-live="polite" hidden></p>
-            <form class="auth-form" id="verification-form" method="post" hidden>
-                <p class="auth-subtitle">Introduz o código enviado para este endereço:</p>
-                <label for="verification-email">E-mail<input id="verification-email" name="email" type="email" autocomplete="email" readonly required></label>
-                <label for="verification-code">Código de verificação<input id="verification-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="000000" required></label>
-                <label for="verification-name">Nome<input id="verification-name" name="displayName" type="text" autocomplete="name" minlength="2" maxlength="120" required></label>
-                <label for="verification-password">Escolhe uma palavra-passe<input id="verification-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" placeholder="Pelo menos 12 caracteres" required></label>
-                <label for="verification-password-confirm">Confirma a palavra-passe<input id="verification-password-confirm" name="passwordConfirmation" type="password" autocomplete="new-password" minlength="12" maxlength="128" placeholder="Repete a palavra-passe" required></label>
-                <button class="button" type="submit">Confirmar email <span aria-hidden="true">&#8599;</span></button>
-                <button class="auth-text-button" id="resend-code" type="button">Enviar outro código</button>
-                <button class="auth-text-button" id="back-register" type="button">Voltar aos dados da conta</button>
-                <p class="auth-feedback" id="verification-status" role="status" aria-live="polite" hidden></p>
-            </form>
-            <section id="registration-success" class="auth-success" aria-live="polite" hidden>
-                <p>Endereço confirmado. A tua conta IMPACTA está ativa.</p>
-                <a class="button" href="login.html">Iniciar sessão</a>
-            </section>
-            <p class="auth-switch">Já tens uma conta? <a href="login.html">Entrar</a></p>
+
+        <header class="auth-modal-heading">
+            <p class="auth-eyebrow">Encontra o teu espaço</p>
+            <h1 id="register-auth-title">Criar conta</h1>
+            <p class="auth-subtitle">Começa com o teu nome e e-mail. Depois confirmas o endereço.</p>
+        </header>
+
+        <form class="auth-form" id="register-form" method="post">
+            <div class="auth-honeypot" aria-hidden="true">
+                <label for="registration-company-website">Deixa este campo vazio
+                    <input id="registration-company-website" name="companyWebsite" type="text" tabindex="-1" autocomplete="off">
+                </label>
+            </div>
+            <label for="full-name">Nome
+                <input id="full-name" name="displayName" type="text" autocomplete="name" placeholder="O teu nome" minlength="2" maxlength="120" required>
+            </label>
+            <label for="register-email">E-mail
+                <input id="register-email" name="email" type="email" autocomplete="email" placeholder="nome@exemplo.com" maxlength="320" required>
+            </label>
+            <button class="auth-submit" type="submit">Continuar a criar a conta <span aria-hidden="true">↗</span></button>
+            <p class="auth-terms">Cada pessoa deve manter uma única conta pessoal. Confirmamos o e-mail antes de activar a conta.</p>
+        </form>
+        <p class="auth-feedback" id="register-status" role="status" aria-live="polite" hidden></p>
+
+        <form class="auth-form auth-verification-form" id="verification-form" method="post" hidden>
+            <p class="auth-subtitle">Introduz o código enviado para o teu e-mail e define a palavra-passe.</p>
+            <label for="verification-email">E-mail
+                <input id="verification-email" name="email" type="email" autocomplete="email" readonly required>
+            </label>
+            <label for="verification-code">Código de verificação
+                <input id="verification-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="000000" required>
+            </label>
+            <label for="verification-name">Nome
+                <input id="verification-name" name="displayName" type="text" autocomplete="name" minlength="2" maxlength="120" required>
+            </label>
+            <label for="verification-password">Palavra-passe
+                <span class="auth-password-control">
+                    <input id="verification-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" placeholder="Pelo menos 12 caracteres" required>
+                    <button class="auth-password-toggle" type="button" data-password-toggle aria-controls="verification-password" aria-label="Mostrar palavra-passe" aria-pressed="false">Mostrar</button>
+                </span>
+            </label>
+            <label for="verification-password-confirm">Confirma a palavra-passe
+                <span class="auth-password-control">
+                    <input id="verification-password-confirm" name="passwordConfirmation" type="password" autocomplete="new-password" minlength="12" maxlength="128" placeholder="Repete a palavra-passe" required>
+                    <button class="auth-password-toggle" type="button" data-password-toggle aria-controls="verification-password-confirm" aria-label="Mostrar palavra-passe" aria-pressed="false">Mostrar</button>
+                </span>
+            </label>
+            <button class="auth-submit" type="submit">Confirmar e-mail <span aria-hidden="true">↗</span></button>
+            <button class="auth-text-button" id="resend-code" type="button">Enviar outro código</button>
+            <button class="auth-text-button" id="back-register" type="button">Voltar aos dados da conta</button>
+            <p class="auth-feedback" id="verification-status" role="status" aria-live="polite" hidden></p>
+        </form>
+
+        <section id="registration-success" class="auth-success" aria-live="polite" hidden>
+            <span class="auth-success-icon" aria-hidden="true">✓</span>
+            <p>Endereço confirmado. A tua conta IMPACTA está ativa.</p>
+            <a class="auth-submit" href="login.html">Entrar <span aria-hidden="true">↗</span></a>
         </section>
-    </main>
+
+        <p class="auth-switch">Já tens uma conta? <a href="login.html">Entrar</a></p>
+        <p class="auth-footnote">Um espaço para aprender, colaborar e transformar ideias em ação.</p>
+    </dialog>
 </body>
 </html>

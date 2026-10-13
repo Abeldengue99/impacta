@@ -105,6 +105,7 @@ CREATE TABLE mfa_credentials (
     user_id bigint PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     encrypted_totp_secret text NOT NULL,
     verified_at timestamptz NOT NULL,
+    last_used_step bigint NOT NULL DEFAULT -1,
     created_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -115,6 +116,23 @@ CREATE TABLE mfa_recovery_codes (
     used_at timestamptz,
     created_at timestamptz NOT NULL DEFAULT now(),
     UNIQUE (user_id, code_hash)
+);
+
+CREATE TABLE mfa_challenges (
+    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id bigint NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token_hash char(64) NOT NULL UNIQUE,
+    purpose text NOT NULL CHECK (purpose IN ('login', 'setup', 'recovery_setup')),
+    encrypted_totp_secret text,
+    failed_attempts smallint NOT NULL DEFAULT 0 CHECK (failed_attempts BETWEEN 0 AND 5),
+    created_at timestamptz NOT NULL DEFAULT now(),
+    expires_at timestamptz NOT NULL,
+    consumed_at timestamptz,
+    ip_address inet,
+    user_agent text CHECK (user_agent IS NULL OR length(user_agent) <= 1000),
+    CHECK (expires_at > created_at),
+    CHECK ((purpose IN ('setup', 'recovery_setup') AND encrypted_totp_secret IS NOT NULL)
+        OR (purpose = 'login' AND encrypted_totp_secret IS NULL))
 );
 
 CREATE TABLE auth_sessions (
@@ -128,6 +146,7 @@ CREATE TABLE auth_sessions (
     absolute_expires_at timestamptz NOT NULL,
     revoked_at timestamptz,
     ip_address inet,
+    mfa_verified_at timestamptz,
     user_agent text,
     CHECK (idle_expires_at <= absolute_expires_at),
     CHECK (user_agent IS NULL OR length(user_agent) <= 1000)
@@ -185,7 +204,7 @@ CREATE TABLE communities (
     slug text NOT NULL UNIQUE,
     description text NOT NULL DEFAULT '',
     status text NOT NULL DEFAULT 'pending'
-        CHECK (status IN ('pending', 'active', 'suspended', 'archived')),
+        CHECK (status IN ('pending', 'active', 'suspended', 'archived', 'rejected')),
     visibility text NOT NULL DEFAULT 'public' CHECK (visibility IN ('public', 'private')),
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
@@ -218,6 +237,14 @@ CREATE TABLE projects (
         CHECK (status IN ('draft', 'review', 'active', 'completed', 'rejected', 'archived')),
     starts_at timestamptz,
     ends_at timestamptz,
+    location_city text,
+    location_neighborhood text,
+    location_municipality text,
+    location_province text,
+    location_commune text,
+    reviewed_at timestamptz,
+    reviewed_by_user_id bigint REFERENCES users(id) ON DELETE SET NULL,
+    review_reason text,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     CHECK (ends_at IS NULL OR starts_at IS NULL OR ends_at >= starts_at),
@@ -301,6 +328,36 @@ CREATE TABLE comments (
 CREATE INDEX comments_post_time_idx ON comments (post_id, created_at);
 CREATE INDEX comments_author_time_idx ON comments (author_user_id, created_at DESC);
 
+CREATE TABLE content_mentions (
+    actor_user_id bigint NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    mentioned_user_id bigint NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    post_id bigint REFERENCES posts(id) ON DELETE CASCADE,
+    comment_id bigint REFERENCES comments(id) ON DELETE CASCADE,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CHECK (actor_user_id <> mentioned_user_id),
+    CHECK (num_nonnulls(post_id, comment_id) = 1)
+);
+CREATE UNIQUE INDEX content_mentions_post_user_idx ON content_mentions (post_id, mentioned_user_id)
+    WHERE post_id IS NOT NULL;
+CREATE UNIQUE INDEX content_mentions_comment_user_idx ON content_mentions (comment_id, mentioned_user_id)
+    WHERE comment_id IS NOT NULL;
+CREATE INDEX content_mentions_user_created_idx ON content_mentions (mentioned_user_id, created_at DESC);
+
+CREATE TABLE impactation_requests (
+    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    requester_user_id bigint NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    recipient_user_id bigint NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'declined', 'cancelled')),
+    created_at timestamptz NOT NULL DEFAULT now(),
+    responded_at timestamptz,
+    CHECK (requester_user_id <> recipient_user_id)
+);
+CREATE UNIQUE INDEX impactation_requests_active_pair_idx
+    ON impactation_requests (LEAST(requester_user_id, recipient_user_id), GREATEST(requester_user_id, recipient_user_id))
+    WHERE status IN ('pending', 'accepted');
+CREATE INDEX impactation_requests_recipient_status_idx ON impactation_requests (recipient_user_id, status, created_at DESC);
+CREATE INDEX impactation_requests_requester_status_idx ON impactation_requests (requester_user_id, status, created_at DESC);
+
 CREATE TABLE reactions (
     user_id bigint NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     post_id bigint NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
@@ -308,6 +365,16 @@ CREATE TABLE reactions (
     created_at timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY (user_id, post_id)
 );
+
+CREATE TABLE post_shares (
+    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    post_id bigint NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    sharer_user_id bigint NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    shared_at timestamptz NOT NULL DEFAULT now(),
+    UNIQUE (post_id, sharer_user_id)
+);
+CREATE INDEX post_shares_user_time_idx ON post_shares (sharer_user_id, shared_at DESC);
+CREATE INDEX post_shares_post_time_idx ON post_shares (post_id, shared_at DESC);
 
 CREATE TABLE content_reports (
     id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -364,6 +431,10 @@ CREATE TABLE announcements (
     author_user_id bigint REFERENCES users(id) ON DELETE SET NULL,
     title text NOT NULL,
     body text NOT NULL,
+    placement text NOT NULL DEFAULT 'announcement'
+        CHECK (placement IN ('notice', 'announcement', 'advertisement')),
+    image_media_id bigint REFERENCES media(id) ON DELETE SET NULL,
+    target_url text,
     status text NOT NULL DEFAULT 'draft'
         CHECK (status IN ('draft', 'scheduled', 'published', 'expired', 'archived')),
     audience jsonb NOT NULL DEFAULT '{"type":"all"}'::jsonb
@@ -373,6 +444,7 @@ CREATE TABLE announcements (
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     CHECK (expires_at IS NULL OR publish_at IS NULL OR expires_at > publish_at),
+    CHECK (target_url IS NULL OR target_url ~* '^https?://[^[:space:]]+$'),
     CHECK (length(trim(title)) > 0),
     CHECK (length(trim(body)) > 0)
 );

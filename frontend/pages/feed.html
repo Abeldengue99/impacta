@@ -1,91 +1,414 @@
 <!doctype html>
-<html lang="pt">
+<html lang="pt-AO">
 <head>
     <meta charset="utf-8">
+    <script src="../scripts/avatar-preview-bootstrap.js?v=avatar-preview-bootstrap-20261013-1"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../styles/scrollbar.css?v=scrollbar-brand-green-20261010-1">
+    <script src="../scripts/scroll-navigation.js?v=scroll-navigation-single-20261010-1" defer></script>
     <meta name="theme-color" content="#f4f6f1">
-    <title>Comunidade — IMPACTA</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" sizes="any">
+    <meta name="description" content="Na comunidade IMPACTA, partilha ideias, encontra projectos, participa em desafios e colabora com pessoas de Angola.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="IMPACTA">
+    <meta property="og:title" content="Comunidade IMPACTA | Projectos, ideias e desafios">
+    <meta property="og:description" content="Na comunidade IMPACTA, partilha ideias, encontra projectos, participa em desafios e colabora com pessoas de Angola.">
+    <title>Comunidade IMPACTA | Projectos, ideias e desafios</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../styles/main.css?v=icons-profile-1">
-    <link rel="stylesheet" href="../styles/feed.css?v=profile-20261009-1">
-    <script src="../scripts/api.js?v=profile-20261009-1" defer></script>
-    <script src="../scripts/feed.js?v=profile-20261009-1" defer></script>
+    <link rel="stylesheet" href="../styles/main.css?v=maintenance-mode-20261013-1">
+    <link rel="stylesheet" href="../styles/feed.css?v=project-chat-compact-empty-20261013-3">
+    <link rel="stylesheet" href="../styles/shell.css?v=header-spacing-balance-20261013-8">
+    <link rel="stylesheet" href="../styles/action-modal.css?v=action-modal-notice-20261011-1">
+    <link rel="stylesheet" href="../styles/support-modal.css?v=support-modal-20261009-1">
+    <link rel="stylesheet" href="../styles/promotion.css?v=announcement-metrics-20261011-1">
+    <script src="../scripts/support-modal.js?v=support-modal-clean-20261013-1" defer></script>
+    <script src="../scripts/api.js?v=avatar-stability-20261013-2" defer></script>
+    <script src="../scripts/public-promotions.js?v=flyer-visibility-20261012-1" defer></script>
+    <script src="../scripts/action-modal.js?v=action-modal-notice-20261011-1" defer></script>
+    <script src="../scripts/carousel-media.js?v=feed-carousel-media-20261013-1" defer></script>
+    <script src="../scripts/feed.js?v=profile-project-actions-20261013-1" defer></script>
+    <script src="../scripts/site-shell.js?v=maintenance-mode-20261013-1" defer></script>
 </head>
 <body class="feed-page">
-    <header class="feed-header">
-        <a class="brand" href="index.html" aria-label="IMPACTA, página inicial"><span class="brand-mark" aria-hidden="true">i</span><span>impacta<span class="brand-period">.</span></span></a>
-        <label class="feed-search"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg><input id="feed-search" type="search" placeholder="Pesquisar ideias e projetos" aria-label="Pesquisar publicações"></label>
+    <header class="feed-header app-shell-header">
+        <a class="brand" href="feed.html" aria-label="Abrir o feed do IMPACTA"><span class="brand-mark" aria-hidden="true">i</span><span>impacta<span class="brand-period">.</span></span></a>
+        <div class="feed-search-shell">
+            <div class="feed-search" role="search" aria-label="Pesquisar na comunidade">
+                <button class="feed-search-scope" id="feed-search-scope" type="button" aria-expanded="false" aria-controls="feed-search-filters"><span id="feed-search-scope-label">Tudo</span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
+                <input id="feed-search" type="search" placeholder="Pesquisar publica&ccedil;&otilde;es" aria-label="Pesquisar publica&ccedil;&otilde;es">
+                <button class="feed-search-action" id="feed-search-submit" type="button" aria-label="Ir para a pesquisa"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg></button>
+                <button class="feed-search-action" id="feed-search-filter-toggle" type="button" aria-label="Abrir filtros" aria-expanded="false" aria-controls="feed-search-filters"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="12" cy="18" r="1.6"/></svg></button>
+            </div>
+            <div class="feed-search-filter-panel" id="feed-search-filters" hidden>
+                <p>Refinar resultados</p>
+                <label class="category-filter-control">Categoria
+                    <select id="feed-category-filter" aria-label="Filtrar publica&ccedil;&otilde;es por categoria"><option value="">Todas as categorias</option></select>
+                </label>
+                <label class="sort-control">Ordenar
+                    <select id="feed-sort" aria-label="Ordenar publica&ccedil;&otilde;es"><option value="recent">Mais recentes</option><option value="supported">Mais apoiadas</option></select>
+                </label>
+            </div>
+        </div>
         <nav class="feed-top-nav" aria-label="Navegação da comunidade">
             <a class="top-nav-active icon-nav-link" href="#feed" aria-label="Início" data-tooltip="Início"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m3.5 10 8.5-7 8.5 7"/><path d="M5.5 9v11h13V9M9.5 20v-6h5v6"/></svg><span class="visually-hidden icon-nav-label">Início</span></a>
             <a class="icon-nav-link" href="#desafios" aria-label="Desafios" data-tooltip="Desafios"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2.5v19M3.8 7.2l16.4 9.6M3.8 16.8l16.4-9.6M5 5l14 14M19 5 5 19"/></svg><span class="visually-hidden icon-nav-label">Desafios</span></a>
-            <a class="icon-nav-link" href="#projetos" aria-label="Projetos" data-tooltip="Projetos"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 19 19 5M8 5h11v11"/></svg><span class="visually-hidden icon-nav-label">Projetos</span></a>
+            <a class="icon-nav-link" href="#projetos" aria-label="Projectos" data-tooltip="Projectos"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 19 19 5M8 5h11v11"/></svg><span class="visually-hidden icon-nav-label">Projectos</span></a>
+            <a class="icon-nav-link" id="feed-admin-link" href="admin/index.html#reports" aria-label="Administração" data-tooltip="Administração" hidden><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg><span class="visually-hidden icon-nav-label">Administração</span></a>
+            <button class="icon-nav-link icon-nav-button" id="feed-notifications-toggle" type="button" aria-label="Notificações" aria-expanded="false" aria-controls="feed-notification-panel" data-tooltip="Notificações" hidden>
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+                <span class="notification-badge" id="feed-notifications-badge" hidden>0</span>
+                <span class="visually-hidden icon-nav-label">Notificações</span>
+            </button>
         </nav>
-        <div class="feed-header-actions"><a class="user-chip" href="login.html" aria-label="Entrar na conta" data-tooltip="Entrar">Entrar</a></div>
+        <section class="notification-panel" id="feed-notification-panel" aria-label="Notificações" hidden>
+            <header class="notification-panel-header">
+                <h2>Notificações</h2>
+                <button class="button-quiet notification-mark-all" id="feed-notifications-mark-all" type="button" hidden>Marcar todas como lidas</button>
+            </header>
+            <p class="notification-status" id="feed-notifications-status" role="status"></p>
+            <div class="notification-list" id="feed-notification-list" role="list"></div>
+        </section>
+        <div class="feed-header-actions"><span class="user-chip account-state-placeholder" aria-hidden="true"></span></div>
+        <button class="feed-menu-toggle" id="feed-menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="feed-mobile-menu">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <nav class="feed-mobile-menu" id="feed-mobile-menu" aria-label="Menu da comunidade" hidden>
+            <a href="#feed"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m3.5 10 8.5-7 8.5 7"/><path d="M5.5 9v11h13V9M9.5 20v-6h5v6"/></svg>Início</a>
+            <a href="#desafios"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2.5v19M3.8 7.2l16.4 9.6M3.8 16.8l16.4-9.6"/></svg>Desafios</a>
+            <a href="#projetos"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 19 19 5M8 5h11v11"/></svg>Projectos</a>
+            <a id="feed-mobile-admin-link" href="admin/index.html#reports" hidden><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg>Administração</a>
+            <a href="#comunidades"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/></svg>Comunidades</a>
+            <span class="feed-menu-divider" aria-hidden="true"></span>
+            <a id="feed-mobile-account-link" href="index.html#login"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg><span>Entrar na conta</span></a>
+            <button class="feed-mobile-logout" id="feed-mobile-logout" type="button" hidden><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg><span>Terminar sessão</span></button>
+        </nav>
     </header>
+
+    <section class="public-promotions" data-public-promotions aria-label="Avisos e publicidade" hidden></section>
 
     <main class="feed-layout" id="feed">
         <aside class="feed-sidebar sidebar-left">
-            <a class="mini-profile" href="login.html"><span class="avatar avatar-user">i</span><span><strong>Entra na tua conta</strong><small>Para participar na comunidade</small></span></a>
             <p class="sidebar-label">A tua comunidade</p>
             <nav class="side-nav" aria-label="Secções da comunidade">
                 <a class="side-nav-active" href="#feed"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3.5 10 8.5-7 8.5 7"/><path d="M5.5 9v11h13V9M9.5 20v-6h5v6"/></svg></span> O teu feed</a>
                 <a href="#desafios"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.5v19M3.8 7.2l16.4 9.6M3.8 16.8l16.4-9.6"/></svg></span> Desafios</a>
-                <a href="#projetos"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19 19 5M8 5h11v11"/></svg></span> Projetos</a>
+                <a href="#projetos"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19 19 5M8 5h11v11"/></svg></span> Projectos</a>
                 <a href="#comunidades"><span aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/></svg></span> Comunidades</a>
             </nav>
-            <div class="sidebar-callout"><span class="callout-icon">✦</span><h3>Uma ideia pode ser o início.</h3><p>Partilha algo que possa ajudar a tua comunidade.</p><a href="#composer">Partilhar uma ideia <span>→</span></a></div>
-            <a class="back-home" href="index.html"><span>←</span> Voltar à página inicial</a>
+            <div class="sidebar-callout">
+                <span class="callout-icon" aria-hidden="true">✦</span>
+                <h3>A tua ideia pode começar uma mudança.</h3>
+                <p>Partilha o que sabes e inspira mais pessoas a agir contigo.</p>
+                <a href="#partilhar-ideia" data-share-idea-link>Quero tirar a minha ideia do papel <span aria-hidden="true">→</span></a>
+            </div>
         </aside>
 
         <section class="feed-column" aria-label="Publicações da comunidade">
-            <div class="feed-welcome">
-                <div><p class="eyebrow">COMUNIDADE IMPACTA · O TEU ESPAÇO</p><h1>Ideias que <span>movem.</span></h1><p>Aprende com outras pessoas e descobre onde podes contribuir.</p></div>
-                <span class="welcome-mark" aria-hidden="true">✳</span>
-            </div>
+            <section class="feed-welcome" data-feed-carousel role="region" aria-roledescription="carrossel" aria-label="Vídeos de impacto da comunidade IMPACTA">
+                <div class="feed-welcome-slides" aria-hidden="true">
+                    <div class="feed-welcome-slide is-active" data-eyebrow="VOZES DO BAIRRO" data-title="O teu bairro" data-highlight="merece ser ouvido." data-description="Partilha o que precisa de melhorar e aproxima pessoas dispostas a agir.">
+                        <video class="feed-welcome-video" muted loop playsinline preload="none" poster="../videos/posters/feed/14161813_3840_2160_25fps.jpg" data-poster="../videos/posters/feed/14161813_3840_2160_25fps.jpg" tabindex="-1"><source data-src="../videos/optimized/feed/14161813_3840_2160_25fps.mp4" type="video/mp4"></video>
+                    </div>
+                    <div class="feed-welcome-slide" data-eyebrow="IDEIAS LOCAIS" data-title="Uma ideia" data-highlight="pode virar projecto." data-description="Propõe uma iniciativa para a tua zona e convida outras pessoas a participar.">
+                        <video class="feed-welcome-video" muted loop playsinline preload="none" data-poster="../videos/posters/feed/3248162-uhd_3840_2160_25fps.jpg" tabindex="-1"><source data-src="../videos/optimized/feed/3248162-uhd_3840_2160_25fps.mp4" type="video/mp4"></video>
+                    </div>
+                    <div class="feed-welcome-slide" data-eyebrow="MORADORES EM CONJUNTO" data-title="Juntos, damos" data-highlight="o primeiro passo." data-description="Propõe uma comunidade para moradores trocarem ideias e organizarem respostas.">
+                        <video class="feed-welcome-video" muted loop playsinline preload="none" data-poster="../videos/posters/feed/3248990-uhd_3840_2160_25fps.jpg" tabindex="-1"><source data-src="../videos/optimized/feed/3248990-uhd_3840_2160_25fps.mp4" type="video/mp4"></video>
+                    </div>
+                    <div class="feed-welcome-slide" data-eyebrow="PARTICIPAÇÃO ABERTA" data-title="Há muitas formas" data-highlight="de contribuir." data-description="Encontra projectos e desafios onde as tuas competências fazem diferença.">
+                        <video class="feed-welcome-video" muted loop playsinline preload="none" data-poster="../videos/posters/feed/3253971-uhd_3840_2160_25fps.jpg" tabindex="-1"><source data-src="../videos/optimized/feed/3253971-uhd_3840_2160_25fps.mp4" type="video/mp4"></video>
+                    </div>
+                    <div class="feed-welcome-slide" data-eyebrow="PROGRESSO PARTILHADO" data-title="Cada passo" data-highlight="também conta." data-description="Partilha o que está a ser feito e acompanha o avanço das iniciativas.">
+                        <video class="feed-welcome-video" muted loop playsinline preload="none" data-poster="../videos/posters/feed/6913254-uhd_3840_2160_25fps.jpg" tabindex="-1"><source data-src="../videos/optimized/feed/6913254-uhd_3840_2160_25fps.mp4" type="video/mp4"></video>
+                    </div>
+                    <div class="feed-welcome-slide" data-eyebrow="RESULTADOS LOCAIS" data-title="Mostra o que" data-highlight="conseguimos juntos." data-description="Conta o que mudou e inspira outras pessoas a agir na sua comunidade.">
+                        <video class="feed-welcome-video" muted loop playsinline preload="none" data-poster="../videos/posters/feed/6914001-uhd_3840_2160_25fps.jpg" tabindex="-1"><source data-src="../videos/optimized/feed/6914001-uhd_3840_2160_25fps.mp4" type="video/mp4"></video>
+                    </div>
+                    <div class="feed-welcome-slide" data-eyebrow="O PROPÓSITO DO IMPACTA" data-title="Necessidades reais" data-highlight="merecem respostas em conjunto." data-description="Ligamos pessoas para transformar ideias locais em projectos acompanhados, acções e resultados partilhados.">
+                        <video class="feed-welcome-video" muted loop playsinline preload="none" data-poster="../videos/posters/feed/6914400-uhd_3840_2160_25fps.jpg" tabindex="-1"><source data-src="../videos/optimized/feed/6914400-uhd_3840_2160_25fps.mp4" type="video/mp4"></video>
+                    </div>
+                </div>
+                <div class="feed-welcome-shade" aria-hidden="true"></div>
+                <div class="feed-welcome-content" aria-live="off">
+                    <p class="eyebrow" data-feed-carousel-eyebrow>VOZES DO BAIRRO</p>
+                    <h1><span data-feed-carousel-title>O teu bairro</span> <span class="feed-welcome-highlight" data-feed-carousel-highlight>merece ser ouvido.</span></h1>
+                    <p data-feed-carousel-description>Partilha o que precisa de melhorar e aproxima pessoas dispostas a agir.</p>
+                </div>
+                <div class="feed-welcome-controls" role="group" aria-label="Controlos do carrossel">
+                    <button class="feed-carousel-arrow" type="button" data-feed-carousel-previous aria-label="Vídeo anterior"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M19 12H5m7 7-7-7 7-7"/></svg></button>
+                    <div class="feed-carousel-indicators" role="group" aria-label="Escolher vídeo">
+                        <button type="button" data-feed-carousel-indicator="0" aria-label="Mostrar vídeo 1" aria-current="true"></button>
+                        <button type="button" data-feed-carousel-indicator="1" aria-label="Mostrar vídeo 2"></button>
+                        <button type="button" data-feed-carousel-indicator="2" aria-label="Mostrar vídeo 3"></button>
+                        <button type="button" data-feed-carousel-indicator="3" aria-label="Mostrar vídeo 4"></button>
+                        <button type="button" data-feed-carousel-indicator="4" aria-label="Mostrar vídeo 5"></button>
+                        <button type="button" data-feed-carousel-indicator="5" aria-label="Mostrar vídeo 6"></button>
+                        <button type="button" data-feed-carousel-indicator="6" aria-label="Mostrar vídeo 7"></button>
+                    </div>
+                    <button class="feed-carousel-toggle" type="button" data-feed-carousel-toggle aria-label="Pausar carrossel" aria-pressed="false">Ⅱ</button>
+                    <button class="feed-carousel-arrow" type="button" data-feed-carousel-next aria-label="Vídeo seguinte"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-7-7 7 7-7 7"/></svg></button>
+                </div>
+            </section>
 
-            <form class="composer panel" id="composer">
+            <section class="share-idea-area" id="partilhar-ideia" aria-labelledby="share-idea-title">
+                <header class="share-idea-heading">
+                    <h2 id="share-idea-title">Partilha uma ideia para melhorar a tua comunidade.</h2>
+                </header>
+                <form class="composer panel" id="composer">
                 <div class="composer-top">
                     <span class="avatar avatar-user composer-avatar" aria-hidden="true">I</span>
-                    <label class="composer-input-wrap" for="post-body">
-                        <textarea id="post-body" name="body" maxlength="2000" rows="2" placeholder="Partilha uma ideia, uma aprendizagem ou uma iniciativa…" required disabled></textarea>
+                    <div class="mention-field-wrap">
+                        <p class="composer-author" id="composer-author" hidden></p>
+                        <label class="composer-input-wrap" for="post-body">
+                            <textarea id="post-body" name="body" maxlength="2000" rows="2" placeholder="Partilha uma ideia, uma aprendizagem ou uma iniciativa…" required disabled></textarea>
+                        </label>
+                    </div>
+                </div>
+                <div class="composer-media-preview" id="composer-media-preview" aria-live="polite" hidden></div>
+                <div class="composer-category-row">
+                    <label class="composer-category-control" for="post-category">
+                        <span>Categoria da publicação</span>
+                        <select id="post-category" name="category" required disabled>
+                            <option value="">A carregar categorias...</option>
+                        </select>
+                    </label>
+                    <label class="composer-project-control" for="post-project">
+                        <span>Associar a um projecto <small>(opcional)</small></span>
+                        <select id="post-project" name="projectId">
+                            <option value="">Publicação geral</option>
+                        </select>
+                    </label>
+                    <label class="custom-category-control" for="post-custom-category" hidden>
+                        <span>Tema próprio <small>(opcional, até 60 caracteres)</small></span>
+                        <input id="post-custom-category" name="customCategory" type="text" maxlength="60"
+                               placeholder="Ex.: Saúde materna" autocomplete="off" disabled>
+                        <small>A publicação continuará filtrável em “Outra categoria”.</small>
                     </label>
                 </div>
                 <div class="composer-bottom">
-                    <p class="composer-hint" id="composer-hint" role="status">Entra na tua conta para partilhar com a comunidade.</p>
+                    <p class="composer-hint" id="composer-hint" role="status">Entra na tua conta para partilhares a tua ideia com a comunidade.</p>
                     <span class="character-count" id="post-character-count">0/2000</span>
-                    <button class="button button-small" id="publish-post" type="submit" disabled>Publicar <span aria-hidden="true">↗</span></button>
-                    <a class="button button-small composer-login" href="login.html">Entrar para participar</a>
+                    <input id="post-media-files" type="file" accept="image/jpeg,image/png,image/webp,video/mp4" multiple hidden>
+                    <button class="button button-quiet media-picker-button" id="choose-post-media" type="button" disabled aria-label="Adicionar fotografias ou vídeo" data-tooltip="Adicionar fotografias ou vídeo">
+                        <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/></svg><span>Anexar imagem ou vídeo</span>
+                    </button>
+                    <button class="button button-small" id="publish-post" type="submit" disabled>Partilhar <span aria-hidden="true">↗</span></button>
+                    <a class="button button-small composer-login" href="index.html#login">Entrar para participar</a>
                 </div>
                 <p class="form-status" id="composer-status" role="status" aria-live="polite"></p>
-            </form>
+                </form>
+            </section>
 
-            <div class="feed-toolbar"><div><span class="eyebrow">PARTILHAS DA COMUNIDADE</span><h2>Em destaque</h2></div><label class="sort-control">Ordenar <select id="feed-sort" aria-label="Ordenar publicações"><option value="recent">Mais recentes</option><option value="supported">Mais apoiadas</option></select></label></div>
-            <div class="post-list" id="post-list" aria-live="polite"></div>
-            <p class="empty-state panel" id="feed-status" role="status">A carregar publicações da base de dados…</p>
+            <div class="feed-toolbar">
+                <div><span class="eyebrow">PARTILHAS DA COMUNIDADE</span><h2>Em destaque</h2></div>
+            </div>
+            <div class="post-list" id="post-list" aria-live="polite" aria-busy="true">
+                <article class="post-card panel feed-post-skeleton" aria-hidden="true">
+                    <div class="feed-skeleton-heading"><span class="feed-skeleton-avatar"></span><span class="feed-skeleton-author"><i></i><i></i></span></div>
+                    <span class="feed-skeleton-line feed-skeleton-line-long"></span>
+                    <span class="feed-skeleton-line feed-skeleton-line-medium"></span>
+                    <span class="feed-skeleton-line feed-skeleton-line-short"></span>
+                    <span class="feed-skeleton-media"></span>
+                    <span class="feed-skeleton-actions"></span>
+                </article>
+            </div>
+            <button class="button button-quiet post-list-more" id="post-list-more" type="button" hidden>Carregar mais publicações da comunidade</button>
+            <p class="post-list-more-status" id="post-list-more-status" role="status" aria-live="polite" hidden></p>
+            <p class="empty-state panel visually-hidden" id="feed-status" role="status" aria-live="polite" hidden></p>
             <p class="empty-state panel" id="empty-state" hidden>Não há publicações para mostrar neste momento.</p>
         </section>
 
         <aside class="feed-sidebar sidebar-right">
             <section class="widget panel" id="desafios">
                 <div class="widget-heading"><div><span class="eyebrow">PEQUENAS AÇÕES</span><h2>Desafio da semana</h2></div><span class="widget-symbol">✳</span></div>
-                <div id="challenge-list"><p>A carregar desafios…</p></div>
+                <label class="resource-area-filter">Área/categoria
+                    <select id="challenge-area-filter" data-resource-area-filter="challenges" aria-label="Filtrar desafios por área ou categoria"><option value="">Todas as áreas</option></select>
+                </label>
+                <label class="resource-location-filter">Cidade, município ou bairro
+                    <input id="challenge-location-filter" type="search" data-resource-location-filter="challenges" maxlength="100" placeholder="Ex.: Huambo, Benfica" aria-label="Filtrar desafios por localidade">
+                </label>
+                <div id="challenge-list" aria-busy="true"><div class="feed-resource-skeleton" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div>
             </section>
 
             <section class="widget panel" id="projetos">
-                <div class="widget-heading"><div><span class="eyebrow">IDEIAS EM AÇÃO</span><h2>Projetos da comunidade</h2></div><a class="widget-more" href="#feed" aria-label="Ver todos os projetos" data-tooltip="Ver todos os projetos">↗</a></div>
-                <div id="projects-list"><p>A carregar projetos…</p></div>
+                <div class="widget-heading"><div><span class="eyebrow">IDEIAS EM ACÇÃO</span><h2>Projectos da comunidade</h2></div><a class="widget-more" href="#feed" aria-label="Ver todos os projectos da comunidade" data-tooltip="Ver todos os projectos da comunidade">↗</a></div>
+                <div class="widget-create-row">
+                    <button class="widget-create-button" id="open-project-proposal" type="button" data-open-project-dialog hidden>Propor um projecto à comunidade <span aria-hidden="true">＋</span></button>
+                    <a class="widget-create-button project-login-link" id="project-login-link" href="index.html#login" hidden>Entrar para propor um projecto <span aria-hidden="true">→</span></a>
+                </div>
+                <label class="resource-area-filter">Área/categoria
+                    <select id="project-area-filter" data-resource-area-filter="projects" aria-label="Filtrar projectos por área ou categoria"><option value="">Todas as áreas</option></select>
+                </label>
+                <label class="resource-location-filter">Cidade, município ou bairro
+                    <input id="project-location-filter" type="search" data-resource-location-filter="projects" maxlength="100" placeholder="Ex.: Huambo, Benfica" aria-label="Filtrar projectos por localidade">
+                </label>
+                <div id="projects-list" aria-busy="true"><div class="feed-resource-skeleton" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div>
             </section>
 
             <section class="widget panel" id="comunidades">
                 <div class="widget-heading"><div><span class="eyebrow">PESSOAS EM CONJUNTO</span><h2>Comunidades</h2></div><span class="widget-symbol" aria-hidden="true">◎</span></div>
-                <div id="community-list"><p>A carregar comunidades…</p></div>
+                <div class="widget-create-row">
+                    <button class="widget-create-button" id="open-community-proposal" type="button" data-open-community-dialog hidden>Propor uma comunidade <span aria-hidden="true">＋</span></button>
+                    <a class="widget-create-button community-login-link" id="community-login-link" href="index.html#login" hidden>Entrar para propor uma comunidade <span aria-hidden="true">→</span></a>
+                </div>
+                <label class="resource-area-filter">Área/categoria
+                    <select id="community-area-filter" data-resource-area-filter="communities" aria-label="Filtrar comunidades por área ou categoria"><option value="">Todas as áreas</option></select>
+                </label>
+                <label class="resource-location-filter">Cidade, município ou bairro
+                    <input id="community-location-filter" type="search" data-resource-location-filter="communities" maxlength="100" placeholder="Ex.: Huambo, Benfica" aria-label="Filtrar comunidades por localidade">
+                </label>
+                <div id="community-list" aria-busy="true"><div class="feed-resource-skeleton" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div>
             </section>
 
             <section class="community-note"><span class="note-spark">✦</span><p>O impacto não se mede só em números. Começa quando alguém decide participar.</p></section>
-            <footer class="feed-footer"><a href="index.html">Sobre o IMPACTA</a><span>·</span><a href="#feed">Ajuda</a><span>·</span><span>© IMPACTA 2026</span></footer>
         </aside>
     </main>
+    <footer class="site-footer feed-footer">
+        <a class="brand brand-footer" href="index.html"><span class="brand-mark" aria-hidden="true">i</span><span>impacta<span class="brand-period">.</span></span></a>
+        <p>Aprende. Colabora. Impacta.</p>
+        <nav class="site-footer-links" id="feed-footer-links" aria-label="Informa&ccedil;&otilde;es">
+            <a href="about.html">Sobre o IMPACTA</a>
+            <span aria-hidden="true">&middot;</span>
+            <a href="help.html">Ajuda</a>
+            <span aria-hidden="true">&middot;</span>
+            <a href="contact.html">Contacto</a>
+            <span aria-hidden="true">&middot;</span>
+            <a href="https://www.linkedin.com/company/impacta-angola/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+            <span aria-hidden="true">&middot;</span>
+            <a href="mailto:impactaa2025@gmail.com" aria-label="Enviar e-mail para impactaa2025@gmail.com">E-mail</a>
+        </nav>
+        <span>&copy; <span>2026</span> IMPACTA</span>
+    </footer>
+
+    <dialog class="resource-dialog" id="community-dialog" aria-labelledby="community-dialog-title">
+        <form id="community-create-form">
+            <div class="resource-dialog-heading"><p class="eyebrow">PESSOAS EM CONJUNTO</p><h2 id="community-dialog-title">Propor uma comunidade</h2><p>Envia a proposta para análise da equipa IMPACTA. A comunidade só fica pública depois de aprovada.</p></div>
+            <label>Nome da comunidade<input name="name" maxlength="100" required autocomplete="off" placeholder="Ex.: Rede de apoio do Huambo"></label>
+            <label>Descrição<textarea name="description" maxlength="2000" rows="4" required placeholder="Qual é o objectivo e quem pode participar?"></textarea></label>
+            <label>Área de impacto<select name="impactAreaId" data-impact-area-select><option value="">Sem área específica</option></select></label>
+            <fieldset class="resource-location-fieldset">
+                <legend>Zona abrangida <span>(opcional)</span></legend>
+                <div class="resource-location-grid">
+                    <label>Província<input name="locationProvince" maxlength="100" autocomplete="address-level1" placeholder="Ex.: Huambo"></label>
+                    <label>Município<input name="locationMunicipality" maxlength="100" autocomplete="address-level2" placeholder="Ex.: Huambo"></label>
+                    <label>Comuna<input name="locationCommune" maxlength="100" placeholder="Comuna"></label>
+                    <label>Bairro<input name="locationNeighborhood" maxlength="100" placeholder="Bairro"></label>
+                    <label>Cidade<input name="locationCity" maxlength="100" placeholder="Cidade ou localidade"></label>
+                </div>
+                <small>Indica onde a comunidade actua, não a morada dos membros. As propostas são revistas antes de ficarem públicas.</small>
+            </fieldset>
+            <p class="community-policy-note">Não são permitidas comunidades para pornografia, exploração sexual, assédio, ameaças, ódio, fraude ou actividades ilegais. Conteúdos sinalizados podem ser revistos pela equipa.</p>
+            <p class="resource-form-status" role="status" aria-live="polite" data-resource-status></p>
+            <div class="resource-dialog-actions"><button class="button button-quiet" type="button" data-close-resource-dialog>Cancelar</button><button class="button button-small" type="submit">Enviar proposta para aprovação</button></div>
+        </form>
+    </dialog>
+
+    <dialog class="resource-dialog" id="project-dialog" aria-labelledby="project-dialog-title">
+        <form id="project-create-form">
+            <div class="resource-dialog-heading"><p class="eyebrow">IDEIAS EM ACÇÃO</p><h2 id="project-dialog-title">Propor um projecto</h2><p>A equipa IMPACTA vai analisar a proposta antes de a publicar para a comunidade.</p></div>
+            <label>Nome do projecto<input name="title" maxlength="120" required autocomplete="off" placeholder="Ex.: Biblioteca comunitária"></label>
+            <label>O que queres realizar?<textarea name="description" maxlength="5000" rows="4" required placeholder="Descreve o objectivo, as acções e o resultado esperado."></textarea></label>
+            <label>Área de impacto<select name="impactAreaId" data-impact-area-select><option value="">Sem área específica</option></select></label>
+            <label>Comunidade (opcional)<select name="communityId" id="project-community-select"><option value="">Projecto independente</option></select></label>
+            <fieldset class="resource-location-fieldset">
+                <legend>Onde vai acontecer o projecto? <span>(opcional)</span></legend>
+                <div class="resource-location-grid">
+                    <label>Província<input name="locationProvince" maxlength="100" autocomplete="address-level1" placeholder="Ex.: Luanda"></label>
+                    <label>Município<input name="locationMunicipality" maxlength="100" autocomplete="address-level2" placeholder="Ex.: Cazenga"></label>
+                    <label>Comuna<input name="locationCommune" maxlength="100" placeholder="Comuna"></label>
+                    <label>Bairro<input name="locationNeighborhood" maxlength="100" placeholder="Bairro"></label>
+                    <label>Cidade<input name="locationCity" maxlength="100" placeholder="Cidade ou localidade"></label>
+                </div>
+                <small>Indica a zona para ajudar as pessoas a encontrar e acompanhar o projecto.</small>
+            </fieldset>
+            <div class="resource-date-row"><label>Início (opcional)<input name="startsAt" type="date"></label><label>Fim (opcional)<input name="endsAt" type="date"></label></div>
+            <p class="resource-form-status" role="status" aria-live="polite" data-resource-status></p>
+            <div class="resource-dialog-actions"><button class="button button-quiet" type="button" data-close-resource-dialog>Cancelar</button><button class="button button-small" type="submit">Enviar projecto para análise</button></div>
+        </form>
+    </dialog>
+
+    <dialog class="resource-dialog" id="challenge-dialog" aria-labelledby="challenge-dialog-title">
+        <form id="challenge-create-form">
+            <input type="hidden" name="projectId">
+            <div class="resource-dialog-heading"><p class="eyebrow">PEQUENAS ACÇÕES</p><h2 id="challenge-dialog-title">Criar desafio</h2><p>O desafio ficará ligado ao projecto aprovado e poderá receber participações.</p></div>
+            <label>Nome do desafio<input name="title" maxlength="120" required autocomplete="off" placeholder="Ex.: Recolher 100 livros até sexta-feira"></label>
+            <label>Como participar?<textarea name="description" maxlength="3000" rows="4" required placeholder="Explica a acção e o que a pessoa deve enviar como participação."></textarea></label>
+            <div class="resource-date-row"><label>Abre em (opcional)<input name="opensAt" type="date"></label><label>Encerra em (opcional)<input name="closesAt" type="date"></label></div>
+            <p class="resource-form-status" role="status" aria-live="polite" data-resource-status></p>
+            <div class="resource-dialog-actions"><button class="button button-quiet" type="button" data-close-resource-dialog>Cancelar</button><button class="button button-small" type="submit">Publicar desafio no projecto</button></div>
+        </form>
+    </dialog>
+    <dialog class="community-chat-dialog" id="community-chat-dialog" aria-labelledby="community-chat-title">
+        <section class="community-chat-panel">
+            <header class="community-chat-heading">
+                <div><p class="eyebrow">PESSOAS EM CONJUNTO</p><h2 id="community-chat-title">Conversa da comunidade</h2></div>
+                <button class="community-chat-close" id="community-chat-close" type="button" aria-label="Fechar conversa">×</button>
+            </header>
+            <p class="community-chat-status" id="community-chat-status" role="status" aria-live="polite">A carregar mensagens…</p>
+            <div class="community-chat-lock-controls" id="community-chat-lock-controls" hidden>
+                <label for="community-chat-lock-duration">Pausar envio por</label>
+                <select id="community-chat-lock-duration">
+                    <option value="15">15 minutos</option>
+                    <option value="60" selected>1 hora</option>
+                    <option value="360">6 horas</option>
+                    <option value="1440">24 horas</option>
+                </select>
+                <button class="community-chat-lock-button" id="community-chat-lock" type="button">Pausar mensagens</button>
+                <button class="community-chat-lock-button is-open" id="community-chat-unlock" type="button" hidden>Reabrir mensagens</button>
+            </div>
+            <button class="community-chat-older" id="community-chat-older" type="button" hidden>Carregar mensagens anteriores</button>
+            <div class="community-chat-messages" id="community-chat-messages" role="log" aria-live="polite" aria-relevant="additions"></div>
+            <form class="community-chat-form" id="community-chat-form">
+                <label class="community-chat-message-label" for="community-chat-input">Escreve uma mensagem</label>
+                <textarea id="community-chat-input" maxlength="2000" rows="3" placeholder="Partilha uma mensagem com os membros…"></textarea>
+                <div class="community-chat-attachment" id="community-chat-attachment" hidden></div>
+                <div class="community-chat-form-bottom">
+                    <label class="community-chat-attach-button" for="community-chat-file">Anexar imagem ou vídeo</label>
+                    <input id="community-chat-file" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime" hidden>
+                    <small>As imagens e os vídeos são otimizados e revistos antes de ficarem visíveis para o grupo.</small>
+                    <button class="button button-small" id="community-chat-send" type="submit">Enviar mensagem</button>
+                </div>
+                <p class="community-chat-form-status" id="community-chat-form-status" role="status" aria-live="polite"></p>
+            </form>
+        </section>
+    </dialog>
+    <dialog class="community-chat-dialog project-chat-dialog" id="project-chat-dialog" aria-labelledby="project-chat-title">
+        <section class="community-chat-panel">
+            <header class="community-chat-heading">
+                <div><p class="eyebrow">IDEIAS EM ACÇÃO</p><h2 id="project-chat-title">Conversa do projecto</h2></div>
+                <button class="community-chat-close" id="project-chat-close" type="button" aria-label="Fechar conversa">×</button>
+            </header>
+            <div class="project-chat-toolbar">
+                <p id="project-chat-status" role="status" aria-live="polite">A carregar mensagens…</p>
+                <button type="button" id="project-chat-mute" hidden>Silenciar</button>
+            </div>
+            <button class="community-chat-older" id="project-chat-older" type="button" hidden>Carregar mensagens anteriores</button>
+            <div class="community-chat-messages" id="project-chat-messages" role="log" aria-live="polite" aria-relevant="additions"></div>
+            <form class="community-chat-form" id="project-chat-form">
+                <p class="project-chat-privacy">Conversa privada aos participantes e responsáveis. Sem mensagens directas, vistos ou notificações externas; podes ocultar a contagem.</p>
+                <label class="community-chat-message-label" for="project-chat-input">Escreve uma mensagem</label>
+                <textarea id="project-chat-input" maxlength="1200" rows="3" placeholder="Combina tarefas, dúvidas ou próximos passos…"></textarea>
+                <div class="community-chat-form-bottom">
+                    <small>Usa a conversa para combinar tarefas e próximos passos do projecto.</small>
+                    <button class="button button-small" id="project-chat-send" type="submit">Enviar mensagem</button>
+                </div>
+                <p class="community-chat-form-status" id="project-chat-form-status" role="status" aria-live="polite"></p>
+            </form>
+        </section>
+    </dialog>
+    <dialog class="feed-media-dialog" id="feed-media-dialog" aria-label="Galeria da publicação">
+        <div class="feed-media-dialog-top">
+            <span id="feed-media-counter">1 / 1</span>
+            <button class="feed-media-close" id="feed-media-close" type="button" aria-label="Fechar galeria">×</button>
+        </div>
+        <div class="feed-media-stage" id="feed-media-stage"></div>
+        <div class="feed-media-dialog-bottom">
+            <button class="feed-media-nav" id="feed-media-previous" type="button" aria-label="Mídia anterior">‹</button>
+            <span>Galeria da publicação</span>
+            <button class="feed-media-nav" id="feed-media-next" type="button" aria-label="Mídia seguinte">›</button>
+        </div>
+    </dialog>
 </body>
 </html>
